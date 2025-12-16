@@ -75,7 +75,7 @@
 
                 <div>
                     <label for="username" class="block text-sm font-semibold mb-1">Username</label>
-                    <input type="text" id="username" name="username" required placeholder="Username"
+                    <input type="text" id="username" name="username" required placeholder="admin atau siswa"
                         class="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
                 </div>
 
@@ -184,7 +184,8 @@
                     whatsapp: '085715232441',
                     angkatan: '2022',
                     ujian: 'Coklat',
-                    status: 'Diverifikasi✅️'
+                    status: 'Kualifikasi', // Mengubah status diverifikasi menjadi Kualifikasi
+                    sertifikatUrl: 'https://drive.google.com/file/d/1RD_rQQYA5I5qHuOhkKr1wHlqR-PFQVjI/view?usp=drive_link' // **TAMBAHAN BARU**
                 }
             },
             // KREDENSIAL DAN DATA DWI NUR AINI (SISWA BARU DARI GAMBAR)
@@ -200,7 +201,8 @@
                     whatsapp: '0815175643',
                     angkatan: '2024',
                     ujian: 'Merah',
-                    status: 'Pending'
+                    status: 'Pending',
+                    sertifikatUrl: null // **TAMBAHAN BARU: Tidak punya sertifikat karena status Pending**
                 }
             }
         ];
@@ -249,4 +251,3 @@
 </body>
 
 </html>
-
