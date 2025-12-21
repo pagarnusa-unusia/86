@@ -40,14 +40,14 @@
     <div class="text-center mb-8">
         <img src="logopn.png" alt="Logo" class="h-20 mx-auto mb-4 drop-shadow-lg">
         <h1 class="text-2xl font-bold text-primary">PAGARNUSA UNUSIA</h1>
-        <p class="text-slate-500 text-sm">Sistem Digital Pengesahan</p>
+        <p class="text-slate-500 text-sm">Sistem Digital Terintegrasi</p>
     </div>
 
     <div class="w-full max-w-md login-card p-8 rounded-[2rem] shadow-2xl shadow-emerald-900/10 border border-white">
         <form id="loginForm" class="space-y-6">
             
             <div>
-                <label class="block text-xs font-bold text-slate-400 tracking-widest mb-2 ml-1">USERNAME / ID</label>
+                <label class="block text-xs font-bold text-slate-400 tracking-widest mb-2 ml-1">USERNAME / NISN</label>
                 <div class="relative group">
                     <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"></i>
                     <input type="text" id="username" required placeholder="Masukkan username"
@@ -69,20 +69,18 @@
 
             <div id="error-message" class="hidden flex items-center gap-2 text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold border border-red-100">
                 <i class="fas fa-circle-exclamation"></i>
-                <span id="error-text">Username atau Password salah!</span>
+                <span id="error-text">Gagal login!</span>
             </div>
 
-            <button type="submit" id="btnSubmit" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-900/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
+            <button type="submit" id="btnSubmit" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-4 rounded-2xl shadow-lg transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
                 <span>MASUK</span>
                 <i class="fas fa-sign-in-alt text-sm"></i>
             </button>
         </form>
     </div>
 
-    <p class="mt-8 text-[10px] text-slate-400 font-bold tracking-[0.2em]">PAGAR NUSA UNUSIA • VERSI 2.0</p>
-
 <script>
-    // 1. Toggle Password Visibility
+    // 1. Tampilkan/Sembunyikan Password
     const toggleBtn = document.getElementById('togglePassword');
     const passInput = document.getElementById('password');
     toggleBtn.onclick = () => {
@@ -91,66 +89,62 @@
         toggleBtn.innerHTML = isPass ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
     };
 
-    // 2. Login Logic
+    // 2. Logika Login
     document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
         const errorDiv = document.getElementById('error-message');
         const errorText = document.getElementById('error-text');
         
-        // Ambil input dan bersihkan spasi
         const userInp = document.getElementById('username').value.trim();
         const passInp = document.getElementById('password').value.trim();
 
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MEMVERIFIKASI...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFIKASI...';
         errorDiv.classList.add('hidden');
 
         try {
-            // Fetch file excel dengan anti-cache
             const response = await fetch('db_login.xlsx?t=' + new Date().getTime());
-            if (!response.ok) throw new Error("File db_login.xlsx tidak ditemukan di server!");
+            if (!response.ok) throw new Error("Database (db_login.xlsx) tidak ditemukan!");
 
             const arrayBuffer = await response.arrayBuffer();
             const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-            
-            // Baca sheet pertama
-            const sheetName = workbook.SheetNames[0];
-            const dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+            const dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
 
-            // Pencarian data (Case Insensitive untuk username)
+            // Cari user (Tidak peduli huruf besar/kecil di username)
             const userMatch = dataJSON.find(u => {
-                const dbUser = (u.username || u.Username || "").toString().trim();
-                const dbPass = (u.password || u.Password || "").toString().trim();
-                
-                // Bandingkan tanpa peduli huruf besar/kecil untuk username
+                const dbUser = (u.username || u.Username || u.USER || "").toString().trim();
+                const dbPass = (u.password || u.Password || u.PASS || "").toString().trim();
                 return dbUser.toLowerCase() === userInp.toLowerCase() && dbPass === passInp;
             });
 
             if (userMatch) {
-                // Simpan profil ke localStorage
+                // Simpan data user ke storage
                 localStorage.setItem('currentUserProfile', JSON.stringify(userMatch));
-                
-                // Ambil target redirect
-                const targetPage = userMatch.redirectUrl || userMatch.redirecturl || userMatch.Link;
 
-                if (targetPage) {
-                    window.location.href = targetPage;
-                } else {
-                    // Jika kolom redirect kosong, cek role/jabatan
-                    const role = (userMatch.role || userMatch.jabatan || "").toLowerCase();
-                    if(role === 'penguji') {
-                        window.location.href = 'profil_penguji.html';
+                // LOGIKA REDIRECT PINTAR
+                let targetPage = userMatch.redirectUrl || userMatch.redirecturl || userMatch.Link;
+
+                if (!targetPage) {
+                    // Jika kolom redirectUrl kosong, kita tebak berdasarkan role/username
+                    const role = (userMatch.role || userMatch.Role || userMatch.status || "").toLowerCase();
+                    const usernameLower = userInp.toLowerCase();
+
+                    if (role === 'penguji' || usernameLower.includes('penguji')) {
+                        targetPage = 'profil_penguji.html';
+                    } else if (role === 'admin') {
+                        targetPage = 'admin.html';
                     } else {
-                        window.location.href = 'profil_siswa.html';
+                        targetPage = 'profil_siswa.html'; // Default untuk siswa
                     }
                 }
+
+                window.location.href = targetPage;
             } else {
-                throw new Error("Akun tidak ditemukan. Periksa kembali username & password.");
+                throw new Error("Username atau Password salah!");
             }
 
         } catch (err) {
-            console.error("Login Error:", err);
             errorText.innerText = err.message;
             errorDiv.classList.remove('hidden');
             btn.disabled = false;
