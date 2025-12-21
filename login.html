@@ -3,404 +3,151 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login Peserta</title>
+    <title>Login | PAGARNUSA UNUSIA</title>
     <link rel="icon" href="logopn.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#1B7548',
-                        primaryDark: '#145c38'
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0) translateX(0)' },
-                            '50%': { transform: 'translateY(-20px) translateX(10px)' },
-                        }
-                    }
+                    colors: { primary: '#1B7548', primaryDark: '#145c38' }
                 }
             }
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
     <style>
-        body { 
-            font-family: 'Poppins', sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* Animasi Background Lingkaran Halus */
-        .bg-glow {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #f0fdf4 0%, #e2e8f0 100%);
-            overflow: hidden;
-        }
-
-        .bubble {
-            position: absolute;
-            background: rgba(27, 117, 72, 0.05);
-            border-radius: 50%;
-            filter: blur(40px);
-            animation: float infinite ease-in-out;
-        }
-
-        .error-message {
-            color: #ef4444;
-            animation: shake 0.4s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
+        body { font-family: 'Poppins', sans-serif; background-color: #f0fdf4; }
+        .login-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
+    
 </head>
-<body class="min-h-screen flex flex-col text-slate-800">
 
-    <div class="bg-glow">
-        <div class="bubble w-96 h-96 -top-20 -left-20" style="animation-duration: 8s;"></div>
-        <div class="bubble w-[500px] h-[500px] -bottom-32 -right-32" style="animation-duration: 12s; animation-delay: 2s;"></div>
-        <div class="bubble w-64 h-64 top-1/2 left-1/4" style="animation-duration: 10s; animation-delay: 1s;"></div>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="fixed top-6 left-6">
+        <a href="index.html" class="flex items-center gap-2 text-primary font-bold hover:text-primaryDark transition-colors">
+            <i class="fas fa-arrow-left"></i>
+            <span>Kembali</span>
+        </a>
     </div>
 
-    <header id="main-header" class="sticky top-0 z-50 bg-primary text-white shadow-lg">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            
-            <div class="flex items-center space-x-3">
-                <img src="logopn.png" alt="Logo PAGARNUSA" class="h-10 drop-shadow-md">
-                <h1 class="text-sm font-bold tracking-wide leading-tight uppercase">
-                    PAGARNUSA<br>UNUSIA
-                </h1>
-            </div>
-            
-            <a href="index.html" class="flex items-center space-x-2 bg-primaryDark/50 hover:bg-primaryDark px-4 py-2 rounded-xl transition-all duration-300 border border-white/10 group">
-                <i class="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition-transform"></i>
-                <span class="text-sm font-medium">Kembali</span>
-            </a>
-            
-        </div>
-    </header>
+    <div class="text-center mb-8">
+        <img src="logopn.png" alt="Logo" class="h-20 mx-auto mb-4 drop-shadow-lg">
+        <h1 class="text-2xl font-bold text-primary">PAGARNUSA UNUSIA</h1>
+        <p class="text-slate-500 text-sm">Sistem Digital</p>
+    </div>
 
-    <main class="flex-1 w-full max-w-sm mx-auto px-4 py-12 flex items-center justify-center animate-fade-in-up">
-
-        <section id="login-section" class="w-full bg-white/80 backdrop-blur-md rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 border border-white" aria-labelledby="login-heading">
-            <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 text-primary rounded-2xl mb-4 shadow-inner">
-                    <i class="fas fa-user-shield text-2xl"></i>
+    <div class="w-full max-w-md login-card p-8 rounded-[2rem] shadow-2xl shadow-emerald-900/10 border border-white">
+        <form id="loginForm" class="space-y-6">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400  tracking-widest mb-2 ml-1">Username</label>
+                <div class="relative group">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"></i>
+                    <input type="text" id="username" required placeholder="Masukkan username"
+                        class="w-full pl-12 pr-4 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-primary focus:bg-white outline-none transition-all text-sm">
                 </div>
-                <h2 id="login-heading" class="text-2xl font-bold text-slate-800">Login Peserta</h2>
-                <p class="text-sm text-slate-500 mt-1">Gunakan akun yang terdaftar</p>
             </div>
 
-            <form id="loginForm" class="space-y-5">
-                <div>
-                    <label for="username" class="block text-xs font-bold tracking-wider text-slate-500 mb-2 ml-1">Username</label>
-                    <div class="relative group">
-                        <input type="text" id="username" name="username" required placeholder="Masukkan username"
-                            class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3 text-sm focus:outline-none focus:border-primary focus:bg-white transition-all">
-                    </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400  tracking-widest mb-2 ml-1">Password</label>
+                <div class="relative group">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"></i>
+                    <input type="password" id="password" required placeholder="••••••••"
+                        class="w-full pl-12 pr-12 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-primary focus:bg-white outline-none transition-all text-sm">
+                    <button type="button" id="togglePassword" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-primary">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
                 </div>
+            </div>
 
-                <div>
-                    <label for="password" class="block text-xs font-bold tracking-wider text-slate-500 mb-2 ml-1">Password</label>
-                    <div class="relative group">
-                        <input type="password" id="password" name="password" required placeholder="********"
-                            class="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/50 px-4 py-3 text-sm focus:outline-none focus:border-primary focus:bg-white transition-all pr-12">
-                        
-                        <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-primary transition-colors">
-                            <i class="fas fa-eye-slash"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <p id="error-message" class="error-message hidden text-center text-sm font-medium">Username atau Password salah!</p>
+            <div id="error-message" class="hidden flex items-center gap-2 text-red-600 bg-red-50 p-4 rounded-xl text-xs font-bold border border-red-100">
+                <i class="fas fa-circle-exclamation"></i>
+                <span>Username atau Password tidak ditemukan!</span>
+            </div>
 
-                <button type="submit" id="loginButton"
-                    class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-900/20 active:scale-[0.98] flex items-center justify-center gap-2">
-                    <span>Masuk</span>
-                    <i class="fas fa-chevron-right text-xs"></i>
-                </button>
-            </form>
+            <button type="submit" id="btnSubmit" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-900/20 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3">
+                <span>MASUK</span>
+                <i class="fas fa-sign-in-alt text-sm"></i>
+            </button>
+        </form>
+    </div>
 
-        </section>
-
-    </main>
-
-    <footer class="bg-primary text-white text-center py-3 mt-auto">
-        <p class="text-xs opacity-90">© 2025 PAGARNUSA UNUSIA. Semua hak cipta dilindungi.</p>
-    </footer>
+    <p class="mt-8 text-[10px] text-slate-400 font-bold tracking-[0.2em]">Pagar Nusa UNUSIA • Halaman Login</p>
 
 <script>
-    // --- SCRIPT TOGGLE PASSWORD ---
-    const passwordInput = document.getElementById('password');
-    const toggleButton = document.getElementById('togglePassword');
-    const toggleIcon = toggleButton.querySelector('i');
+    // 1. Fungsi Sembunyi/Tampil Password
+    const toggleBtn = document.getElementById('togglePassword');
+    const passInput = document.getElementById('password');
+    toggleBtn.onclick = () => {
+        const isPass = passInput.type === 'password';
+        passInput.type = isPass ? 'text' : 'password';
+        toggleBtn.innerHTML = isPass ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    };
 
-    toggleButton.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        toggleIcon.classList.toggle('fa-eye-slash');
-        toggleIcon.classList.toggle('fa-eye');
-    });
-
-    // --- DATABASE PENGGUNA (TETAP SAMA) ---
-    const userDatabase = [
-        {
-            username: 'admin',
-            password: 'adminpn',
-            redirectUrl: 'profil_admin.html',
-            data: { nama: 'Admin Pagar Nusa', role: 'Admin', is_admin: true }
-        },
-        {
-            username: 'penguji',
-            password: 'hafalan',
-            redirectUrl: 'https://uktpagarnusa.my.id/penilaian/hafalan/penilaian',
-            data: { nama: 'Penguji Hafalan', role: 'Penguji', is_admin: false }
-        },
-        {
-            username: 'penguji',
-            password: 'fisik',
-            redirectUrl: 'https://uktpagarnusa.my.id/penilaian/fisik/penilaian',
-            data: { nama: 'Penguji Fisik', role: 'Penguji', is_admin: false }
-        },
-        {
-            username: 'penguji',
-            password: 'senaman&teknik',
-            redirectUrl: 'https://uktpagarnusa.my.id/penilaian/senaman&teknik/penilaian',
-            data: { nama: 'Penguji Senaman & Teknik', role: 'Penguji', is_admin: false }
-        },
-        {
-            username: 'penguji',
-            password: 'sejarah',
-            redirectUrl: 'https://uktpagarnusa.my.id/penilaian/sejarah/penilaian',
-            data: { nama: 'Penguji Sejarah', role: 'Penguji', is_admin: false }
-        },
-        {
-            username: 'penguji',
-            password: 'mental',
-            redirectUrl: 'https://uktpagarnusa.my.id/penilaian/mental/penilaian',
-            data: { nama: 'Penguji Mental', role: 'Penguji', is_admin: false }
-        },
-        {
-            username: 'siswa',
-            password: '123',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Muhammad Ibnu Mundzir',
-                email: 'mundzir011@gmail.com',
-                ttl: 'Mamuju, 06 Maret 2004',
-                alamat: 'Mamuju, Sulawesi Barat',
-                whatsapp: '085715232441',
-                angkatan: '2022',
-                ujian: 'Coklat',
-                status: 'Kualifikasi',
-                sertifikatUrl: 'https://drive.google.com/file/d/1RD_rQQYA5I5qHuOhkKr1wHlqR-PFQVjI/view?usp=drive_link',
-                fotoUrl: 'https://lh3.googleusercontent.com/d/15ZweUZ3vY5tauL9BmFgx1z72nh_sdkjW'
-            }
-        },
-        {
-            username: 'dwinnuraini51@gmail.com',
-            password: '2024',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Dwi Nur Aini',
-                email: 'dwinnuraini51@gmail.com',
-                ttl: 'Sidoarjo, 23 Mei 2005',
-                alamat: 'Sukajaya, Damarsi, Buduran, Sidoarjo',
-                whatsapp: '0815175643',
-                angkatan: '2024',
-                ujian: 'Merah',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        },
-        {
-            username: 'khairuna806@gmail.com',
-            password: '2024',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Khairun Anwar',
-                email: 'khairuna806@gmail.com',
-                ttl: 'Mapane tambu, 14 Desember 2005',
-                alamat: 'Donggal, Sulawesi tengah',
-                whatsapp: '085814698694',
-                angkatan: '2024',
-                ujian: 'Merah',
-                status: 'Pending',
-                sertifikatUrl: null,
-                fotoUrl: 'https://lh3.googleusercontent.com/d/1RD_rQQYA5I5qHuOhkKr1wHlqR-PFQVjI'
-            }
-        },
-        {
-            username: 'rendiimam.s33@gmail.com',
-            password: '2024',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Rendi Imam Saputra',
-                email: 'rendiimam.s33@gmail.com',
-                ttl: 'Lampung, 18 Maret 2005',
-                alamat: 'Lampung utara, Lampung',
-                whatsapp: '081225866794',
-                angkatan: '2024',
-                ujian: 'Merah',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        },
-        {
-            username: 'Ardanmaskur767@gmail.com',
-            password: '2025',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Ardan mizanul khoiri',
-                email: 'Ardanmaskur767@gmail.com',
-                ttl: 'Brebes, 07 juni 2007',
-                alamat: 'Brebes, Jawa Tengah',
-                whatsapp: '083857670720',
-                angkatan: '2025',
-                ujian: 'Putih',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        },
-        {
-            username: 'wildanazwatunisa@gmail.com',
-            password: '2025',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Wilda Nazwatun Nisa',
-                email: 'wildanazwatunisa@gmail.com',
-                ttl: 'Lebak, 15 april 2006',
-                alamat: 'Lebak, Banten',
-                whatsapp: '083160439639',
-                angkatan: '2025',
-                ujian: 'Putih',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        },
-        {
-            username: 'dedeahmadfauzan348@gmail.com',
-            password: '2024',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Dede Ahmad Fauzan',
-                email: 'dedeahmadfauzan348@gmail.com',
-                ttl: 'Garut, 13 November 2005',
-                alamat: 'Garut, jawa barat',
-                whatsapp: '083147387373',
-                angkatan: '2024',
-                ujian: 'Merah',
-                status: 'Pending',
-                sertifikatUrl: null,
-                fotoUrl:'https://lh3.googleusercontent.com/d/1HbY8YDAI7v5W_XJFrdVFQqcw8Y5uCLPi'
-            }
-        },
-        {
-            username: 'wafiantasena@gmail.com',
-            password: '2025',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'MOCHAMMAD WAFI NUR JIHAN',
-                email: 'wafiantasena@gmail.com',
-                ttl: 'BREBES, 02 JUNI 2007',
-                alamat: 'DESA.SIDAMULYA-KEC.WANASARI-KAB.BREBES',
-                whatsapp: '083842685953',
-                angkatan: '2025',
-                ujian: 'Putih',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        },
-        {
-            username: 'hoirulsambudi49@gmail.com',
-            password: '2024',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'HOIRUL SAMBUDI',
-                email: 'hoirulsambudi49@gmail.com',
-                ttl: 'Penumangan Baru, 13 Oktober 2005',
-                alamat: 'Tulang Bawang Barat, Lampung',
-                whatsapp: '082299054116',
-                angkatan: '2024',
-                ujian: 'Merah',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        },
-        {
-            username: 'ramlanramlankhenzo79@gmail.com',
-            password: '2025',
-            redirectUrl: 'profil_siswa.html',
-            data: {
-                nama: 'Ramlan',
-                email: 'ramlanramlankhenzo79@gmail.com',
-                ttl: 'Bone, 06 Oktober 2006',
-                alamat: 'Sulawesi Tengah, Kabupaten Poso',
-                whatsapp: '085810936860',
-                angkatan: '2025',
-                ujian: 'Putih',
-                status: 'Pending',
-                sertifikatUrl: null
-            }
-        }
-    ];
-
-    const studentData = userDatabase
-        .filter(user => user.data && !user.data.is_admin)
-        .map(user => user.data);
-
-    localStorage.setItem('allStudentsData', JSON.stringify(studentData));
-    
-    // --- SCRIPT LOGIKA LOGIN (TETAP SAMA) ---
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('error-message');
-    const loginButton = document.getElementById('loginButton');
-
-    loginForm.addEventListener('submit', function(e) {
+    // 2. Logika Login Multi-User (Siswa, Admin, Penguji)
+    document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
-        
-        loginButton.disabled = true;
-        loginButton.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Memproses...';
-        errorMessage.classList.add('hidden');
+        const btn = document.getElementById('btnSubmit');
+        const error = document.getElementById('error-message');
+        const userInp = document.getElementById('username').value.trim();
+        const passInp = document.getElementById('password').value;
 
-        const inputUsername = document.getElementById('username').value.trim();
-        const inputPassword = document.getElementById('password').value;
-        
-        setTimeout(() => {
-            const matchedUser = userDatabase.find(cred => 
-                cred.username === inputUsername && cred.password === inputPassword
-            );
+        // Efek Loading
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MEMVERIFIKASI...';
+        error.classList.add('hidden');
 
-            if (matchedUser) {
-                localStorage.setItem('currentUserProfile', JSON.stringify(matchedUser.data));
-                window.location.href = matchedUser.redirectUrl;
+        try {
+            // Mengambil file excel terbaru
+            const response = await fetch('db_login.xlsx?t=' + new Date().getTime());
+            if (!response.ok) throw new Error("File database tidak ditemukan");
+            
+            const arrayBuffer = await response.arrayBuffer();
+            const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const dataJSON = XLSX.utils.sheet_to_json(firstSheet);
+
+            // Cari data yang sesuai username & password
+            const userMatch = dataJSON.find(u => {
+                const dbUser = (u.username || u.Username || "").toString();
+                const dbPass = (u.password || u.Password || "").toString();
+                return dbUser === userInp && dbPass === passInp;
+            });
+
+            if (userMatch) {
+                // SIMPAN DATA KE LOCALSTORAGE
+                // Ini penting agar halaman tujuan tahu siapa yang login
+                localStorage.setItem('currentUserProfile', JSON.stringify(userMatch));
+                
+                // LOGIKA REDIRECT OTOMATIS
+                // Mengambil link dari kolom 'redirectUrl' di Excel Anda
+                const targetPage = userMatch.redirectUrl || userMatch.redirecturl;
+                
+                if (targetPage) {
+                    window.location.href = targetPage;
+                } else {
+                    // Jika kolom redirectUrl di excel kosong, default ke profil_siswa.html
+                    window.location.href = 'profil_siswa.html';
+                }
             } else {
-                errorMessage.classList.remove('hidden');
-                loginButton.disabled = false;
-                loginButton.innerHTML = '<span>Masuk</span><i class="fas fa-chevron-right text-xs"></i>';
+                throw new Error("User tidak ditemukan");
             }
-        }, 800); 
-    });
-</script>
 
+        } catch (err) {
+            console.error(err);
+            error.classList.remove('hidden');
+            btn.disabled = false;
+            btn.innerHTML = '<span>MASUK SEKARANG</span><i class="fas fa-sign-in-alt text-sm"></i>';
+        }
+    };
+</script>
 </body>
 </html>
-
