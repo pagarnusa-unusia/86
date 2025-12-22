@@ -1,915 +1,458 @@
 <!DOCTYPE html>
-
 <html lang="id" class="scroll-smooth">
-
 <head>
-
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>Dashboard Admin | PAGARNUSA UNUSIA</title>
-
     <link rel="icon" href="logopn.png">
 
-
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-
-
     <script>
-
         tailwind.config = {
-
             darkMode: 'class',
-
             theme: { extend: { colors: { primary: '#1B7548', primaryDark: '#145c38' } } }
-
         }
-
     </script>
 
-
-
     <style>
-
         body { font-family: 'Poppins', sans-serif; }
-
         .sidebar-link.active { background: #145c38; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-
         .modal-active { display: flex !important; }
-
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .animate-fade { animation: fadeInUp 0.4s ease-out; }
-
         .animate-fadeInUp { animation: fadeInUp 0.8s ease-out forwards; }
-
         
-
         /* Penting untuk TTD di Mobile */
-
         #signature-pad {
-
             touch-action: none;
-
             cursor: crosshair;
-
         }
-
     </style>
-
 </head>
-
-
 
 <body class="min-h-screen bg-slate-50 dark:bg-slate-900 dark:text-slate-100">
 
-
-
 <header class="sticky top-0 z-50 bg-primary text-white shadow-md">
-
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-
         <div class="flex items-center gap-3">
-
             <img src="logopn.png" class="h-10" alt="Logo">
-
             <div class="leading-tight">
-
                 <p class="text-[10px] uppercase tracking-widest opacity-80">Sistem Database</p>
-
                 <p class="font-bold">ADMIN PAGARNUSA</p>
-
             </div>
-
         </div>
-
         <div class="flex items-center gap-3">
-
             <button id="darkToggle" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all">🌙</button>
-
             <a href="login.html" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-sm font-bold transition-all">Logout</a>
-
         </div>
-
     </div>
-
 </header>
 
-
-
 <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
-
     <aside class="md:w-64 space-y-4">
-
         <nav class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4 border border-slate-200 dark:border-slate-700">
-
             <p class="text-[10px] font-bold text-slate-400 uppercase mb-4 px-3">Menu Utama</p>
-
             <ul class="space-y-2">
-
                 <li><a class="sidebar-link active block px-4 py-3 rounded-xl cursor-pointer transition-all" data-target="ringkasan"><i class="fas fa-th-large mr-3 text-sm"></i>Ringkasan</a></li>
-
                 <li><a class="sidebar-link block px-4 py-3 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-700 cursor-pointer transition-all" data-target="peserta"><i class="fas fa-users mr-3 text-sm"></i>Kelola Peserta</a></li>
-
                 <li><a class="sidebar-link block px-4 py-3 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-700 cursor-pointer transition-all" data-target="statistik"><i class="fas fa-chart-line mr-3 text-sm"></i>Statistik</a></li>
-
                 <li><a class="sidebar-link block px-4 py-3 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-700 cursor-pointer transition-all" data-target="buat_ttd"><i class="fas fa-signature mr-3 text-sm"></i>Buat TTD</a></li>
-
             </ul>
-
         </nav>
 
-
-
         <div class="bg-emerald-900 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden group">
-
             <div class="relative z-10">
-
                 <p class="text-[10px] uppercase opacity-70 font-bold mb-1">Status Database</p>
-
                 <p class="text-xs font-mono break-all" id="db_filename">db_login.xlsx</p>
-
                 <div class="mt-3 flex items-center gap-2">
-
                     <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-
                     <span class="text-[10px] font-bold uppercase tracking-wider">Terhubung</span>
-
                 </div>
-
             </div>
-
             <i class="fas fa-database absolute -bottom-4 -right-4 text-6xl opacity-10 group-hover:scale-110 transition-transform"></i>
-
         </div>
-
     </aside>
 
-
-
     <main class="flex-1 space-y-6">
-
         <section id="ringkasan" class="animate-fade">
-
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-b-4 border-blue-500">
-
                     <p class="text-xs text-slate-500 uppercase font-bold">Total Peserta</p>
-
                     <p id="total" class="text-4xl font-bold mt-1">0</p>
-
                 </div>
-
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-b-4 border-yellow-500">
-
                     <p class="text-xs text-slate-500 uppercase font-bold">Pending</p>
-
                     <p id="panding" class="text-4xl font-bold mt-1 text-yellow-600">0</p>
-
                 </div>
-
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500">
-
                     <p class="text-xs text-slate-500 uppercase font-bold">Kualifikasi</p>
-
                     <p id="lulus" class="text-4xl font-bold mt-1 text-emerald-600">0</p>
-
                 </div>
-
             </div>
-
         </section>
-
-
 
         <section id="peserta" class="hidden animate-fade">
-
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-
                 <div class="p-4 border-b dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-
                     <h2 class="font-bold text-slate-700 dark:text-slate-200">Database Peserta</h2>
-
                     <span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md font-bold uppercase">Live Excel Data</span>
-
                 </div>
-
                 <div class="overflow-x-auto">
-
                     <table class="w-full text-sm text-left">
-
                         <thead class="bg-slate-50 dark:bg-slate-900 text-slate-500 uppercase text-[11px] font-bold">
-
                             <tr>
-
                                 <th class="p-4">Nama Lengkap</th>
-
                                 <th class="p-4 text-center">Angkatan</th>
-
                                 <th class="p-4 text-center">Ujian</th>
-
                                 <th class="p-4 text-center">Status</th>
-
                                 <th class="p-4 text-center">Aksi</th>
-
                             </tr>
-
                         </thead>
-
                         <tbody id="pesertaBody" class="divide-y dark:divide-slate-700">
-
                             <tr><td colspan="5" class="p-10 text-center text-slate-400 italic">Sedang menyelaraskan data...</td></tr>
-
                         </tbody>
-
                     </table>
-
                 </div>
-
             </div>
-
         </section>
-
-
 
         <section id="statistik" class="hidden animate-fade">
-
             <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
-
                 <h2 class="text-center font-bold text-slate-700 dark:text-slate-200 mb-6">Persentase Status Kelulusan</h2>
-
                 <div class="max-w-xs mx-auto">
-
                     <canvas id="chartPeserta"></canvas>
-
                 </div>
-
             </div>
-
         </section>
 
-
-
         <section id="buat_ttd" class="hidden animate-fade">
-
             <div class="max-w-xl mx-auto">
-
                 <div id="main-card-ttd" class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 animate-fadeInUp">
-
                     <div class="text-center mb-8">
-
                         <h2 class="text-2xl font-extrabold text-primary mb-1">Tanda Tangan Digital</h2>
-
                         <p class="text-xs font-bold text-slate-400 tracking-widest uppercase">PSNU PAGARNUSA UNUSIA</p>
-
                         <div class="w-12 h-1 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
-
                     </div>
 
-
-
                     <form id="formData" action="https://docs.google.com/forms/u/0/d/e/XXXXX-ID-ANDA/formResponse" method="POST" target="hidden_iframe" onsubmit="handleFormSubmit(event)">
-
                         <div class="group mb-4">
-
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 group-focus-within:text-primary">Nama Lengkap *</label>
-
                             <input type="text" id="nama" name="entry.111111" required placeholder="Masukkan Nama Lengkap"
-
                                 class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-4 focus:ring-primary/10 focus:border-primary dark:text-white transition-all">
-
                         </div>
-
-
 
                         <div class="group mb-4">
-
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2 group-focus-within:text-primary">Jabatan *</label>
-
                             <input type="text" id="jabatan" name="entry.222222" required placeholder="Contoh: Sekretaris Pelaksana"
-
                                 class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm focus:ring-4 focus:ring-primary/10 focus:border-primary dark:text-white transition-all">
-
                         </div>
-
-
 
                         <div class="mb-6">
-
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Goreskan Tanda Tangan *</label>
-
                             <div class="relative bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden">
-
                                 <canvas id="signature-pad" class="w-full h-40"></canvas>
-
                                 <button type="button" onclick="clearSignature()" 
-
                                     class="absolute top-2 right-2 bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded-md hover:bg-red-200 transition-colors">
-
                                     <i class="fas fa-eraser mr-1"></i> Hapus
-
                                 </button>
-
                             </div>
-
                             <p class="text-[10px] text-slate-400 mt-2 italic">* Gunakan jari atau mouse pada kotak di atas</p>
-
                         </div>
-
-
 
                         <div class="grid grid-cols-2 gap-4 mb-6">
-
                             <div class="group">
-
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Tanggal *</label>
-
                                 <input type="date" id="tanggal" name="entry.333333" required
-
                                     class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm dark:text-white transition-all">
-
                             </div>
-
                             <div class="group">
-
                                 <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Pukul *</label>
-
                                 <input type="time" id="pukul" name="entry.444444" required
-
                                     class="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-4 py-3 text-sm dark:text-white transition-all">
-
                             </div>
-
                         </div>
-
-
 
                         <input type="hidden" id="qr_hidden" name="entry.555555">
 
-
-
                         <button type="submit"
-
                             class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-4 rounded-2xl transition-all transform hover:-translate-y-1 active:scale-95 shadow-lg flex items-center justify-center space-x-3 group">
-
                             <span>Daftar & Buat QR</span>
-
                             <i class="fas fa-qrcode group-hover:rotate-12 transition-transform"></i>
-
                         </button>
-
                     </form>
-
                 </div>
-
-
 
                 <div id="download-section" class="hidden bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-8 border border-slate-200 dark:border-slate-700 text-center animate-fadeInUp">
-
                     <h2 class="text-xl font-bold text-primary mb-4">QR Tanda Tangan Berhasil Dibuat!</h2>
-
                     <div id="qr-container" class="mb-6 flex justify-center"></div>
-
                     <p class="text-sm text-slate-500 mb-6 px-4">QR ini memvalidasi identitas digital Anda secara resmi.</p>
-
                     <div class="flex flex-col gap-3">
-
                         <a id="download-btn" href="#" download="QR_TTD_PagarNusa.png" class="bg-primary text-white font-bold py-3 rounded-xl hover:bg-primaryDark transition-all">
-
                             <i class="fas fa-download mr-2"></i> Unduh Gambar QR (.png)
-
                         </a>
-
                         <button onclick="window.location.reload()" class="text-sm text-slate-400 hover:text-primary underline">Buat Baru</button>
-
                     </div>
-
                 </div>
-
             </div>
-
             <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
         </section>
-
     </main>
-
 </div>
-
-
 
 <div id="modalEdit" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
-
     <div class="bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-fade">
-
         <div class="p-6 text-center">
-
             <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-
                 <i class="fas fa-user-check text-2xl"></i>
-
             </div>
-
             <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-1">Update Status</h3>
-
             <p id="editNama" class="text-sm text-slate-500 mb-6 font-medium"></p>
-
             
-
             <select id="selectStatus" class="w-full p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-bold text-slate-700 dark:text-slate-200 focus:border-primary outline-none transition-all mb-6">
-
                 <option value="Pending">🕒 Pending</option>
-
                 <option value="Kualifikasi">✅ Kualifikasi</option>
-
                 <option value="Diskualifikasi">❌ Diskualifikasi</option>
-
             </select>
-
             
-
             <div class="flex gap-3">
-
                 <button onclick="closeModal()" class="flex-1 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition-all">Batal</button>
-
                 <button onclick="saveStatus()" class="flex-1 py-4 bg-primary hover:bg-primaryDark text-white rounded-2xl text-sm font-bold shadow-lg shadow-emerald-900/20 transition-all">Simpan</button>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
-
-
 <footer class="text-center py-6 text-slate-400 text-[10px] tracking-widest font-bold uppercase">
-
     © 2025 PAGARNUSA UNUSIA • Hak Cipta Dilindungi
-
 </footer>
 
-
-
 <script>
-
 let globalData = [];
-
 let myChart = null;
-
 let currentEditIndex = null;
 
-
-
 // --- DARK MODE ---
-
 const html = document.documentElement;
-
 if (localStorage.getItem('theme') === 'dark') html.classList.add('dark');
-
 document.getElementById('darkToggle').onclick = () => {
-
     html.classList.toggle('dark');
-
     localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
-
     if (myChart) renderChart(); 
-
 };
 
-
-
 // --- NAVIGATION ---
-
 document.querySelectorAll('.sidebar-link').forEach(link => {
-
     link.onclick = () => {
-
         document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
-
         link.classList.add('active');
-
         document.querySelectorAll('main section').forEach(s => s.classList.add('hidden'));
-
         const target = link.dataset.target;
-
         document.getElementById(target).classList.remove('hidden');
-
         if (target === 'statistik') renderChart();
-
         if (target === 'buat_ttd') setTimeout(resizeCanvas, 100);
-
     };
-
 });
 
-
-
 // --- CORE: LOAD EXCEL DATA ---
-
 async function loadExcelData() {
-
     try {
-
         const response = await fetch('db_login.xlsx?update=' + new Date().getTime());
-
         if (!response.ok) throw new Error('File db_login.xlsx tidak terbaca.');
-
         
-
         const arrayBuffer = await response.arrayBuffer();
-
         const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
         const rawData = XLSX.utils.sheet_to_json(sheet);
-
         
-
         globalData = rawData.filter(row => {
-
             const nama = row.nama || row.Nama;
-
             const angkatan = row.angkatan || row.Angkatan;
-
             return nama && angkatan;
-
         });
-
         
-
         refreshUI();
-
     } catch (err) {
-
         console.error(err);
-
         document.getElementById('pesertaBody').innerHTML = `
-
             <tr><td colspan="5" class="p-10 text-center">
-
                 <p class="text-red-500 font-bold"><i class="fas fa-exclamation-circle mr-2"></i>Gagal Memuat Database</p>
-
                 <p class="text-[10px] text-slate-400 mt-1">Pastikan file 'db_login.xlsx' ada dan data terisi lengkap.</p>
-
             </td></tr>`;
-
     }
-
 }
-
-
 
 function refreshUI() {
-
     const tbody = document.getElementById('pesertaBody');
-
     let cPending = 0, cLulus = 0;
-
     
-
     tbody.innerHTML = '';
-
     globalData.forEach((p, idx) => {
-
         const nama = p.nama || p.Nama || "-";
-
         const angkatan = p.angkatan || p.Angkatan || "-";
-
         const ujian = p.ujian || p.Ujian || "-";
-
         const sRaw = p.status || p.Status || "Pending";
-
         const sLow = sRaw.toLowerCase();
 
-
-
         if (sLow.includes('pand')) cPending++;
-
         else if (sLow.includes('kualifikasi') || sLow.includes('lulus')) cLulus++;
 
-
-
         tbody.innerHTML += `
-
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all group">
-
                 <td class="p-4 font-bold text-slate-700 dark:text-slate-200">${nama}</td>
-
                 <td class="p-4 text-center text-slate-500">${angkatan}</td>
-
                 <td class="p-4 text-center">
-
                     <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md text-[10px] font-bold border dark:border-slate-700">${ujian}</span>
-
                 </td>
-
                 <td class="p-4 text-center">
-
                     <span class="px-3 py-1 rounded-full text-[9px] font-bold border ${getStatusStyle(sLow)}">${sRaw}</span>
-
                 </td>
-
                 <td class="p-4 text-center">
-
                     <button onclick="openEditModal(${idx})" class="opacity-0 group-hover:opacity-100 bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all">
-
                         <i class="fas fa-edit mr-1"></i>Edit
-
                     </button>
-
                 </td>
-
             </tr>`;
-
     });
 
-
-
     document.getElementById('total').textContent = globalData.length;
-
     document.getElementById('panding').textContent = cPending;
-
     document.getElementById('lulus').textContent = cLulus;
-
 }
-
-
 
 function getStatusStyle(s) {
-
     if (s.includes('pand')) return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-
     if (s.includes('kualifikasi') || s.includes('lulus')) return 'bg-emerald-50 text-emerald-600 border-emerald-200';
-
     return 'bg-red-50 text-red-600 border-red-200';
-
 }
-
-
 
 function openEditModal(idx) {
-
     currentEditIndex = idx;
-
     const p = globalData[idx];
-
     document.getElementById('editNama').textContent = p.nama || p.Nama;
-
     document.getElementById('selectStatus').value = p.status || p.Status || "Pending";
-
     document.getElementById('modalEdit').classList.add('modal-active');
-
 }
-
-
 
 function closeModal() { document.getElementById('modalEdit').classList.remove('modal-active'); }
 
-
-
 function saveStatus() {
-
     const val = document.getElementById('selectStatus').value;
-
     if (globalData[currentEditIndex].status !== undefined) globalData[currentEditIndex].status = val;
-
     else globalData[currentEditIndex].Status = val;
-
     closeModal();
-
     refreshUI();
-
 }
-
-
 
 function renderChart() {
-
     let l = 0, p = 0, d = 0;
-
     globalData.forEach(i => {
-
         const s = (i.status || i.Status || "").toLowerCase();
-
         if (s.includes('pand')) p++;
-
         else if (s.includes('kualifikasi') || s.includes('lulus')) l++;
-
         else d++;
-
     });
-
-
 
     const ctx = document.getElementById('chartPeserta').getContext('2d');
-
     if (myChart) myChart.destroy();
-
     myChart = new Chart(ctx, {
-
         type: 'doughnut',
-
         data: {
-
             labels: ['Kualifikasi', 'Pending', 'Diskualifikasi'],
-
             datasets: [{
-
                 data: [l, p, d],
-
                 backgroundColor: ['#1B7548', '#EAB308', '#EF4444'],
-
                 borderWidth: 0,
-
                 hoverOffset: 20
-
             }]
-
         },
-
         options: {
-
             plugins: { legend: { position: 'bottom', labels: { color: html.classList.contains('dark') ? '#cbd5e1' : '#334155', font: { family: 'Poppins', size: 10 } } } }
-
         }
-
     });
-
 }
-
-
 
 // --- SIGNATURE LOGIC ---
-
 const canvas = document.getElementById('signature-pad');
-
 const ctx = canvas.getContext('2d');
-
 let writingMode = false;
 
-
-
 function resizeCanvas() {
-
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-
     canvas.width = canvas.offsetWidth * ratio;
-
     canvas.height = canvas.offsetHeight * ratio;
-
     ctx.scale(ratio, ratio);
-
     ctx.lineWidth = 3;
-
     ctx.lineJoin = "round";
-
     ctx.lineCap = "round";
-
     ctx.strokeStyle = "#1B7548"; 
-
 }
 
-
-
 const getCursorPosition = (event) => {
-
     const rect = canvas.getBoundingClientRect();
-
     return [
-
         (event.clientX || (event.touches && event.touches[0].clientX)) - rect.left,
-
         (event.clientY || (event.touches && event.touches[0].clientY)) - rect.top
-
     ];
-
 };
-
-
 
 const handlePointerMove = (event) => {
-
     if (!writingMode) return;
-
     const [x, y] = getCursorPosition(event);
-
     ctx.lineTo(x, y);
-
     ctx.stroke();
-
 };
-
-
 
 const handlePointerUp = () => { writingMode = false; };
-
 const handlePointerDown = (event) => {
-
     writingMode = true;
-
     ctx.beginPath();
-
     const [x, y] = getCursorPosition(event);
-
     ctx.moveTo(x, y);
-
 };
 
-
-
 canvas.addEventListener('mousedown', handlePointerDown);
-
 canvas.addEventListener('mouseup', handlePointerUp);
-
 canvas.addEventListener('mousemove', handlePointerMove);
-
 canvas.addEventListener('touchstart', handlePointerDown);
-
 canvas.addEventListener('touchend', handlePointerUp);
-
 canvas.addEventListener('touchmove', handlePointerMove);
-
-
 
 function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-
-
 function handleFormSubmit(e) {
-
     const n = document.getElementById('nama').value;
-
     const j = document.getElementById('jabatan').value;
-
     const t = document.getElementById('tanggal').value;
-
     const p = document.getElementById('pukul').value;
 
-
-
     const contentUrl = `https://uktpagarnusa.my.id/ttd.html?n=${encodeURIComponent(n)}&j=${encodeURIComponent(j)}&t=${encodeURIComponent(t)}&p=${encodeURIComponent(p)}`;
-
     const qrFormula = `=IMAGE("https://quickchart.io/qr?text=${encodeURIComponent(contentUrl)}&size=200")`;
-
     document.getElementById('qr_hidden').value = qrFormula;
-
-
 
     const quickChartUrl = `https://quickchart.io/qr?text=${encodeURIComponent(contentUrl)}&size=500&margin=2`;
 
-
-
     setTimeout(() => {
-
         document.getElementById('main-card-ttd').classList.add('hidden');
-
         document.getElementById('download-section').classList.remove('hidden');
-
         const qrImg = document.createElement('img');
-
         qrImg.src = quickChartUrl;
-
         qrImg.className = "w-48 h-48 border-4 border-emerald-100 rounded-lg shadow-sm";
-
         document.getElementById('qr-container').innerHTML = '';
-
         document.getElementById('qr-container').appendChild(qrImg);
-
         document.getElementById('download-btn').href = quickChartUrl;
-
     }, 500);
-
 }
 
-
-
 window.onload = () => {
-
     loadExcelData();
-
 };
-
 </script>
 
-
-
 </body>
-
 </html>
