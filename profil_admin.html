@@ -193,8 +193,8 @@
                     <div id="qr-container" class="mb-6 flex justify-center"></div>
                     <p class="text-sm text-slate-500 mb-6 px-4">QR ini memvalidasi identitas digital Anda secara resmi.</p>
                     <div class="flex flex-col gap-3">
-                        <a id="download-btn" href="#" download="QR_TTD_PagarNusa.png" class="bg-primary text-white font-bold py-3 rounded-xl hover:bg-primaryDark transition-all">
-                            <i class="fas fa-download mr-2"></i> Unduh Gambar QR (.png)
+                        <a id="download-btn" href="javascript:void(0)" onclick="downloadQR()" class="bg-primary text-white font-bold py-3 rounded-xl hover:bg-primaryDark transition-all">
+                            <i class="fas fa-download mr-2"></i> Unduh QR
                         </a>
                         <button onclick="window.location.reload()" class="text-sm text-slate-400 hover:text-primary underline">Buat Baru</button>
                     </div>
@@ -425,6 +425,30 @@ canvas.addEventListener('touchmove', handlePointerMove);
 
 function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
+// --- QR DOWNLOAD LOGIC (FIX CORS) ---
+async function downloadQR() {
+    const qrImg = document.querySelector('#qr-container img');
+    if (!qrImg) return;
+
+    try {
+        const response = await fetch(qrImg.src);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const namaFile = document.getElementById('nama').value.replace(/\s+/g, '_') || 'TTD';
+        
+        a.href = url;
+        a.download = `QR_TTD_${namaFile}.png`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } catch (err) {
+        console.error("Gagal mengunduh QR:", err);
+        window.open(qrImg.src, '_blank');
+    }
+}
+
 function handleFormSubmit(e) {
     const n = document.getElementById('nama').value;
     const j = document.getElementById('jabatan').value;
@@ -432,21 +456,32 @@ function handleFormSubmit(e) {
     const p = document.getElementById('pukul').value;
 
     const contentUrl = `https://uktpagarnusa.my.id/ttd.html?n=${encodeURIComponent(n)}&j=${encodeURIComponent(j)}&t=${encodeURIComponent(t)}&p=${encodeURIComponent(p)}`;
+    
+    // Formula untuk Google Sheets
     const qrFormula = `=IMAGE("https://quickchart.io/qr?text=${encodeURIComponent(contentUrl)}&size=200")`;
     document.getElementById('qr_hidden').value = qrFormula;
 
+    // URL Gambar untuk Preview dan Download
     const quickChartUrl = `https://quickchart.io/qr?text=${encodeURIComponent(contentUrl)}&size=500&margin=2`;
 
-    setTimeout(() => {
-        document.getElementById('main-card-ttd').classList.add('hidden');
-        document.getElementById('download-section').classList.remove('hidden');
-        const qrImg = document.createElement('img');
-        qrImg.src = quickChartUrl;
-        qrImg.className = "w-48 h-48 border-4 border-emerald-100 rounded-lg shadow-sm";
-        document.getElementById('qr-container').innerHTML = '';
-        document.getElementById('qr-container').appendChild(qrImg);
-        document.getElementById('download-btn').href = quickChartUrl;
-    }, 500);
+    // Tampilkan Section Download & Generate QR Image
+    document.getElementById('main-card-ttd').classList.add('hidden');
+    document.getElementById('download-section').classList.remove('hidden');
+    
+    const qrImg = document.createElement('img');
+    qrImg.src = quickChartUrl;
+    qrImg.className = "w-48 h-48 border-4 border-emerald-100 rounded-lg shadow-sm mx-auto";
+    
+    const container = document.getElementById('qr-container');
+    container.innerHTML = '';
+    container.appendChild(qrImg);
+
+    // Hubungkan fungsi download ke tombol
+    const btnDown = document.getElementById('download-btn');
+    btnDown.onclick = (event) => {
+        event.preventDefault();
+        downloadQR();
+    };
 }
 
 window.onload = () => {
