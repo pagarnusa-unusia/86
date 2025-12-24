@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id" class="scroll-smooth">
 <head>
@@ -155,14 +156,32 @@
 
                         <div class="mb-6">
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-2">Goreskan Tanda Tangan *</label>
-                            <div class="relative bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden">
+                            
+                            <div id="signature-container" class="relative bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl overflow-hidden">
                                 <canvas id="signature-pad" class="w-full h-40"></canvas>
                                 <button type="button" onclick="clearSignature()" 
                                     class="absolute top-2 right-2 bg-red-100 text-red-600 text-[10px] px-2 py-1 rounded-md hover:bg-red-200 transition-colors">
                                     <i class="fas fa-eraser mr-1"></i> Hapus
                                 </button>
+                                <div id="canvas-overlay" class="hidden absolute inset-0 bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center backdrop-blur-[1px]">
+                                    <span class="text-xs font-medium italic text-slate-500">ttd sudah diupload</span>
+                                </div>
                             </div>
-                            <p class="text-[10px] text-slate-400 mt-2 italic">* Gunakan jari atau mouse pada kotak di atas</p>
+
+                            <div class="relative flex py-4 items-center">
+                                <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                                <span class="flex-shrink mx-4 text-slate-400 text-[10px] uppercase font-bold tracking-wider">Atau</span>
+                                <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label class="text-[11px] font-semibold text-slate-500 uppercase">Upload Gambar Tanda Tangan</label>
+                                <input type="file" id="signature-upload" accept="image/*" 
+                                    class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+                                    onchange="handleSignatureUpload(this)">
+                            </div>
+
+                            <p class="text-[10px] text-slate-400 mt-2 italic">* Gunakan jari/mouse pada kotak atau upload file gambar</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-6">
@@ -263,63 +282,37 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
 async function loadExcelData() {
     try {
         const response = await fetch('db_login.xlsx?update=' + new Date().getTime());
-        if (!response.ok) throw new Error('File db_login.xlsx tidak terbaca.');
-        
+        if (!response.ok) throw new Error('File tidak terbaca.');
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rawData = XLSX.utils.sheet_to_json(sheet);
-        
-        globalData = rawData.filter(row => {
-            const nama = row.nama || row.Nama;
-            const angkatan = row.angkatan || row.Angkatan;
-            return nama && angkatan;
-        });
-        
+        globalData = rawData.filter(row => (row.nama || row.Nama) && (row.angkatan || row.Angkatan));
         refreshUI();
     } catch (err) {
         console.error(err);
-        document.getElementById('pesertaBody').innerHTML = `
-            <tr><td colspan="5" class="p-10 text-center">
-                <p class="text-red-500 font-bold"><i class="fas fa-exclamation-circle mr-2"></i>Gagal Memuat Database</p>
-                <p class="text-[10px] text-slate-400 mt-1">Pastikan file 'db_login.xlsx' ada dan data terisi lengkap.</p>
-            </td></tr>`;
+        document.getElementById('pesertaBody').innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-500">Gagal Memuat Database</td></tr>`;
     }
 }
 
 function refreshUI() {
     const tbody = document.getElementById('pesertaBody');
     let cPending = 0, cLulus = 0;
-    
     tbody.innerHTML = '';
     globalData.forEach((p, idx) => {
-        const nama = p.nama || p.Nama || "-";
-        const angkatan = p.angkatan || p.Angkatan || "-";
-        const ujian = p.ujian || p.Ujian || "-";
         const sRaw = p.status || p.Status || "Pending";
         const sLow = sRaw.toLowerCase();
-
         if (sLow.includes('pand')) cPending++;
-        else if (sLow.includes('kualifikasi') || sLow.includes('lulus')) cLulus++;
-
+        else if (sLow.includes('lulus')) cLulus++;
         tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all group">
-                <td class="p-4 font-bold text-slate-700 dark:text-slate-200">${nama}</td>
-                <td class="p-4 text-center text-slate-500">${angkatan}</td>
-                <td class="p-4 text-center">
-                    <span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md text-[10px] font-bold border dark:border-slate-700">${ujian}</span>
-                </td>
-                <td class="p-4 text-center">
-                    <span class="px-3 py-1 rounded-full text-[9px] font-bold border ${getStatusStyle(sLow)}">${sRaw}</span>
-                </td>
-                <td class="p-4 text-center">
-                    <button onclick="openEditModal(${idx})" class="opacity-0 group-hover:opacity-100 bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-bold hover:bg-primary hover:text-white transition-all">
-                        <i class="fas fa-edit mr-1"></i>Edit
-                    </button>
-                </td>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                <td class="p-4 font-bold">${p.nama || p.Nama}</td>
+                <td class="p-4 text-center">${p.angkatan || p.Angkatan}</td>
+                <td class="p-4 text-center"><span class="px-2 py-1 bg-slate-100 rounded-md text-[10px]">${p.ujian || p.Ujian || "-"}</span></td>
+                <td class="p-4 text-center"><span class="px-3 py-1 rounded-full text-[9px] border ${getStatusStyle(sLow)}">${sRaw}</span></td>
+                <td class="p-4 text-center"><button onclick="openEditModal(${idx})" class="text-primary text-xs font-bold">Edit</button></td>
             </tr>`;
     });
-
     document.getElementById('total').textContent = globalData.length;
     document.getElementById('panding').textContent = cPending;
     document.getElementById('lulus').textContent = cLulus;
@@ -327,15 +320,14 @@ function refreshUI() {
 
 function getStatusStyle(s) {
     if (s.includes('pand')) return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-    if (s.includes('kualifikasi') || s.includes('lulus')) return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+    if (s.includes('lulus')) return 'bg-emerald-50 text-emerald-600 border-emerald-200';
     return 'bg-red-50 text-red-600 border-red-200';
 }
 
 function openEditModal(idx) {
     currentEditIndex = idx;
-    const p = globalData[idx];
-    document.getElementById('editNama').textContent = p.nama || p.Nama;
-    document.getElementById('selectStatus').value = p.status || p.Status || "Pending";
+    document.getElementById('editNama').textContent = globalData[idx].nama || globalData[idx].Nama;
+    document.getElementById('selectStatus').value = globalData[idx].status || globalData[idx].Status || "Pending";
     document.getElementById('modalEdit').classList.add('modal-active');
 }
 
@@ -353,31 +345,20 @@ function renderChart() {
     let l = 0, p = 0, d = 0;
     globalData.forEach(i => {
         const s = (i.status || i.Status || "").toLowerCase();
-        if (s.includes('pand')) p++;
-        else if (s.includes('kualifikasi') || s.includes('lulus')) l++;
-        else d++;
+        if (s.includes('pand')) p++; else if (s.includes('lulus')) l++; else d++;
     });
-
     const ctx = document.getElementById('chartPeserta').getContext('2d');
     if (myChart) myChart.destroy();
     myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Kualifikasi', 'Pending', 'Diskualifikasi'],
-            datasets: [{
-                data: [l, p, d],
-                backgroundColor: ['#1B7548', '#EAB308', '#EF4444'],
-                borderWidth: 0,
-                hoverOffset: 20
-            }]
-        },
-        options: {
-            plugins: { legend: { position: 'bottom', labels: { color: html.classList.contains('dark') ? '#cbd5e1' : '#334155', font: { family: 'Poppins', size: 10 } } } }
+            labels: ['Lulus', 'Pending', 'Gagal'],
+            datasets: [{ data: [l, p, d], backgroundColor: ['#1B7548', '#EAB308', '#EF4444'] }]
         }
     });
 }
 
-// --- SIGNATURE LOGIC ---
+// --- SIGNATURE PAD ---
 const canvas = document.getElementById('signature-pad');
 const ctx = canvas.getContext('2d');
 let writingMode = false;
@@ -387,106 +368,99 @@ function resizeCanvas() {
     canvas.width = canvas.offsetWidth * ratio;
     canvas.height = canvas.offsetHeight * ratio;
     ctx.scale(ratio, ratio);
-    ctx.lineWidth = 3;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "#1B7548"; 
+    ctx.lineWidth = 3; ctx.strokeStyle = "#1B7548"; ctx.lineCap = "round";
 }
 
-const getCursorPosition = (event) => {
+const getCursorPosition = (e) => {
     const rect = canvas.getBoundingClientRect();
-    return [
-        (event.clientX || (event.touches && event.touches[0].clientX)) - rect.left,
-        (event.clientY || (event.touches && event.touches[0].clientY)) - rect.top
-    ];
+    return [(e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top];
 };
 
-const handlePointerMove = (event) => {
-    if (!writingMode) return;
-    const [x, y] = getCursorPosition(event);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-};
+canvas.addEventListener('mousedown', (e) => { writingMode = true; ctx.beginPath(); const [x,y] = getCursorPosition(e); ctx.moveTo(x,y); });
+canvas.addEventListener('mousemove', (e) => { if(!writingMode) return; const [x,y] = getCursorPosition(e); ctx.lineTo(x,y); ctx.stroke(); });
+canvas.addEventListener('mouseup', () => writingMode = false);
+canvas.addEventListener('touchstart', (e) => { writingMode = true; ctx.beginPath(); const [x,y] = getCursorPosition(e); ctx.moveTo(x,y); });
+canvas.addEventListener('touchmove', (e) => { if(!writingMode) return; const [x,y] = getCursorPosition(e); ctx.lineTo(x,y); ctx.stroke(); });
 
-const handlePointerUp = () => { writingMode = false; };
-const handlePointerDown = (event) => {
-    writingMode = true;
-    ctx.beginPath();
-    const [x, y] = getCursorPosition(event);
-    ctx.moveTo(x, y);
-};
+function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); document.getElementById('canvas-overlay').classList.add('hidden'); canvas.style.pointerEvents = 'auto'; }
 
-canvas.addEventListener('mousedown', handlePointerDown);
-canvas.addEventListener('mouseup', handlePointerUp);
-canvas.addEventListener('mousemove', handlePointerMove);
-canvas.addEventListener('touchstart', handlePointerDown);
-canvas.addEventListener('touchend', handlePointerUp);
-canvas.addEventListener('touchmove', handlePointerMove);
-
-function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
-// --- QR DOWNLOAD LOGIC (FIX CORS) ---
-async function downloadQR() {
-    const qrImg = document.querySelector('#qr-container img');
-    if (!qrImg) return;
-
-    try {
-        const response = await fetch(qrImg.src);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        const namaFile = document.getElementById('nama').value.replace(/\s+/g, '_') || 'TTD';
-        
-        a.href = url;
-        a.download = `QR_TTD_${namaFile}.png`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    } catch (err) {
-        console.error("Gagal mengunduh QR:", err);
-        window.open(qrImg.src, '_blank');
+function handleSignatureUpload(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width/2, canvas.height/2);
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+        document.getElementById('canvas-overlay').classList.remove('hidden');
+        canvas.style.pointerEvents = 'none';
     }
 }
 
-function handleFormSubmit(e) {
-    const n = document.getElementById('nama').value;
-    const j = document.getElementById('jabatan').value;
-    const t = document.getElementById('tanggal').value;
-    const p = document.getElementById('pukul').value;
-
-    const contentUrl = `https://uktpagarnusa.my.id/ttd.html?n=${encodeURIComponent(n)}&j=${encodeURIComponent(j)}&t=${encodeURIComponent(t)}&p=${encodeURIComponent(p)}`;
-    
-    // Formula untuk Google Sheets
-    const qrFormula = `=IMAGE("https://quickchart.io/qr?text=${encodeURIComponent(contentUrl)}&size=200")`;
-    document.getElementById('qr_hidden').value = qrFormula;
-
-    // URL Gambar untuk Preview dan Download
-    const quickChartUrl = `https://quickchart.io/qr?text=${encodeURIComponent(contentUrl)}&size=500&margin=2`;
-
-    // Tampilkan Section Download & Generate QR Image
-    document.getElementById('main-card-ttd').classList.add('hidden');
-    document.getElementById('download-section').classList.remove('hidden');
-    
-    const qrImg = document.createElement('img');
-    qrImg.src = quickChartUrl;
-    qrImg.className = "w-48 h-48 border-4 border-emerald-100 rounded-lg shadow-sm mx-auto";
-    
-    const container = document.getElementById('qr-container');
-    container.innerHTML = '';
-    container.appendChild(qrImg);
-
-    // Hubungkan fungsi download ke tombol
-    const btnDown = document.getElementById('download-btn');
-    btnDown.onclick = (event) => {
-        event.preventDefault();
-        downloadQR();
-    };
+// --- QR LOGIC ---
+async function downloadQR() {
+    const qrImg = document.querySelector('#qr-container img');
+    if (!qrImg) return;
+    const response = await fetch(qrImg.src);
+    const blob = await response.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `QR_TTE_${new Date().getTime()}.png`;
+    a.click();
 }
 
-window.onload = () => {
-    loadExcelData();
-};
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+    btn.disabled = true;
+
+    // 1. Ambil Data Tanda Tangan dari Canvas
+    const imageData = canvas.toDataURL("image/png").split(',')[1]; // Ambil base64-nya saja
+
+    // 2. Upload ke ImgBB (Gratis & Tanpa API Key untuk testing, atau gunakan key Anda)
+    // Gunakan API Key: 96904e5436d4608c02f06821262d1c67 (Contoh API Key publik)
+    const formData = new FormData();
+    formData.append("image", imageData);
+
+    try {
+        const response = await fetch("https://api.imgbb.com/1/upload?key=96904e5436d4608c02f06821262d1c67", {
+            method: "POST",
+            body: formData
+        });
+        const result = await response.json();
+        const secureUrl = result.data.url; // Ini link gambar permanen yang pendek
+
+        // 3. Buat URL Verifikasi dengan Link Gambar Tersebut
+        const n = document.getElementById('nama').value;
+        const j = document.getElementById('jabatan').value;
+        const t = document.getElementById('tanggal').value;
+        const p = document.getElementById('pukul').value;
+
+        const baseUrl = "https://uktpagarnusa.my.id/ttd.html";
+        const finalUrl = `${baseUrl}?n=${encodeURIComponent(n)}&j=${encodeURIComponent(j)}&t=${encodeURIComponent(t)}&p=${encodeURIComponent(p)}&s=${encodeURIComponent(secureUrl)}`;
+
+        // 4. Tampilkan QR Code (Sangat Ringan & Anti Pecah)
+        const quickChartUrl = `https://quickchart.io/qr?text=${encodeURIComponent(finalUrl)}&size=500`;
+        
+        document.getElementById('main-card-ttd').classList.add('hidden');
+        document.getElementById('download-section').classList.remove('hidden');
+        document.getElementById('qr-container').innerHTML = `<img src="${quickChartUrl}" class="mx-auto w-48 shadow-lg rounded-lg">`;
+
+    } catch (error) {
+        alert("Gagal mengunggah tanda tangan. Periksa koneksi internet.");
+        console.error(error);
+    } finally {
+        btn.innerHTML = 'Generate QR Code';
+        btn.disabled = false;
+    }
+}
+
+window.onload = loadExcelData;
 </script>
 
 </body>
