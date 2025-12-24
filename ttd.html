@@ -65,26 +65,23 @@
     <script>
 window.onload = function() {
     const urlParams = new URLSearchParams(window.location.search);
-    
-    // Baca parameter singkat
-    const nama = urlParams.get('n');
-    const jabatan = urlParams.get('j');
-    const tanggal = urlParams.get('t');
-    const pukul = urlParams.get('p');
-    const imgData = urlParams.get('s');
+    const id = urlParams.get('id');
 
-    document.getElementById('v-nama').innerText = nama || "Data Kosong";
-    document.getElementById('v-jabatan').innerText = jabatan || "Data Kosong";
-    
-    // Jika Anda punya elemen tanggal/pukul di ttd.html:
-    if(document.getElementById('v-waktu')) {
-        document.getElementById('v-waktu').innerText = `${tanggal} | ${pukul}`;
-    }
+    if (id) {
+        // Ambil data dari LocalStorage berdasarkan ID di QR
+        const storedData = JSON.parse(localStorage.getItem(id));
 
-    if (imgData) {
-        const sigImg = document.getElementById('v-signature');
-        sigImg.src = imgData;
-        document.getElementById('signature-container').classList.remove('hidden');
+        if (storedData) {
+            document.getElementById('v-nama').innerText = storedData.nama;
+            document.getElementById('v-jabatan').innerText = storedData.jabatan;
+            
+            const sigImg = document.getElementById('v-signature');
+            sigImg.src = storedData.image; // Tanda tangan akan muncul dengan kualitas tajam
+            document.getElementById('signature-container').classList.remove('hidden');
+        } else {
+            document.getElementById('v-nama').innerText = "Data Tidak Ditemukan";
+            document.getElementById('v-jabatan').innerText = "Mungkin QR sudah kadaluarsa";
+        }
     }
 
     setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 800);
