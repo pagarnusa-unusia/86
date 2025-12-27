@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Materi Putih | PAGARNUSA UNUSIA</title>
+    <link rel="icon" href="https://lh3.googleusercontent.com/d/1drM76LlU3sdqpwo-Urq7ZULoyORC0UMQ">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B7548',
+                        primaryDark: '#145c38',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .materi-content { display: none; }
+        .materi-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-emerald-50 to-slate-50 min-h-screen flex flex-col">
+
+    <header class="bg-primary text-white shadow-lg p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <img src="logopn.png" alt="Logo" class="h-8">
+                <span class="font-bold text-sm tracking-widest uppercase">Materi Sabuk Putih</span>
+            </div>
+            <a href="profil_siswa.html" class="text-xs bg-white/20 px-3 py-1 rounded-lg hover:bg-white/30 transition">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-1 container mx-auto max-w-lg px-4 py-8">
+        
+        <div class="mb-8 text-center">
+            <h1 class="text-2xl font-bold text-slate-800 uppercase text-shadow-sm">Kurikulum UKT IV</h1>
+            <div class="inline-block px-4 py-1 rounded-full bg-white border border-slate-200 text-[10px] font-bold text-emerald-600 mt-2 shadow-sm">
+                TINGKAT: SABUK PUTIH (DASAR)
+            </div>
+        </div>
+
+        <div class="grid gap-4">
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <button onclick="toggleMateri('hafalan')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition">
+                    <div class="flex items-center space-x-4 text-left">
+                        <div class="bg-orange-50 text-orange-600 p-3 rounded-xl"><i class="fas fa-brain text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Hafalan</h3>
+                            <p class="text-[10px] text-slate-500 uppercase font-medium">Doa & Surah Pendek</p>
+                        </div>
+                    </div>
+                    <i id="icon-hafalan" class="fas fa-chevron-down text-slate-300 transition-transform"></i>
+                </button>
+                <div id="hafalan" class="materi-content p-5 bg-orange-50/30 border-t border-slate-100">
+                    <ul class="text-xs space-y-3 text-slate-700">
+                        <li class="flex items-start"><i class="fas fa-check-circle text-orange-500 mt-0.5 mr-2"></i> Tahiat Akhir & Doa Qunut</li>
+                        <li class="flex items-start"><i class="fas fa-check-circle text-orange-500 mt-0.5 mr-2"></i> Surah: Quraisy, Al-Ma'un, Al-Kautsar</li>
+                        <li class="flex items-start"><i class="fas fa-check-circle text-orange-500 mt-0.5 mr-2"></i> Tahlil (Awal sampai Akhir)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <button onclick="toggleMateri('sejarah')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition">
+                    <div class="flex items-center space-x-4 text-left">
+                        <div class="bg-blue-50 text-blue-600 p-3 rounded-xl"><i class="fas fa-history text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Sejarah</h3>
+                            <p class="text-[10px] text-slate-500 uppercase font-medium">Wawasan Organisasi</p>
+                        </div>
+                    </div>
+                    <i id="icon-sejarah" class="fas fa-chevron-down text-slate-300 transition-transform"></i>
+                </button>
+                <div id="sejarah" class="materi-content p-5 bg-blue-50/30 border-t border-slate-100">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 text-[11px] font-bold text-center text-blue-700 uppercase">Pagar Nusa</div>
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 text-[11px] font-bold text-center text-blue-700 uppercase">Indonesia</div>
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 text-[11px] font-bold text-center text-blue-700 uppercase">Nahdlatul Ulama</div>
+                        <div class="bg-white p-3 rounded-lg border border-blue-100 text-[11px] font-bold text-center text-blue-700 uppercase">ASWAJA</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <button onclick="toggleMateri('teknik')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition">
+                    <div class="flex items-center space-x-4 text-left">
+                        <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl"><i class="fas fa-user-ninja text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Senaman & Teknik</h3>
+                            <p class="text-[10px] text-slate-500 uppercase font-medium">Gerakan Dasar & Praktik</p>
+                        </div>
+                    </div>
+                    <i id="icon-teknik" class="fas fa-chevron-down text-slate-300 transition-transform"></i>
+                </button>
+                <div id="teknik" class="materi-content p-5 bg-emerald-50/30 border-t border-slate-100">
+                    <div class="space-y-4">
+                        <div>
+                            <span class="text-[10px] font-bold text-emerald-700 uppercase">Kuda-Kuda & Langkah</span>
+                            <p class="text-[11px] text-slate-600 italic">Tempur, Sejajar, Ganti Kuda-kuda, Langkah, Senaman SD</p>
+                        </div>
+                        <hr class="border-emerald-100">
+                        <div>
+                            <span class="text-[10px] font-bold text-emerald-700 uppercase">Serangan & Tangkisan</span>
+                            <p class="text-[11px] text-slate-600"><b>Pukulan:</b> Jab, Bandol (Atas/Bawah), Uppercut, Sotok, Tongkok, Gebang, Parang.</p>
+                            <p class="text-[11px] text-slate-600 mt-1"><b>Tendangan:</b> A,B,C,T,Sabit, Sirkel Atas dan Bawah.</p>
+                            <p class="text-[11px] text-slate-600 mt-1"><b>Tangkisan:</b> Atas, Luar, Dalam, Tangkisan Kepala.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <button onclick="toggleMateri('fisik')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition">
+                    <div class="flex items-center space-x-4 text-left">
+                        <div class="bg-red-50 text-red-600 p-3 rounded-xl"><i class="fas fa-running text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Fisik</h3>
+                            <p class="text-[10px] text-slate-500 uppercase font-medium">Tes Ketahanan Tubuh</p>
+                        </div>
+                    </div>
+                    <i id="icon-fisik" class="fas fa-chevron-down text-slate-300 transition-transform"></i>
+                </button>
+                <div id="fisik" class="materi-content p-5 bg-red-50/30 border-t border-slate-100">
+                    <div class="grid grid-cols-2 gap-3 text-[11px] text-slate-700">
+                        <div class="bg-white p-2 rounded-lg"><i class="fas fa-dot-circle mr-1 text-red-400"></i> Push Up & Sit Up</div>
+                        <div class="bg-white p-2 rounded-lg"><i class="fas fa-dot-circle mr-1 text-red-400"></i> Spir Perut & Paha</div>
+                        <div class="bg-white p-2 rounded-lg"><i class="fas fa-dot-circle mr-1 text-red-400"></i> Tendangan A,B,C,T,Sabit</div>
+                        <div class="bg-white p-2 rounded-lg"><i class="fas fa-dot-circle mr-1 text-red-400"></i> Plank Standart</div>
+                        <div class="bg-white p-2 rounded-lg"><i class="fas fa-dot-circle mr-1 text-red-400"></i> Loncat, Lari, Rol, Skip</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <button onclick="toggleMateri('mental')" class="w-full p-5 flex items-center justify-between hover:bg-slate-50 transition">
+                    <div class="flex items-center space-x-4 text-left">
+                        <div class="bg-purple-50 text-purple-600 p-3 rounded-xl"><i class="fas fa-heart text-xl"></i></div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Mental</h3>
+                            <p class="text-[10px] text-slate-500 uppercase font-medium">Sparing, (ketahanan emosional, kepercayaan diri, dan ketenangan)</p>
+                        </div>
+                    </div>
+                    <i id="icon-mental" class="fas fa-chevron-down text-slate-300 transition-transform"></i>
+                </button>
+                <div id="mental" class="materi-content p-5 bg-purple-50/30 border-t border-slate-100">
+                    <ul class="text-xs space-y-2 text-slate-700">
+                        <li class="flex items-center bg-white p-2 rounded-lg"><i class="fas fa-bolt text-purple-500 mr-2"></i> Lompat Harimau</li>
+                        <li class="flex items-center bg-white p-2 rounded-lg"><i class="fas fa-shield-alt text-purple-500 mr-2"></i> Sparing Teknikan</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-8 p-4 bg-emerald-600 rounded-2xl text-white shadow-lg flex items-center space-x-4">
+            <div class="text-3xl opacity-50"><i class="fas fa-quote-left"></i></div>
+            <p class="text-[10px] italic leading-relaxed">
+                "Janganlah engkau menjadi pesilat yang hanya pandai dalam jurus, tetapi kosong dalam doa dan akhlak."
+            </p>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-6 text-slate-400 text-[10px]">
+        © 2025 PAGARNUSA UNUSIA. Pusat Belajar Digital.
+    </footer>
+
+    <script>
+        // Fungsi untuk buka-tutup detail materi
+        function toggleMateri(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            // Tutup semua yang lain (Opsional, hapus jika ingin buka banyak sekaligus)
+            // document.querySelectorAll('.materi-content').forEach(el => {
+            //     if(el.id !== id) el.classList.remove('active');
+            // });
+
+            content.classList.toggle('active');
+            
+            // Putar icon chevron
+            if(content.classList.contains('active')) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUserProfile'));
+            if (!currentUser) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>
