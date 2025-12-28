@@ -187,7 +187,7 @@
                         LANJUT <i class="fas fa-chevron-right"></i>
                     </button>
 
-                    <button id="btn-finish" onclick="tryFinish()" class="hidden flex items-center gap-3 px-10 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 shadow-xl animate-pulse transition-all">
+                    <button id="btn-finish" onclick="tryFinish(event)" class="hidden flex items-center gap-3 px-10 py-4 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 shadow-xl animate-pulse transition-all">
                         SELESAI UJIAN <i class="fas fa-check-double"></i>
                     </button>
                 </div>
@@ -268,11 +268,7 @@
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
 
-            const usedEmails = JSON.parse(localStorage.getItem('used_emails') || '[]');
-            if (usedEmails.includes(u)) {
-                alert("Email ini sudah digunakan dan tidak dapat mengerjakan ulang.");
-                return;
-            }
+            // BAGIAN CEK EMAIL DIHAPUS AGAR EMAIL TERBLOKIR BISA LOGIN LAGI
 
             btn.disabled = true;
             btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> VERIFIKASI...`;
@@ -349,20 +345,7 @@
             }, 1000);
         }
 
-        function monitorCheating() {
-            window.onblur = () => {
-                if(state.isFinished) return; 
-                state.violations++;
-                saveSession();
-                if (state.violations >= CONFIG.MAX_VIOLATIONS) {
-                    state.isFinished = true; 
-                    alert("PELANGGARAN: Ujian dihentikan karena meninggalkan halaman.");
-                    forceSubmit();
-                } else {
-                    alert(`PERINGATAN [${state.violations}/${CONFIG.MAX_VIOLATIONS}]: Jangan tinggalkan halaman!`);
-                }
-            };
-        }
+
 
         function renderQuestion() {
             const q = state.questions[state.currentIdx];
@@ -457,13 +440,17 @@
             }
         }
 
-        // PERBAIKAN: Fungsi dicegah agar tidak memicu reload/reset posisi saat Batal
-        function tryFinish(event) {
-            if (event) event.preventDefault(); // Mencegah aksi default tombol
+function tryFinish(event) {
+            if (event) event.preventDefault(); 
+            
             if (confirm("Kirim jawaban sekarang?")) {
+                // Jika tekan OK, kirim jawaban
                 forceSubmit();
+            } else {
+                // Jika tekan Batal, kembali ke soal nomor 1 (index 0)
+                jump(0);
             }
-            return false; // Memastikan tidak ada pengiriman form atau navigasi tambahan
+            return false;
         }
 
         function togglePasswordVisibility() {
