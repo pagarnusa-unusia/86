@@ -8,6 +8,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
         tailwind.config = {
@@ -29,46 +30,19 @@
         .glass-card { background: white; border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; }
         .status-badge { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Animasi Glow */
         @keyframes subtle-glow {
             0% { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
-            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(27, 117, 72, 0.3); }
             100% { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
         }
-        .lulus-glow { animation: subtle-glow 3s infinite; border-color: #10b981 !important; }
+        .lulus-glow { animation: subtle-glow 3s infinite; border: 2px solid #1B7548 !important; }
 
-        /* Pop Up Animation */
-        .modal-enter { animation: modalFadeIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.8) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
+        /* Custom SweetAlert Style */
+        .swal2-popup { border-radius: 32px !important; padding: 2rem !important; }
+        .swal2-title { color: #1B7548 !important; font-weight: 800 !important; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col relative">
-
-    <div id="modal-selamat" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white rounded-[32px] p-8 max-w-sm w-full text-center shadow-2xl modal-enter relative overflow-hidden">
-            <div class="mb-6 relative">
-                <div class="w-24 h-24 bg-emerald-100 rounded-full mx-auto flex items-center justify-center text-primary text-5xl">
-                    <i class="fas fa-user-ninja animate-bounce"></i>
-                </div>
-                <div class="absolute -top-2 -right-2 bg-yellow-400 text-white p-2 rounded-full text-xs animate-pulse">
-                    <i class="fas fa-star"></i>
-                </div>
-            </div>
-            
-            <h3 class="text-2xl font-black text-slate-800 mb-2">SELAMAT!</h3>
-            <p class="text-slate-600 leading-relaxed text-sm mb-6">
-                Selamat anda memenuhi <br>
-                <span class="font-bold text-primary">Kualifikasi Ujian Kenaikan Tingkat IV</span>
-            </p>
-            
-            <button onclick="tutupModal()" class="w-full bg-primary hover:bg-primaryDark text-white font-bold py-4 rounded-2xl transition-all shadow-lg">
-                LIHAT PROFIL
-            </button>
-        </div>
-    </div>
+<body class="min-h-screen flex flex-col">
 
     <header class="sticky top-0 z-50 bg-primary text-white shadow-md">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -195,33 +169,31 @@
     </footer>
 
 <script>
-    function tutupModal() {
-        document.getElementById('modal-selamat').classList.add('hidden');
-    }
-
+    // FUNGSI ANIMASI PETASAN (Confetti) - Slow Motion Version
     function rilisPetasanMeriah() {
-        const end = Date.now() + (4 * 1000); // 4 detik
-        const colors = ['#1B7548', '#FFD700', '#ffffff'];
+        const duration = 5 * 1000;
+        const animationEnd = Date.now() + duration;
+        const colors = ['#1B7548', '#FFD700', '#ffffff', '#22c55e'];
 
         (function frame() {
             confetti({
-                particleCount: 3,
+                particleCount: 2,
                 angle: 60,
                 spread: 55,
-                origin: { x: 0 },
+                origin: { x: 0, y: 0.6 },
                 colors: colors,
-                ticks: 300 // Slow motion effect
+                ticks: 300 // Membuat jatuh lebih lambat
             });
             confetti({
-                particleCount: 3,
+                particleCount: 2,
                 angle: 120,
                 spread: 55,
-                origin: { x: 1 },
+                origin: { x: 1, y: 0.6 },
                 colors: colors,
-                ticks: 300 // Slow motion effect
+                ticks: 300
             });
 
-            if (Date.now() < end) {
+            if (Date.now() < animationEnd) {
                 requestAnimationFrame(frame);
             }
         }());
@@ -235,7 +207,7 @@
             return;
         }
 
-        // Mapping Data UI
+        // Data Mapping
         document.getElementById('display-nama').textContent = currentUser.nama || currentUser.Nama || "-";
         document.getElementById('display-email').textContent = currentUser.email || currentUser.Email || "-";
         document.getElementById('display-ttl').textContent = currentUser.ttl || currentUser.TTL || "-";
@@ -244,7 +216,6 @@
         document.getElementById('display-angkatan').textContent = currentUser.angkatan || currentUser.Angkatan || "-";
         document.getElementById('display-ujian').textContent = currentUser.ujian || currentUser.Ujian || "-";
 
-        // Logika Foto
         const imgEl = document.getElementById('display-foto');
         const placeholderEl = document.getElementById('foto-placeholder');
         const fotoUrl = currentUser.fotoUrl || currentUser.fotourl || "";
@@ -269,13 +240,24 @@
 
         const rawStatus = (currentUser.status || "Pending").toLowerCase();
 
+        // LOGIKA STATUS KUALIFIKASI / LULUS
         if (rawStatus.includes('kualifikasi') || rawStatus.includes('lulus')) {
             statusText.textContent = "Kualifikasi ✅";
             statusBox.className = "status-badge py-4 px-2 rounded-2xl border-2 bg-emerald-50 border-emerald-500 text-emerald-700";
             profileCard.classList.add('lulus-glow');
 
-            // MUNCULKAN POPUP & PETASAN
-            document.getElementById('modal-selamat').classList.remove('hidden');
+            // --- POP UP VERSI FINAL ---
+            Swal.fire({
+                title: 'SELAMAT!',
+                html: 'Selamat anda memenuhi <br><b>Kualifikasi Ujian Kenaikan Tingkat IV</b>',
+                icon: 'success',
+                iconColor: '#1B7548',
+                confirmButtonText: 'ALHAMDULILLAH',
+                confirmButtonColor: '#1B7548',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' }
+            });
+
             rilisPetasanMeriah();
 
             const sLink = currentUser.sertifikatUrl || currentUser.sertifikaturl;
@@ -307,9 +289,9 @@
         if (!currentUser) return;
         const rawTingkatan = currentUser.ujian || currentUser.Ujian || currentUser.kategori || "";
         const tingkatan = rawTingkatan.trim();
-        const mapMateri = { "Putih": "putih", "Kuning": "kuning", "Merah": "merah", "Biru": "biru" };
-        if (mapMateri[tingkatan]) {
-            window.location.href = `materi/materi_${mapMateri[tingkatan]}.html`;
+        const materiMap = { "Putih": "putih", "Kuning": "kuning", "Merah": "merah", "Biru": "biru" };
+        if (materiMap[tingkatan]) {
+            window.location.href = `materi/materi_${materiMap[tingkatan]}.html`;
         } else {
             alert("Data tingkatan tidak ditemukan: " + tingkatan);
         }
