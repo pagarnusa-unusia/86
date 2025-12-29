@@ -6,7 +6,6 @@
     <title>CBT UKT | PAGARNUSA UNUSIA</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -250,6 +249,7 @@
         };
 
         let timerInterval;
+        let isCheckingFinish = false; // Flag untuk mencegah modal pelanggaran muncul saat konfirmasi selesai
 
         window.onload = () => {
             disableInspect();
@@ -327,7 +327,6 @@
 
         function enterFullscreen() {
             const doc = document.documentElement;
-            // Perbaikan untuk Android & iPhone (iPhone sering menolak Fullscreen API)
             try {
                 if (doc.requestFullscreen) {
                     doc.requestFullscreen().catch(() => {});
@@ -348,7 +347,8 @@
 
         function monitorCheating() {
             window.onblur = () => {
-                if (!state.isFinished && state.user) {
+                // Jangan catat pelanggaran jika sedang dalam proses konfirmasi selesai
+                if (!state.isFinished && state.user && !isCheckingFinish) {
                     state.violations++;
                     saveSession();
                     document.getElementById('violation-modal').classList.remove('hidden');
@@ -473,10 +473,14 @@
 
         function tryFinish(event) {
             if (event) event.preventDefault(); 
+            
+            isCheckingFinish = true; // Matikan deteksi pelanggaran sementara
+            
             if (confirm("Kirim jawaban sekarang?")) {
                 forceSubmit();
             } else {
-                jump(0);
+                isCheckingFinish = false; // Aktifkan kembali deteksi pelanggaran
+                jump(0); // Kembali ke soal nomor 1
             }
             return false;
         }
