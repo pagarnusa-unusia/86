@@ -298,20 +298,30 @@ document.querySelectorAll('.sidebar-link').forEach(link => {
 // --- CORE: LOAD DATA FROM GOOGLE SHEETS (SHEET: LOGIN) ---
 async function loadExcelData() {
     try {
-        // Menggunakan parameter ?type=admin untuk mengakses sheet "login"
-        const response = await fetch(`${SCRIPT_URL}?type=admin&_=${new Date().getTime()}`);
+        // Tambahkan mode: 'cors' secara eksplisit
+        const response = await fetch(`${SCRIPT_URL}?type=admin&_=${new Date().getTime()}`, {
+            method: 'GET',
+            redirect: 'follow'
+        });
+        
         if (!response.ok) throw new Error('Gagal terhubung ke server.');
         
         const data = await response.json();
         
-        // Memastikan data valid (mendukung header huruf kecil hasil dari Apps Script)
+        // Log untuk pengecekan di console (F12)
+        console.log("Data diterima:", data);
+
+        if (data.error) {
+            alert("Error dari Script: " + data.error);
+            return;
+        }
+
         globalData = data.filter(row => (row.nama || row.Nama));
-        
         document.getElementById('db_filename').textContent = "Sheet: login (Live)";
         refreshUI();
     } catch (err) {
-        console.error(err);
-        document.getElementById('pesertaBody').innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-500">Gagal Sinkronisasi Google Sheets</td></tr>`;
+        console.error("Detail Error:", err);
+        document.getElementById('pesertaBody').innerHTML = `<tr><td colspan="5" class="p-10 text-center text-red-500">Gagal Sinkronisasi: ${err.message}</td></tr>`;
     }
 }
 
