@@ -253,7 +253,7 @@
         let myChart = null;
         let currentEditIndex = null;
 
-        // PASTI KAN URL INI ADALAH URL WEB APP HASIL DEPLOY TERBARU ANDA
+        // URL Web App hasil deploy App Script
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1kF8k3uY2_YF1SR7KYeoOxjfPh4zOK0vl6w5aKfYctQmnmUQkt1jTIIqGYkRh1XDNeQ/exec";
 
         // Dark Mode Controller
@@ -383,7 +383,6 @@
             
             btn.innerText = "Menyimpan..."; btn.disabled = true;
             try {
-                // Mengirim perintah update ke AppScript
                 await fetch(SCRIPT_URL, { 
                     method: "POST", 
                     mode: "no-cors", 
@@ -393,8 +392,6 @@
                         newStatus: newVal 
                     }) 
                 });
-                
-                // Jika berhasil (no-cors tidak bisa baca response, jadi kita asumsikan sukses jika tidak masuk catch)
                 alert(`Status ${p.nama || p.Nama} diperbarui ke ${newVal}. Email akan terkirim jika Kualifikasi.`);
                 location.reload();
             } catch (e) { 
@@ -487,4 +484,3 @@
     </script>
 </body>
 </html>
-
