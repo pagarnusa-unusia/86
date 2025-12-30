@@ -75,6 +75,21 @@
 
     <main class="flex-1 w-full max-w-2xl mx-auto px-4 py-6">
 
+        <section id="closed-section" class="hidden bg-white rounded-2xl shadow-xl p-10 mt-4 border border-red-100 text-center animate-[fadeInScale_0.5s_ease-out]">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span class="text-5xl">🥺</span>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-800 mb-2">Pendaftaran Ditutup</h2>
+            <p class="text-slate-500 leading-relaxed">
+                Maaf, batas waktu pendaftaran Ujian Kenaikan Tingkat telah berakhir pada 31 Desember 2025. 
+                Silahkan hubungi admin melalui tombol di bawah ini.
+            </p>
+            
+            <a href="https://wa.me/6285715232441" target="_blank" class="inline-flex items-center justify-center mt-8 px-6 py-3 bg-emerald-50 text-primary border border-primary rounded-xl font-bold hover:bg-primary hover:text-white transition-all duration-300 shadow-sm">
+                <i class="fab fa-whatsapp mr-2 text-xl"></i> Hubungi Admin
+            </a>
+        </section>
+
         <section id="form-section" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 mt-4 border border-emerald-50 transform transition-all duration-700 opacity-0 translate-y-8 animate-[fadeInUp_0.8s_ease-out_forwards]" aria-labelledby="form-heading">
             <div class="text-center mb-8">
                 <h2 id="form-heading" class="text-2xl md:text-3xl font-extrabold text-primary mb-1 tracking-tight">PENDAFTARAN PESERTA<br></h2>
@@ -209,12 +224,30 @@
         const formSection = document.getElementById('form-section');
         const successSection = document.getElementById('success-section');
         const resetButton = document.getElementById('reset-button');
+        const closedSection = document.getElementById('closed-section');
         
         // Menambahkan action URL ke form di JavaScript
         const formActionURL = "https://script.google.com/macros/s/AKfycbyCrP0iYfrjSY_PpKfyLExdMUgjeZWrvCbjQhv1qfZXigtaCYNVr7AuwLm7cRaPR5YjrQ/exec";
 
+        // --- FUNGSI CEK WAKTU PENDAFTARAN ---
+        function checkDeadline() {
+            const deadline = new Date('2025-12-31T23:59:59').getTime();
+            const now = new Date().getTime();
+
+            if (now > deadline) {
+                formSection.classList.add('hidden');
+                closedSection.classList.remove('hidden');
+                return true; // Pendaftaran tutup
+            }
+            return false; // Pendaftaran buka
+        }
+
+        // Jalankan cek saat halaman dimuat
+        checkDeadline();
+
         // Fungsi untuk mereset form (dibuat global karena dipanggil dari success button)
         function resetForm() {
+            if(checkDeadline()) return; // Jangan reset jika sudah lewat deadline
             successSection.classList.add('hidden');
             formSection.classList.remove('hidden');
             // Scroll ke form
@@ -224,6 +257,12 @@
         // Event listener untuk submit form
         form.addEventListener('submit', e => {
             e.preventDefault();
+
+            // Cek deadline sekali lagi sebelum kirim
+            if (checkDeadline()) {
+                alert('Maaf, pendaftaran sudah ditutup.');
+                return;
+            }
             
             // Tampilkan pesan loading jika perlu
             const submitButton = form.querySelector('button[type="submit"]');
@@ -283,9 +322,4 @@
         });
     </script>
 </body>
-
 </html>
-
-
-
-
