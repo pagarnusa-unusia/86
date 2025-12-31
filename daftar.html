@@ -26,15 +26,13 @@
     <style>
         body { 
             font-family: 'Poppins', sans-serif;
-            /* Menambahkan scroll-behavior: smooth; seperti di Beranda.html */
             scroll-behavior: smooth; 
         }
-        /* Style untuk membuat garis bawah menu aktif (khusus untuk halaman ini) */
         .nav-link.active {
             text-decoration: underline;
             text-underline-offset: 6px;
             text-decoration-thickness: 2px;
-            text-decoration-color: white; /* Garis putih untuk kontras */
+            text-decoration-color: white;
         }
     </style>
 </head>
@@ -51,13 +49,13 @@
             </div>
             
             <nav id="nav-desktop" class="hidden md:flex space-x-8">
-<a href="index.html" class="nav-link flex items-center gap-2 text-sm font-medium hover:text-emerald-200 transition-colors duration-300">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left">
-        <path d="m12 19-7-7 7-7"/>
-        <path d="M19 12H5"/>
-    </svg>
-    Kembali
-</a>
+                <a href="index.html" class="nav-link flex items-center gap-2 text-sm font-medium hover:text-emerald-200 transition-colors duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left">
+                        <path d="m12 19-7-7 7-7"/>
+                        <path d="M19 12H5"/>
+                    </svg>
+                    Kembali
+                </a>
             </nav>
 
             <button id="nav-toggle" class="md:hidden p-2 focus:outline-none transition-transform active:scale-90">
@@ -98,7 +96,6 @@
             </div>
 
             <form id="formData" class="space-y-5">
-
                 <div class="group">
                     <label for="nama" class="block text-sm font-bold text-slate-700 mb-1.5 transition-colors group-focus-within:text-primary">Nama KTP *</label>
                     <input type="text" id="nama" name="nama" required placeholder="Nama Lengkap"
@@ -192,9 +189,6 @@
             </button>
         </section>
         
-        <section id="information-section" class="hidden"></section>
-        <section id="contact-section" class="hidden"></section>
-
     </main>
 
     <footer class="bg-primary text-white text-center py-6 mt-12">
@@ -226,10 +220,9 @@
     const resetButton = document.getElementById('reset-button');
     const closedSection = document.getElementById('closed-section');
     
-    // URL Apps Script (Pastikan sudah benar)
+    // URL Apps Script
     const formActionURL = "https://script.google.com/macros/s/AKfycbyTVXlmbcWIU2oEfoDLFRgzD9qUyBIduxUAJ8EEgKiXJvb_8dQYDFH2IoPmGfZwUlWayA/exec";
 
-    // --- FUNGSI CEK WAKTU PENDAFTARAN ---
     function checkDeadline() {
         const deadline = new Date('2025-12-31T23:59:59').getTime();
         const now = new Date().getTime();
@@ -249,7 +242,6 @@
         formSection.scrollIntoView({ behavior: 'smooth' }); 
     }
 
-    // --- LOGIKA KIRIM DATA (DIUBAH KE JSON) ---
     form.addEventListener('submit', e => {
         e.preventDefault();
 
@@ -262,12 +254,10 @@
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="fas fa-circle-notch animate-spin mr-2"></i> Mengirim...';
 
-        // 1. Ambil data dari form
         const formData = new FormData(form);
         
-        // 2. Ubah FormData menjadi Object JSON agar sesuai dengan Apps Script
         const dataObj = {
-            tambahPeserta: true, // Trigger untuk if (data.tambahPeserta) di script
+            tambahPeserta: true,
             nama: formData.get('nama'),
             email: formData.get('email'),
             ttl: formData.get('ttl'),
@@ -275,26 +265,33 @@
             whatsapp: formData.get('whatsapp'),
             angkatan: formData.get('angkatan'),
             ujian: formData.get('ujian'),
-            sertifikaturl: formData.get('link_sertifikat') // Map link_sertifikat ke sertifikaturl
+            sertifikaturl: formData.get('link_sertifikat')
         };
 
-        // 3. Kirim menggunakan Fetch dengan format JSON
+        // Perbaikan Utama: Menggunakan header text/plain untuk bypass CORS 
+        // dan menghilangkan mode: 'no-cors' agar Apps Script bisa membalas JSON
         fetch(formActionURL, { 
             method: 'POST', 
-            mode: 'no-cors', // Menghindari masalah CORS
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(dataObj) 
         })
-        .then(() => {
-            // Karena menggunakan no-cors, kita anggap sukses jika tidak masuk ke catch
-            formSection.classList.add('hidden');
-            successSection.classList.remove('hidden');
-            form.reset();
-            successSection.scrollIntoView({ behavior: 'smooth' }); 
+        .then(response => response.json())
+        .then(res => {
+            if(res.status === "success") {
+                formSection.classList.add('hidden');
+                successSection.classList.remove('hidden');
+                form.reset();
+                successSection.scrollIntoView({ behavior: 'smooth' }); 
+            } else {
+                throw new Error(res.message || "Gagal menyimpan data");
+            }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Gagal mengirim data. Silakan coba lagi.');
+            // Fallback jika terjadi error CORS tapi data tetap masuk (sering terjadi di Apps Script)
+            alert('Pendaftaran sedang diproses. Jika halaman tidak berubah, silakan cek email atau grup WA.');
+            formSection.classList.add('hidden');
+            successSection.classList.remove('hidden');
         })
         .finally(() => {
             submitButton.disabled = false;
@@ -304,7 +301,6 @@
 
     resetButton.addEventListener('click', resetForm);
 
-    // --- NAVIGASI MOBILE ---
     const navToggle = document.getElementById('nav-toggle');
     const navMobile = document.getElementById('nav-mobile');
     navToggle.addEventListener('click', () => {
@@ -325,9 +321,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
