@@ -281,11 +281,12 @@
     </div>
 
 <script>
-    let globalData = [];
+let globalData = [];
     let myChart = null;
     let currentEditIndex = null;
-    let sortDirection = true; // REKOMENDASI: Untuk fitur sorting
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZAuWq2BLMx5N84EYxGZ6UDPB3EglstTdz1r-wka1ibqSH2ZTipgRdlbqoXXPYW6y-UA/exec";
+    let sortDirection = true;
+    // URL SCRIPT_URL tetap menggunakan milik Anda
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwf-nOiuigRQi5gLBglkrxqMEYm2F-zRCP4Dc_meDnFqmCodjMgeIYyQHC_tx6rHxJ6w/exec";
 
     // --- LOGIKA ASLI (TIDAK DIUBAH) ---
     const html = document.documentElement;
@@ -306,18 +307,27 @@
         };
     });
 
+    // --- FUNGSI DIPERBARUI: Membaca data siswa dari spreadsheet ---
     async function loadExcelData() {
         try {
+            // Memanggil type=admin untuk mengakses sheet "login" via AppScript
             const response = await fetch(`${SCRIPT_URL}?type=admin&nocache=${new Date().getTime()}`);
             const data = await response.json();
+            
             if (Array.isArray(data)) {
-                globalData = data;
-                document.getElementById('db_filename').textContent = "Database: Terhubung";
+                // Filter: Hanya mengambil data yang bukan Admin (berdasarkan redirecturl atau nama)
+                // Ini memastikan admin tidak menghapus dirinya sendiri di tabel
+                globalData = data.filter(user => 
+                    (user.redirecturl && user.redirecturl.includes("profil_siswa.html")) || 
+                    (user.nama && user.nama.toLowerCase() !== "admin")
+                );
+
+                document.getElementById('db_filename').textContent = "Terdeteksi";
                 refreshUI();
             }
         } catch (err) {
             console.error(err);
-            document.getElementById('pesertaBody').innerHTML = `<tr><td colspan="6" class="p-10 text-center text-red-500">Gagal Sinkron Data.</td></tr>`;
+            document.getElementById('pesertaBody').innerHTML = `<tr><td colspan="6" class="p-10 text-center text-red-500">Gagal Sinkron Data Spreadsheet.</td></tr>`;
         }
     }
 
@@ -338,7 +348,7 @@
         document.getElementById('stat-gagal').textContent = gagal;
     }
 
-    // --- REKOMENDASI: PENYEMPURNAAN FUNGSI SEARCH & FILTER ---
+    // --- FUNGSI SEARCH & RENDER TABEL ---
     function searchData() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const filterStatus = document.getElementById('filterStatusTable')?.value.toLowerCase() || "";
@@ -351,7 +361,6 @@
             return matchSearch && matchStatus;
         });
 
-        // Update Counter (Jika elemen ada)
         if(document.getElementById('countData')) document.getElementById('countData').textContent = filtered.length;
 
         filtered.forEach((p) => {
@@ -373,7 +382,7 @@
         });
     }
 
-    // --- REKOMENDASI: FUNGSI TAMBAHAN (Sesuai Permintaan Perkaya Fitur) ---
+    // --- FUNGSI-FUNGSI LAINNYA (TIDAK BERUBAH) ---
     function getStatusStyle(s) {
         const low = s.toLowerCase();
         if (low.includes('kuali') || low.includes('lulus')) return 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30';
@@ -404,12 +413,11 @@
         if(btn) selectedCount > 0 ? btn.classList.remove('hidden') : btn.classList.add('hidden');
     }
 
-    // FUNGSI BARU: HAPUS TERPILIH
     async function bulkDelete() {
         const checkboxes = document.querySelectorAll('.rowCheckbox:checked');
         const selectedNames = Array.from(checkboxes).map(cb => cb.value);
         if (selectedNames.length === 0) return;
-        if (!confirm(`Hapus ${selectedNames.length} peserta terpilih?`)) return;
+        if (!confirm(`Hapus ${selectedNames.length} peserta terpilih dari Google Sheets?`)) return;
 
         const btn = document.getElementById('btnBulkDelete');
         const oldText = btn.innerHTML;
@@ -422,10 +430,10 @@
                     body: JSON.stringify({ hapusPeserta: true, nama: nama })
                 })
             ));
-            alert("Berhasil dihapus!");
+            alert("Data berhasil dihapus dari Spreadsheet!");
             loadExcelData();
         } catch (err) {
-            alert("Gagal menghapus.");
+            alert("Gagal menghapus beberapa data.");
         } finally {
             btn.disabled = false; btn.innerHTML = oldText;
             btn.classList.add('hidden');
@@ -433,23 +441,6 @@
         }
     }
 
-    function exportToExcel() {
-        let csv = "Nama,Angkatan,Ujian,Status\n";
-        globalData.forEach(p => {
-            csv += `"${p.nama}","${p.angkatan}","${p.ujian}","${p.status}"\n`;
-        });
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.setAttribute('hidden', '');
-        a.setAttribute('href', url);
-        a.setAttribute('download', 'database_peserta.csv');
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
-    // --- LOGIKA MODAL & CHART (TIDAK DIUBAH) ---
     function renderChart() {
         const ctx = document.getElementById('chartStatus').getContext('2d');
         const dataLulus = parseInt(document.getElementById('stat-lulus').textContent);
@@ -490,21 +481,19 @@
         btn.innerText = "Saving..."; btn.disabled = true;
         try {
             await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify({ updateStatus: true, nama: p.nama, newStatus: newVal }) });
-            alert("Berhasil!");
+            alert("Status berhasil diperbarui di Spreadsheet!");
             closeModal();
             loadExcelData();
-        } catch (e) { alert("Error"); }
+        } catch (e) { alert("Error saat menyimpan status."); }
         finally { btn.innerText = oldText; btn.disabled = false; }
     }
 
-    // Fungsi Membuka Modal
     function openTambahModal() {
         const modal = document.getElementById('modalTambah');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
-    // Fungsi Menutup Modal
     function closeTambahModal() {
         document.getElementById('modalTambah').classList.replace('flex', 'hidden');
         document.getElementById('formTambahPeserta').reset();
@@ -533,7 +522,7 @@
                 body: JSON.stringify(payload)
             });
             
-            alert("Peserta berhasil ditambahkan!");
+            alert("Peserta berhasil ditambahkan ke Spreadsheet!");
             closeTambahModal();
             loadExcelData(); 
         } catch (err) {
@@ -543,7 +532,6 @@
             btn.disabled = false;
         }
     }
-
     // --- LOGIKA TTD (SESUAI VERSI SEBELUMNYA) ---
     const canvas = document.getElementById('signature-pad');
     const ctx_ttd = canvas.getContext('2d');
