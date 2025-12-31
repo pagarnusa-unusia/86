@@ -82,7 +82,10 @@
     <p class="mt-8 text-[10px] text-slate-400 font-bold tracking-[0.2em] uppercase">Pagar Nusa UNUSIA • Security System</p>
 
 <script>
-    // 1. Fungsi Toggle Password
+// 1. URL Apps Script Anda (Ganti dengan URL Deployment Anda yang terbaru)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwf-nOiuigRQi5gLBglkrxqMEYm2F-zRCP4Dc_meDnFqmCodjMgeIYyQHC_tx6rHxJ6w/exec";
+
+    // 2. Fungsi Toggle Password (Tetap sama)
     const toggleBtn = document.getElementById('togglePassword');
     const passInput = document.getElementById('password');
     toggleBtn.onclick = () => {
@@ -91,7 +94,7 @@
         toggleBtn.innerHTML = isPass ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
     };
 
-    // 2. Logika Login
+    // 3. Logika Login Versi Spreadsheet
     document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
@@ -105,43 +108,34 @@
         errorDiv.classList.add('hidden');
 
         try {
-            // Fetch file Excel dengan anti-cache
-            const response = await fetch('db_login.xlsx?v=' + new Date().getTime());
-            if (!response.ok) throw new Error("File database tidak terdeteksi di server.");
+            // Memanggil data dari Apps Script (Sheet "login")
+            const response = await fetch(`${SCRIPT_URL}?type=login&nocache=${new Date().getTime()}`);
             
-            const arrayBuffer = await response.arrayBuffer();
-            const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+            if (!response.ok) throw new Error("Gagal terhubung ke server database.");
             
-            // Ambil sheet pertama
-            const sheetName = workbook.SheetNames[0];
-            const dataJSON = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+            const dataJSON = await response.json();
 
-            // Pencarian User
+            // Pencarian User di dalam Array JSON
             const userMatch = dataJSON.find(u => {
-                // Menangani kemungkinan perbedaan huruf besar/kecil pada header kolom Excel
-                const dbUser = (u.username || u.Username || u.USERNAME || "").toString().trim();
-                const dbPass = (u.password || u.Password || u.PASSWORD || "").toString().trim();
+                // Mencocokkan input dengan kolom 'username' dan 'password' di Spreadsheet
+                const dbUser = (u.username || "").toString().trim();
+                const dbPass = (u.password || "").toString().trim();
                 return dbUser === userInp && dbPass === passInp;
             });
 
             if (userMatch) {
-                // Simpan data ke session agar bisa dipanggil di halaman tujuan
+                // Simpan profil user ke localStorage agar bisa dipakai di halaman berikutnya
                 localStorage.setItem('currentUserProfile', JSON.stringify(userMatch));
                 
-                // Ambil URL redirect dari kolom 'redirectUrl'
-                const targetPage = userMatch.redirectUrl || userMatch.redirectURL || userMatch.redirecturl;
+                // Ambil URL tujuan dari kolom 'redirecturl'
+                const targetPage = userMatch.redirecturl || "profil_siswa.html";
                 
-                if (targetPage) {
-                    // Redirect ke halaman yang tertulis di Excel
+                // Beri jeda sedikit agar efek loading terlihat
+                setTimeout(() => {
                     window.location.href = targetPage;
-                } else {
-                    // Fallback jika kolom redirect kosong
-                    alert("Akses diizinkan, namun halaman tujuan tidak diatur di database.");
-                    btn.disabled = false;
-                    btn.innerHTML = '<span>MASUK</span>';
-                }
+                }, 800);
             } else {
-                throw new Error("Username atau Password tidak sesuai.");
+                throw new Error("Username atau Password salah.");
             }
 
         } catch (err) {
