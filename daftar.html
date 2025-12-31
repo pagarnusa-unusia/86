@@ -219,111 +219,112 @@
         .animate-fade-in { animation: fadeIn 0.3s ease-out; }
     </style>
 
-    <script>
-        const form = document.getElementById('formData');
-        const formSection = document.getElementById('form-section');
-        const successSection = document.getElementById('success-section');
-        const resetButton = document.getElementById('reset-button');
-        const closedSection = document.getElementById('closed-section');
+<script>
+    const form = document.getElementById('formData');
+    const formSection = document.getElementById('form-section');
+    const successSection = document.getElementById('success-section');
+    const resetButton = document.getElementById('reset-button');
+    const closedSection = document.getElementById('closed-section');
+    
+    // URL Apps Script (Pastikan sudah benar)
+    const formActionURL = "https://script.google.com/macros/s/AKfycbzNGiHoDKYuh4hzUeUkeiiwekaae5KIEGuh22h1hGVotYrXgkq-gU5-1xlge_VXZjSKUw/exec";
+
+    // --- FUNGSI CEK WAKTU PENDAFTARAN ---
+    function checkDeadline() {
+        const deadline = new Date('2025-12-31T23:59:59').getTime();
+        const now = new Date().getTime();
+        if (now > deadline) {
+            formSection.classList.add('hidden');
+            closedSection.classList.remove('hidden');
+            return true;
+        }
+        return false;
+    }
+    checkDeadline();
+
+    function resetForm() {
+        if(checkDeadline()) return;
+        successSection.classList.add('hidden');
+        formSection.classList.remove('hidden');
+        formSection.scrollIntoView({ behavior: 'smooth' }); 
+    }
+
+    // --- LOGIKA KIRIM DATA (DIUBAH KE JSON) ---
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        if (checkDeadline()) {
+            alert('Maaf, pendaftaran sudah ditutup.');
+            return;
+        }
         
-        // Menambahkan action URL ke form di JavaScript
-        const formActionURL = "https://script.google.com/macros/s/AKfycbxwf-nOiuigRQi5gLBglkrxqMEYm2F-zRCP4Dc_meDnFqmCodjMgeIYyQHC_tx6rHxJ6w/exec";
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-circle-notch animate-spin mr-2"></i> Mengirim...';
 
-        // --- FUNGSI CEK WAKTU PENDAFTARAN ---
-        function checkDeadline() {
-            const deadline = new Date('2025-12-31T23:59:59').getTime();
-            const now = new Date().getTime();
+        // 1. Ambil data dari form
+        const formData = new FormData(form);
+        
+        // 2. Ubah FormData menjadi Object JSON agar sesuai dengan Apps Script
+        const dataObj = {
+            tambahPeserta: true, // Trigger untuk if (data.tambahPeserta) di script
+            nama: formData.get('nama'),
+            email: formData.get('email'),
+            ttl: formData.get('ttl'),
+            alamat: formData.get('alamat'),
+            whatsapp: formData.get('whatsapp'),
+            angkatan: formData.get('angkatan'),
+            ujian: formData.get('ujian'),
+            sertifikaturl: formData.get('link_sertifikat') // Map link_sertifikat ke sertifikaturl
+        };
 
-            if (now > deadline) {
-                formSection.classList.add('hidden');
-                closedSection.classList.remove('hidden');
-                return true; // Pendaftaran tutup
-            }
-            return false; // Pendaftaran buka
-        }
-
-        // Jalankan cek saat halaman dimuat
-        checkDeadline();
-
-        // Fungsi untuk mereset form (dibuat global karena dipanggil dari success button)
-        function resetForm() {
-            if(checkDeadline()) return; // Jangan reset jika sudah lewat deadline
-            successSection.classList.add('hidden');
-            formSection.classList.remove('hidden');
-            // Scroll ke form
-            formSection.scrollIntoView({ behavior: 'smooth' }); 
-        }
-
-        // Event listener untuk submit form
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-
-            // Cek deadline sekali lagi sebelum kirim
-            if (checkDeadline()) {
-                alert('Maaf, pendaftaran sudah ditutup.');
-                return;
-            }
-            
-            // Tampilkan pesan loading jika perlu
-            const submitButton = form.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-circle-notch animate-spin mr-2"></i> Mengirim...';
-
-            const data = new FormData(form);
-            
-            fetch(formActionURL, { method: 'POST', body: data })
-                .then(() => {
-                    formSection.classList.add('hidden');
-                    successSection.classList.remove('hidden');
-                    form.reset();
-                    // Scroll ke bagian sukses
-                    successSection.scrollIntoView({ behavior: 'smooth' }); 
-                })
-                .catch(error => {
-                    console.error('Error submitting form:', error);
-                    alert('Gagal mengirim data. Silakan coba lagi.');
-                })
-                .finally(() => {
-                    // Kembalikan tombol ke keadaan semula
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = '<span>Kirim Pendaftaran</span><i class="fas fa-paper-plane text-sm group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>';
-                });
+        // 3. Kirim menggunakan Fetch dengan format JSON
+        fetch(formActionURL, { 
+            method: 'POST', 
+            mode: 'no-cors', // Menghindari masalah CORS
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataObj) 
+        })
+        .then(() => {
+            // Karena menggunakan no-cors, kita anggap sukses jika tidak masuk ke catch
+            formSection.classList.add('hidden');
+            successSection.classList.remove('hidden');
+            form.reset();
+            successSection.scrollIntoView({ behavior: 'smooth' }); 
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Gagal mengirim data. Silakan coba lagi.');
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<span>Daftar</span><i class="fas fa-paper-plane text-sm group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>';
         });
+    });
 
-        // Event listener untuk tombol Kirim Data Lagi
-        resetButton.addEventListener('click', resetForm);
+    resetButton.addEventListener('click', resetForm);
 
+    // --- NAVIGASI MOBILE ---
+    const navToggle = document.getElementById('nav-toggle');
+    const navMobile = document.getElementById('nav-mobile');
+    navToggle.addEventListener('click', () => {
+        navMobile.classList.toggle('hidden');
+        const icon = navToggle.querySelector('i');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-times');
+    });
 
-        // --- SCRIPT UNTUK NAVIGASI MOBILE (DISAMAKAN DENGAN Beranda.html) ---
-
-        // Elemen Navigasi Mobile
-        const navToggle = document.getElementById('nav-toggle');
-        const navMobile = document.getElementById('nav-mobile');
-        const navLinks = document.querySelectorAll('.nav-link'); 
-        
-        // Fungsi Toggle Navigasi Mobile
-        navToggle.addEventListener('click', () => {
-            navMobile.classList.toggle('hidden');
-            // Mengubah icon burger menjadi close
+    navMobile.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navMobile.classList.add('hidden');
             const icon = navToggle.querySelector('i');
-            icon.classList.toggle('fa-bars');
-            icon.classList.toggle('fa-times');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
         });
-
-        // Tutup menu mobile saat link diklik
-        navMobile.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navMobile.classList.add('hidden');
-                // Mengembalikan icon burger
-                const icon = navToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
-
 
 
 
