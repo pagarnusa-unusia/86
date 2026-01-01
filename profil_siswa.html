@@ -346,6 +346,7 @@ else {
     statusText.textContent = "Sedang Ditinjau ⏳";
     statusBox.className = "status-badge py-4 px-2 rounded-2xl border-2 bg-yellow-50 border-yellow-500 text-yellow-700";
 
+    // Cek apakah SweetAlert sudah pernah ditampilkan di sesi ini
     if (!sessionStorage.getItem('swalShown')) {
         Swal.fire({
             title: 'Sedang ditinjau',
@@ -353,12 +354,14 @@ else {
             icon: 'info',
             confirmButtonColor: '#eab308',
             confirmButtonText: 'Baik, Saya Mengerti',
-            allowOutsideClick: false // Opsional: agar user wajib klik tombol
+            allowOutsideClick: false, // User tidak bisa menutup popup dengan klik di luar kotak
+            allowEscapeKey: false     // User tidak bisa menutup dengan tombol Esc
         }).then((result) => {
             if (result.isConfirmed) {
-                // Simpan session agar tidak muncul lagi
+                // 1. Simpan status agar tidak muncul lagi di sesi yang sama
                 sessionStorage.setItem('swalShown', 'true');
-                // Pindah ke halaman pembayaran
+                
+                // 2. Arahkan ke halaman pembayaran.html
                 window.location.href = 'pembayaran.html';
             }
         });
@@ -391,6 +394,7 @@ else {
     </script>
 </body>
 </html>
+
 
 
 
