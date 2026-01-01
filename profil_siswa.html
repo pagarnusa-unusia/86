@@ -342,21 +342,28 @@
                     sessionStorage.setItem('swalShown', 'true');
                 }
             } 
-            else {
-                statusText.textContent = "Sedang Ditinjau ⏳";
-                statusBox.className = "status-badge py-4 px-2 rounded-2xl border-2 bg-yellow-50 border-yellow-500 text-yellow-700";
+else {
+    statusText.textContent = "Sedang Ditinjau ⏳";
+    statusBox.className = "status-badge py-4 px-2 rounded-2xl border-2 bg-yellow-50 border-yellow-500 text-yellow-700";
 
-                if (!sessionStorage.getItem('swalShown')) {
-                    Swal.fire({
-                        title: 'DALAM PROSES',
-                        text: 'Data Anda sedang dalam tahap peninjauan oleh tim admin. Silakan cek berkala secara mandiri.',
-                        icon: 'info',
-                        confirmButtonColor: '#eab308',
-                        confirmButtonText: 'Baik, Saya Mengerti'
-                    });
-                    sessionStorage.setItem('swalShown', 'true');
-                }
+    if (!sessionStorage.getItem('swalShown')) {
+        Swal.fire({
+            title: 'Sedang ditinjau',
+            text: 'Segera menyelesaikan ke tahap Pembayaran.',
+            icon: 'info',
+            confirmButtonColor: '#eab308',
+            confirmButtonText: 'Baik, Saya Mengerti',
+            allowOutsideClick: false // Opsional: agar user wajib klik tombol
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Simpan session agar tidak muncul lagi
+                sessionStorage.setItem('swalShown', 'true');
+                // Pindah ke halaman pembayaran
+                window.location.href = 'pembayaran.html';
             }
+        });
+    }
+}
 
             // 4. Logic Akses Sertifikat
             if ((currentStatus.includes("kualifikasi") || currentStatus.includes("lulus")) && data.sertifikaturl && data.sertifikaturl.includes("http")) {
@@ -384,6 +391,7 @@
     </script>
 </body>
 </html>
+
 
 
 
