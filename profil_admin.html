@@ -841,6 +841,17 @@ let globalData = [];
     });
 
     resetButton.addEventListener('click', resetForm);
+    // Logika Tombol Keluar
+document.getElementById('logout-button').onclick = () => {
+    if (confirm('Apakah Anda yakin ingin keluar?')) {
+        // Hapus data sesi jika ada (opsional)
+        // localStorage.clear(); 
+        // sessionStorage.clear();
+
+        // Arahkan ke halaman login atau beranda
+        window.location.href = "login.html"; // Ubah sesuai nama file login Anda
+    }
+};
 </script>
 <div id="modalTambah" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-fadeInUp">
@@ -884,6 +895,7 @@ let globalData = [];
 </div>
 </body>
 </html>
+
 
 
 
