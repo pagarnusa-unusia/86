@@ -36,28 +36,29 @@
 </head>
 <body class="bg-slate-50 text-slate-900 overflow-x-hidden">
 
-    <header class="sticky top-0 z-[100] bg-primary/95 backdrop-blur-md text-white shadow-xl">
+    <header class="sticky top-0 z-[100] bg-primary/95 backdrop-blur-md text-white shadow-2xl transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="index.html" class="flex items-center space-x-3 group">
-                <div class="bg-white p-1 rounded-lg transform group-hover:rotate-12 transition">
-                    <img src="logopn.png" alt="Logo" class="h-10">
+            <a href="#" class="flex items-center space-x-3 group">
+                <div class="bg-white p-1 rounded-lg transform group-hover:rotate-12 transition shrink-0">
+                    <img src="logopn.png" alt="Logo" class="h-10 md:h-12">
                 </div>
                 <div class="leading-tight">
-                    <span class="block text-lg font-black tracking-tighter">PAGAR NUSA</span>
-                    <span class="block text-[8px] uppercase tracking-[0.3em] text-accent font-bold">UNUSIA JAKARTA</span>
+                    <span class="block text-lg md:text-xl font-black tracking-tighter uppercase">PAGARNUSA</span>
+                    <span class="block text-[9px] uppercase tracking-[0.3em] text-accent font-bold">UNUSIA JAKARTA</span>
                 </div>
             </a>
             
-            <nav class="hidden lg:flex items-center space-x-6 font-bold text-[11px] tracking-widest uppercase">
-                <a href="index.html" class="hover:text-accent transition">Beranda</a>
-                <a href="index.html#profil" class="hover:text-accent transition">Profil</a>
-                <a href="index.html#informasi" class="text-accent transition border-b-2 border-accent">Berita</a>
-                <a href="daftar.html" class="bg-accent text-slate-900 px-5 py-2 rounded-full font-black hover:bg-white transition shadow-lg">DAFTAR UKT</a>
+            <nav id="main-nav" class="hidden lg:flex items-center space-x-2 font-bold text-[11px] tracking-widest">
+                <a href="#" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent">BERANDA</a>
+                <a href="#profil" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Profil</a>
+                <a href="#informasi" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Berita</a>
+                <a href="#galeri" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Gallery</a>
+                <a href="login.html" class="lg:ml-6 bg-accent text-slate-900 px-7 py-3 rounded-full font-black hover:bg-white hover:scale-105 transition-all shadow-xl shadow-black/20 text-center">Login</a>
             </nav>
 
-            <a href="index.html" class="lg:hidden text-white text-sm font-bold flex items-center">
-                <i class="fas fa-arrow-left mr-2"></i> KEMBALI
-            </a>
+            <button id="mobile-menu-btn" class="lg:hidden text-2xl p-2 hover:text-accent transition">
+                <i class="fas fa-bars-staggered"></i>
+            </button>
         </div>
     </header>
 
@@ -77,7 +78,7 @@
                     <span id="detail-category" class="inline-block bg-primary/10 text-primary text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter mb-4">
                         KATEGORI
                     </span>
-                    <h1 id="detail-title" class="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tighter mb-6 uppercase italic">
+                    <h1 id="detail-title" class="text-3xl md:text-5xl font-semibold text-slate-900 leading-tight tracking-tighter mb-6">
                         Memuat Judul Berita...
                     </h1>
                     <div class="flex items-center space-x-6 py-6 border-y border-slate-100">
@@ -121,9 +122,9 @@
             <aside class="lg:w-1/3 space-y-10">
                 <div class="bg-primary p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl shadow-primary/30" data-aos="fade-left">
                     <i class="fas fa-fist-raised absolute -right-6 -bottom-6 text-9xl opacity-10 rotate-12"></i>
-                    <h4 class="text-2xl font-black mb-4 relative z-10 leading-tight">Gabung Menjadi <br><span class="text-accent italic">Pendekar PN!</span></h4>
-                    <p class="text-xs text-emerald-100 mb-8 relative z-10 font-medium">Jadilah bagian dari penjaga Ulama dan Bangsa. Pendaftaran UKT IV dibuka sekarang.</p>
-                    <a href="daftar.html" class="block w-full bg-white text-primary text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-accent hover:text-slate-900 transition relative z-10 shadow-xl">Daftar UKT Sekarang</a>
+                    <h4 class="text-2xl font-black mb-4 relative z-10 leading-tight">Gabung Menjadi <br><span class="text-accent">Santri PSNU Pagarnusa!</span></h4>
+                    <p class="text-xs text-emerald-100 mb-8 relative z-10 font-medium">Siapa yang mengurus NU, saya anggap santriku. Siapa yang menjadi santriku, saya doakan Khusnul Khatimah beserta keluarganya.</p>
+                    <a href="daftar.html" class="block w-full bg-white text-primary text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-accent hover:text-slate-900 transition relative z-10 shadow-xl">Daftar Sekarang</a>
                 </div>
 
                 <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm" data-aos="fade-left" data-aos-delay="200">
@@ -138,47 +139,57 @@
         </div>
     </main>
 
-    <footer class="bg-slate900 text-white pt-24 pb-12 relative">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
-            <div class="lg:col-span-1 space-y-6">
+    <footer class="bg-slate900 text-white pt-20 md:pt-32 pb-12 relative">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-20">
+            <div class="lg:col-span-1 space-y-8">
                 <div class="flex items-center space-x-4">
-                    <img src="logopn.png" class="h-16 bg-white p-2 rounded-2xl">
+                    <img src="logopn.png" class="h-14 md:h-16 bg-white p-2 rounded-2xl">
                     <div class="leading-none">
-                        <span class="text-2xl font-black block tracking-tighter uppercase">PAGAR NUSA</span>
+                        <span class="text-xl md:text-2xl font-black block tracking-tighter uppercase">PAGARNUSA</span>
                         <span class="text-[9px] text-accent tracking-[0.3em] uppercase font-bold">UNUSIA JAKARTA</span>
                     </div>
                 </div>
-                <p class="text-slate-400 text-sm leading-relaxed font-medium italic">"Bela Diri, Bela Bangsa, Bela Agama. Satu Komando di bawah naungan Nahdlatul Ulama."</p>
+                <p class="text-slate-400 text-sm leading-relaxed font-medium">"Bela Diri, Bela Bangsa, Bela Agama. Satu Komando di bawah naungan Nahdlatul Ulama."</p>
+                <div class="flex space-x-4">
+                    <a href="https://www.instagram.com/pagarnusaunusia/" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-primary transition text-xl"><i class="fab fa-instagram"></i></a>
+                    <a href="https://wa.me/6285715232441" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-primary transition text-xl"><i class="fab fa-whatsapp"></i></a>
+                </div>
             </div>
             
             <div>
-                <h5 class="text-lg font-black mb-8 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-accent mr-3 rounded-full"></span> Navigasi</h5>
-                <ul class="space-y-3 text-sm text-slate-400 font-bold uppercase tracking-tighter">
-                    <li><a href="index.html" class="hover:text-accent transition">Beranda Utama</a></li>
-                    <li><a href="index.html#profil" class="hover:text-accent transition">Profil Organisasi</a></li>
+                <h5 class="text-lg font-black mb-6 md:mb-10 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-accent mr-3 rounded-full"></span> Pencarian</h5>
+                <ul class="space-y-4 text-sm text-slate-400 font-bold uppercase tracking-tighter">
+                    <li><a href="#" class="hover:text-accent transition">Beranda Utama</a></li>
+                    <li><a href="#profil" class="hover:text-accent transition">Profil Organisasi</a></li>
+                    <li><a href="#informasi" class="hover:text-accent transition">Berita Terkini</a></li>
                     <li><a href="daftar.html" class="hover:text-accent transition">Pendaftaran UKT</a></li>
                 </ul>
             </div>
 
             <div>
-                <h5 class="text-lg font-black mb-8 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-primary mr-3 rounded-full"></span> Markas</h5>
-                <p class="text-xs text-slate-400 leading-relaxed font-bold italic">
-                    Gedung UKM Lt. 2 UNUSIA Jakarta<br>
-                    Jl. Taman Amir Hamzah No.5, Jakarta Pusat
+                <h5 class="text-lg font-black mb-6 md:mb-10 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-primary mr-3 rounded-full"></span> Alamat</h5>
+                <p class="text-sm text-slate-400 leading-relaxed font-bold">
+                    Jl. Taman Amir Hamzah No. 5, Pegangsaan, Menteng, Jakarta Pusat, DKI Jakarta 10430<br>
+                    <br>________<br>
+                    Jl. Parung Hijau, Pondok Udik, Kemang, Kabupaten Bogor, Jawa Barat<br>
                 </p>
             </div>
 
-            <div class="bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center">
-                <h5 class="text-[10px] font-black mb-6 uppercase tracking-widest text-accent italic">Didukung Oleh</h5>
-                <div class="flex justify-center gap-4 opacity-40 hover:opacity-100 transition duration-500">
-                    <span class="font-black text-xs">UNUSIA</span>
-                    <span class="font-black text-xs">NU ONLINE</span>
+            <div class="bg-white/5 p-6 md:p-8 rounded-[2rem] border border-white/5">
+                <h5 class="text-xs font-black mb-6 uppercase tracking-widest text-accent text-center">Supported By</h5>
+                <div class="grid grid-cols-2 gap-4 opacity-50 grayscale hover:grayscale-0 transition duration-700">
+                    <div class="h-10 md:h-12 bg-white/10 rounded-xl flex items-center justify-center font-black text-[10px]">Mundzir</div>
+                    <div class="h-10 md:h-12 bg-white/10 rounded-xl flex items-center justify-center font-black text-[10px]">Fauzan</div>
                 </div>
             </div>
         </div>
         
-        <div class="container mx-auto px-6 mt-20 pt-8 border-t border-white/5 text-center">
-            <p class="text-[10px] text-slate-500 font-black tracking-widest uppercase">&copy; 2026 PAGAR NUSA RAYON UNUSIA JAKARTA.</p>
+        <div class="container mx-auto px-6 mt-20 md:mt-32 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+            <p class="text-[9px] md:text-[10px] text-slate-500 font-black tracking-widest">&copy; 2026 PAGARNUSA UNUSIA Jakarta. Hak Cipta Dilindungi.</p>
+            <div class="flex gap-6 text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                <a href="#" class="hover:text-white transition">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition">Terms of Service</a>
+            </div>
         </div>
     </footer>
 

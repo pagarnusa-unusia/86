@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Warta Pendekar - PAGARNUSA UNUSIA</title>
+    <link rel="icon" href="logopn.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B7548',
+                        accent: '#FFB800',
+                        slate900: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hero-mini { background: linear-gradient(135deg, #1B7548 0%, #064e3b 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <header class="sticky top-0 z-[100] bg-primary text-white shadow-xl">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-3">
+                <img src="logopn.png" alt="Logo" class="h-10 bg-white p-1 rounded-lg">
+                <span class="text-xl font-black tracking-tighter uppercase">PAGARNUSA</span>
+            </a>
+            <a href="index.html" class="text-[11px] font-bold tracking-widest hover:text-accent transition">
+                <i class="fas fa-arrow-left mr-2"></i> KEMBALI KE BERANDA
+            </a>
+        </div>
+    </header>
+
+    <section class="hero-mini py-16 md:py-24 text-white text-center">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-4" data-aos="fade-down">Warta Pendekar</h1>
+            <p class="text-emerald-100/80 max-w-2xl mx-auto italic font-medium" data-aos="fade-up">Kumpulan berita, kegiatan, dan prestasi terbaru Pagar Nusa UNUSIA Jakarta.</p>
+        </div>
+    </section>
+
+    <section class="container mx-auto px-6 -mt-8 relative z-20">
+        <div class="bg-white p-4 rounded-2xl shadow-2xl border border-slate-100">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="news-search" placeholder="Cari berita atau kategori..." 
+                    class="w-full pl-12 pr-4 py-4 rounded-xl border border-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/20 transition font-medium">
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 md:py-24 min-h-[50vh]">
+        <div class="container mx-auto px-6">
+            <div id="all-news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate900 text-white py-12 text-center">
+        <p class="text-[10px] font-black tracking-widest text-slate-500 uppercase">© 2026 PAGARNUSA UNUSIA Jakarta</p>
+    </footer>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        const newsGrid = document.getElementById('all-news-grid');
+        const searchInput = document.getElementById('news-search');
+        let allNews = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
+
+        function renderNews(data) {
+            if (data.length === 0) {
+                newsGrid.innerHTML = `
+                    <div class="col-span-full py-20 text-center opacity-50">
+                        <i class="fas fa-search text-5xl mb-4"></i>
+                        <p class="font-bold uppercase tracking-widest">Berita tidak ditemukan</p>
+                    </div>`;
+                return;
+            }
+
+            newsGrid.innerHTML = data.map((post, index) => `
+                <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 group hover:shadow-2xl transition-all duration-500" data-aos="fade-up">
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="${post.image || 'logopn.png'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <span class="absolute top-6 left-6 bg-accent text-slate-900 text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter">${post.category}</span>
+                    </div>
+                    <div class="p-8">
+                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">${post.date}</p>
+                        <h4 class="font-black text-slate-900 mb-4 line-clamp-2 text-xl uppercase tracking-tighter italic group-hover:text-primary transition">${post.title}</h4>
+                        <p class="text-sm text-slate-500 line-clamp-3 mb-8 font-medium italic">"${post.content}"</p>
+                        <a href="detail_berita.html?id=${index}" class="inline-flex items-center gap-3 text-slate-900 font-black text-xs uppercase tracking-widest group/btn">
+                            Baca Selengkapnya 
+                            <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover/btn:bg-primary group-hover/btn:text-white transition-all">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Fungsi Cari
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = allNews.filter(post => 
+                post.title.toLowerCase().includes(val) || 
+                post.category.toLowerCase().includes(val)
+            );
+            renderNews(filtered);
+        });
+
+        // Load awal
+        renderNews(allNews);
+    </script>
+</body>
+</html>
