@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pagar Nusa UNUSIA</title>
+    <link rel="icon" href="logopn.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { 
+                        primary: '#1B7548', 
+                        primaryDark: '#145c38', 
+                        accent: '#FFB800',
+                        danger: '#EF4444',
+                        slate900: '#0f172a'
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { transition: background-color 0.3s; }
+        .sidebar-item.active { 
+            background: #1B7548; color: white; 
+            box-shadow: 0 10px 20px -5px rgba(27, 117, 72, 0.4); 
+            transform: translateX(8px);
+        }
+        .sidebar-item { transition: all 0.3s ease; }
+        .tab-content { animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1B7548; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 min-h-screen flex">
+
+    <aside class="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 hidden lg:flex flex-col fixed h-full z-50">
+        <div class="p-8">
+            <div class="flex items-center gap-3 mb-10">
+                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg overflow-hidden">
+    <img src="logopn.png" alt="Logo Pagar Nusa" class="w-10 h-10 object-contain">
+</div>
+                <div>
+                    <h1 class="font-extrabold text-slate-900 dark:text-white leading-none text-lg uppercase tracking-tighter">Administrator</h1>
+                    <span class="text-[9px] font-black text-primary tracking-[0.2em] uppercase">PN UNUSIA</span>
+                </div>
+            </div>
+            <nav class="space-y-2">
+                <button onclick="switchTab('dashboard')" id="btn-dashboard" class="sidebar-item active w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm text-left">
+                    <i class="fas fa-grid-2 w-5"></i> Dashboard
+                </button>
+                <button onclick="switchTab('pendaftar')" id="btn-pendaftar" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
+                    <i class="fas fa-users w-5"></i> Manajemen Peserta
+                </button>
+                <button onclick="switchTab('berita')" id="btn-berita" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
+                    <i class="fas fa-newspaper w-5"></i> Konten Artikel
+                </button>
+                <button onclick="switchTab('webcontrol')" id="btn-webcontrol" class="sidebar-item w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-sm text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 text-left">
+                    <i class="fas fa-clapperboard w-5"></i> Visual Website
+                </button>
+            </nav>
+        </div>
+        <div class="mt-auto p-8 space-y-4">
+            <button id="themeToggle" class="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-700 font-bold text-xs flex items-center justify-center gap-2">
+                <span id="themeIcon">🌙</span> <span id="themeText">Mode Gelap</span>
+            </button>
+            <a href="index.html" class="flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:bg-primary transition shadow-lg">
+                <i class="fas fa-external-link-alt"></i> Preview Web
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 lg:ml-72 flex flex-col">
+        <header class="h-20 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-10 sticky top-0 z-40">
+            <h2 id="tab-title" class="font-black text-slate-900 dark:text-white uppercase tracking-tight italic">Dasboard</h2>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden sm:block">
+                    <p class="text-[10px] font-black text-primary uppercase">System Status</p>
+                    <p id="sync-status" class="text-xs font-bold text-emerald-500 italic">Menghubungkan</p>
+                </div>
+                <div class="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-slate-500"><i class="fas fa-user-shield"></i></div>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-8">
+            <section id="tab-dashboard" class="tab-content block space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700 shadow-sm">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Peserta</p>
+                        <h3 id="stat-total" class="text-4xl font-black">0</h3>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700 shadow-sm">
+                        <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">Terverifikasi</p>
+                        <h3 id="stat-lulus" class="text-4xl font-black">0</h3>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700 shadow-sm">
+                        <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Pending</p>
+                        <h3 id="stat-pending" class="text-4xl font-black">0</h3>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700 shadow-sm">
+                        <p class="text-[10px] font-black text-primary uppercase tracking-widest mb-2">Artikel Aktif</p>
+                        <h3 id="stat-berita" class="text-4xl font-black">0</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border dark:border-slate-700 shadow-sm">
+                        <h4 class="font-black mb-6 italic uppercase flex items-center gap-2"><i class="fas fa-chart-pie text-primary"></i> Rasio Kelulusan</h4>
+                        <div class="h-64"><canvas id="chartStatus"></canvas></div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border dark:border-slate-700 shadow-sm">
+                        <h4 class="font-black mb-6 italic uppercase flex items-center gap-2"><i class="fas fa-sync text-accent"></i> Sinkronisasi Sheet</h4>
+                        <div class="space-y-4">
+                            <button onclick="fetchDataFromSheet()" id="btn-sync" class="w-full bg-slate-900 dark:bg-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] transition">
+                                <i class="fas fa-download mr-2"></i> Refresh
+                            </button>
+                            <div id="log-list" class="space-y-3">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-pendaftar" class="tab-content hidden space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-800 p-6 rounded-[2rem] border dark:border-slate-700">
+                    <div class="relative flex-1 w-full">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchPeserta" oninput="renderPendaftar()" placeholder="Cari nama atau jurusan..." class="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border-none rounded-xl outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest"><i class="fas fa-file-excel mr-1"></i> EXPORT</button>
+                        <button onclick="bulkDelete()" id="btnBulk" class="hidden bg-red-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">HAPUS TERPILIH</button>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-[2rem] border dark:border-slate-700 overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 dark:bg-slate-900 border-b dark:border-slate-700">
+                                <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                    <th class="p-6 w-12 text-center"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                                    <th class="p-6">Data Pendaftar (Sheets)</th>
+                                    <th class="p-6 text-center">Tingkat</th>
+                                    <th class="p-6 text-center">Status UKT</th>
+                                    <th class="p-6 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendaftar-table" class="divide-y dark:divide-slate-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-berita" class="tab-content hidden space-y-8">
+                <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border dark:border-slate-700">
+                    <div>
+                        <h3 class="text-xl font-black uppercase italic leading-none">Buat Artikel Berita</h3>
+                        <p class="text-xs text-slate-400 font-bold mt-2 uppercase tracking-widest">Update Informasi & Prestasi</p>
+                    </div>
+                    <button onclick="openNewsModal()" class="bg-primary text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/30 hover:scale-105 transition">Tulis Artikel</button>
+                </div>
+                <div id="news-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-8"></div>
+            </section>
+
+            <section id="tab-webcontrol" class="tab-content hidden space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] border dark:border-slate-700 shadow-sm space-y-6">
+                        <h4 class="font-black uppercase italic border-b pb-4"><i class="fas fa-desktop text-primary mr-2"></i> Teks Beranda</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Hero Utama 1</label>
+                                <input type="text" id="v-hero-1" class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-xl font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Hero Utama 2 (Aksen)</label>
+                                <input type="text" id="v-hero-2" class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-xl font-bold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Sub-Deskripsi</label>
+                                <textarea id="v-sub" rows="3" class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-xl"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] border dark:border-slate-700 shadow-sm space-y-6">
+                        <h4 class="font-black uppercase italic border-b pb-4"><i class="fas fa-bullhorn text-accent mr-2"></i> Marquee & Info</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase block mb-1">Teks Berjalan (Marquee)</label>
+                                <textarea id="v-marquee" rows="4" class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-xl font-bold"></textarea>
+                            </div>
+                            <button onclick="saveVisual()" class="w-full bg-slate-900 dark:bg-primary text-white py-5 rounded-xl font-black text-xs uppercase tracking-widest shadow-2xl">SIMPAN PERUBAHAN VISUAL</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="modal-news" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[100] hidden items-center justify-center p-6">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[3rem] p-10 relative overflow-y-auto max-h-[90vh]">
+            <button onclick="closeNewsModal()" class="absolute top-10 right-10 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all"><i class="fas fa-times text-2xl"></i></button>
+            <h3 id="modal-title" class="text-3xl font-black uppercase italic mb-8 tracking-tighter">Tambah Berita</h3>
+            <form id="form-news" class="space-y-6">
+                <input type="hidden" id="edit-id" value="-1">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Judul Artikel</label>
+                        <input type="text" id="n-title" required class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-2xl outline-none font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Kategori</label>
+                        <select id="n-category" class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-2xl font-bold outline-none">
+                            <option>Berita Utama</option>
+                            <option>Prestasi Santri</option>
+                            <option>Event & UKT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Link Foto (Landscape)</label>
+                    <input type="text" id="n-image" placeholder="https://..." class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-2xl outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase ml-2">Isi Artikel Lengkap</label>
+                    <textarea id="n-content" rows="6" required class="w-full px-5 py-3 bg-slate-50 dark:bg-slate-700 border dark:border-slate-600 rounded-2xl outline-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-primaryDark transition">PUBLIKASIKAN ARTIKEL</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+    // --- KONFIGURASI DATABASE ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwf-nOiuigRQi5gLBglkrxqMEYm2F-zRCP4Dc_meDnFqmCodjMgeIYyQHC_tx6rHxJ6w/exec";
+    
+    const KEYS = {
+        news: 'pagarnusa_news',
+        pendaftar: 'pagarnusa_pendaftar', 
+        visual: 'pagarnusa_visual',
+        logs: 'pagarnusa_logs'
+    };
+
+    let globalData = [];
+    let myChart = null;
+
+    // --- DARK MODE LOGIC ---
+    const html = document.documentElement;
+    document.getElementById('themeToggle').onclick = () => {
+        html.classList.toggle('dark');
+        const isDark = html.classList.contains('dark');
+        document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+        document.getElementById('themeText').innerText = isDark ? 'Mode Terang' : 'Mode Gelap';
+        if (myChart) refreshDashboard(); 
+    };
+
+    // --- CORE TAB SWITCHING ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.sidebar-item').forEach(i => {
+            i.classList.remove('active');
+            i.classList.add('text-slate-500');
+        });
+
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+        document.getElementById('btn-' + tabId).classList.add('active');
+        document.getElementById('btn-' + tabId).classList.remove('text-slate-500');
+        
+        const titles = { 
+            dashboard: 'Admin Pagarnusa UNUSIA', 
+            pendaftar: 'Manajemen Peserta', 
+            berita: 'Artikel Berita', 
+            webcontrol: 'Visual Website' 
+        };
+        document.getElementById('tab-title').innerText = titles[tabId];
+
+        if(tabId === 'dashboard') refreshDashboard();
+        if(tabId === 'pendaftar') renderPendaftar();
+        if(tabId === 'berita') renderNews();
+        if(tabId === 'webcontrol') loadVisualFields();
+    }
+
+    // --- FUNGSI LOAD DATA DARI GOOGLE SHEETS ---
+    async function fetchDataFromSheet() {
+        const btn = document.getElementById('btn-sync');
+        const statusText = document.getElementById('sync-status');
+        
+        if(btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> MENGHUBUNGKAN...';
+            btn.disabled = true;
+        }
+
+        try {
+            const response = await fetch(`${SCRIPT_URL}?type=admin&nocache=${new Date().getTime()}`);
+            const data = await response.json();
+            
+            if (Array.isArray(data)) {
+                // Filter: hilangkan akun admin dari list pendaftar
+                globalData = data.filter(user => user.nama && user.nama.toLowerCase() !== "admin");
+                localStorage.setItem(KEYS.pendaftar, JSON.stringify(globalData));
+                
+                if(statusText) {
+                    statusText.innerText = "Aktif";
+                    statusText.className = "text-xs font-bold text-emerald-500 italic";
+                }
+                
+                addLog(`Sinkronisasi berhasil: ${globalData.length} data.`);
+                refreshDashboard();
+                if(!document.getElementById('tab-pendaftar').classList.contains('hidden')) renderPendaftar();
+            }
+        } catch (err) {
+            console.error(err);
+            addLog("Gagal sinkron data Sheets.");
+            if(statusText) statusText.innerText = "Sync Failed";
+        } finally {
+            if(btn) {
+                btn.innerHTML = '<i class="fas fa-download mr-2"></i> Tarik Data Pendaftar Terbaru';
+                btn.disabled = false;
+            }
+        }
+    }
+
+    // --- DASHBOARD UI & CHART ---
+    function refreshDashboard() {
+        let pend = 0, lulus = 0, gagal = 0;
+        
+        globalData.forEach(p => {
+            const s = (p.status || "").toLowerCase();
+            if (s.includes('pend')) pend++;
+            else if (s.includes('kuali') || s.includes('lulus') || s.includes('lunas') || s.includes('aktif')) lulus++;
+            else if (s.includes('disku') || s.includes('gagal')) gagal++;
+        });
+
+        document.getElementById('stat-total').textContent = globalData.length;
+        document.getElementById('stat-lulus').textContent = lulus;
+        document.getElementById('stat-pending').textContent = pend;
+        
+        const news = JSON.parse(localStorage.getItem(KEYS.news)) || [];
+        document.getElementById('stat-berita').textContent = news.length;
+
+        renderChart(lulus, pend, gagal);
+        renderLogs();
+    }
+
+    function renderChart(l, p, g) {
+        const ctx = document.getElementById('chartStatus').getContext('2d');
+        if (myChart) myChart.destroy();
+        
+        const isDark = html.classList.contains('dark');
+        
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Lulus', 'Pending', 'Gagal'],
+                datasets: [{
+                    data: [l, p, g],
+                    backgroundColor: ['#1B7548', '#FFB800', '#EF4444'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: { color: isDark ? '#cbd5e1' : '#475569', font: { weight: 'bold', size: 10 } }
+                    } 
+                },
+                cutout: '75%'
+            }
+        });
+    }
+
+    // --- MANAJEMEN PENDAFTAR ---
+    function renderPendaftar() {
+        const term = document.getElementById('searchPeserta').value.toLowerCase();
+        const tbody = document.getElementById('pendaftar-table');
+        tbody.innerHTML = '';
+        
+        const filtered = globalData.filter(p => 
+            (p.nama || "").toLowerCase().includes(term) || 
+            (p.angkatan || "").toString().includes(term)
+        );
+
+        filtered.forEach((p) => {
+            const status = p.status || "Pending";
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors border-b dark:border-slate-700">
+                    <td class="p-6 text-center">
+                        <input type="checkbox" class="rowCheckbox rounded border-slate-300 text-primary" value="${p.nama}" onclick="toggleBulkButton()">
+                    </td>
+                    <td class="p-6">
+                        <p class="font-bold text-slate-900 dark:text-white">${p.nama}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">${p.email || '-'}</p>
+                    </td>
+                    <td class="p-6 text-center text-xs font-black text-slate-500">${p.angkatan || '-'}</td>
+                    <td class="p-6 text-center">
+                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase ${getStatusStyle(status)}">
+                            ${status}
+                        </span>
+                    </td>
+                    <td class="p-6 text-center">
+                        <button onclick="deleteSingle('${p.nama}')" class="text-red-500 hover:scale-110 transition"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    function getStatusStyle(s) {
+        const low = s.toLowerCase();
+        if (low.includes('kuali') || low.includes('lulus') || low.includes('lunas')) return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30';
+        if (low.includes('pend')) return 'bg-amber-100 text-amber-600 dark:bg-amber-900/30';
+        return 'bg-red-100 text-red-600 dark:bg-red-900/30';
+    }
+
+    function toggleSelectAll() {
+        const isChecked = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.rowCheckbox').forEach(cb => cb.checked = isChecked);
+        toggleBulkButton();
+    }
+
+    function toggleBulkButton() {
+        const selectedCount = document.querySelectorAll('.rowCheckbox:checked').length;
+        const btn = document.getElementById('btnBulk');
+        selectedCount > 0 ? btn.classList.remove('hidden') : btn.classList.add('hidden');
+    }
+
+    async function deleteSingle(nama) {
+        if(!confirm(`Hapus ${nama} dari Google Sheets?`)) return;
+        addLog(`Menghapus ${nama}...`);
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                body: JSON.stringify({ action: "hapusPeserta", nama: nama })
+            });
+            alert("Perintah hapus dikirim!");
+            fetchDataFromSheet();
+        } catch(e) { alert("Gagal koneksi."); }
+    }
+
+    async function bulkDelete() {
+        const selected = Array.from(document.querySelectorAll('.rowCheckbox:checked')).map(cb => cb.value);
+        if(!confirm(`Hapus ${selected.length} data?`)) return;
+        
+        const btn = document.getElementById('btnBulk');
+        btn.disabled = true; btn.innerText = "PROSES...";
+
+        for(let nama of selected) {
+            await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "hapusPeserta", nama }) });
+        }
+        
+        alert("Selesai!");
+        fetchDataFromSheet();
+        btn.disabled = false; btn.innerText = "HAPUS TERPILIH";
+    }
+
+    // --- MANAJEMEN BERITA ---
+    function openNewsModal(index = -1) {
+        const modal = document.getElementById('modal-news');
+        const form = document.getElementById('form-news');
+        form.reset();
+        document.getElementById('edit-id').value = index;
+        
+        if(index > -1) {
+            const news = JSON.parse(localStorage.getItem(KEYS.news))[index];
+            document.getElementById('n-title').value = news.title;
+            document.getElementById('n-category').value = news.category;
+            document.getElementById('n-image').value = news.image;
+            document.getElementById('n-content').value = news.content;
+            document.getElementById('modal-title').innerText = "Edit Berita";
+        } else {
+            document.getElementById('modal-title').innerText = "Tambah Berita";
+        }
+        
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeNewsModal() {
+        document.getElementById('modal-news').classList.add('hidden');
+        document.getElementById('modal-news').classList.remove('flex');
+    }
+
+    document.getElementById('form-news').onsubmit = (e) => {
+        e.preventDefault();
+        const index = parseInt(document.getElementById('edit-id').value);
+        let news = JSON.parse(localStorage.getItem(KEYS.news)) || [];
+        
+        const newData = {
+            title: document.getElementById('n-title').value,
+            category: document.getElementById('n-category').value,
+            image: document.getElementById('n-image').value,
+            content: document.getElementById('n-content').value,
+            date: new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })
+        };
+
+        if(index > -1) news[index] = newData;
+        else news.unshift(newData);
+
+        localStorage.setItem(KEYS.news, JSON.stringify(news));
+        addLog(`Berita "${newData.title}" disimpan.`);
+        closeNewsModal();
+        renderNews();
+        refreshDashboard();
+    };
+
+    function renderNews() {
+        const grid = document.getElementById('news-grid');
+        const news = JSON.parse(localStorage.getItem(KEYS.news)) || [];
+        grid.innerHTML = news.map((n, i) => `
+            <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] border dark:border-slate-700 overflow-hidden shadow-sm group">
+                <img src="${n.image || 'https://via.placeholder.com/600x300'}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
+                <div class="p-8">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-lg">${n.category}</span>
+                    <h4 class="text-xl font-black mt-4 line-clamp-2">${n.title}</h4>
+                    <p class="text-xs text-slate-400 mt-2 font-bold uppercase">${n.date}</p>
+                    <div class="flex gap-2 mt-6">
+                        <button onclick="openNewsModal(${i})" class="flex-1 py-3 bg-slate-100 dark:bg-slate-700 rounded-xl font-black text-[10px] uppercase">Edit</button>
+                        <button onclick="deleteNews(${i})" class="px-5 py-3 bg-red-50 text-red-500 rounded-xl"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function deleteNews(i) {
+        if(!confirm("Hapus berita ini?")) return;
+        let news = JSON.parse(localStorage.getItem(KEYS.news));
+        news.splice(i, 1);
+        localStorage.setItem(KEYS.news, JSON.stringify(news));
+        renderNews();
+        refreshDashboard();
+    }
+
+    // --- VISUAL CONTROL ---
+    function loadVisualFields() {
+        const v = JSON.parse(localStorage.getItem(KEYS.visual)) || { h1: "PAGAR NUSA", h2: "UNUSIA", sub: "", marquee: "" };
+        document.getElementById('v-hero-1').value = v.h1;
+        document.getElementById('v-hero-2').value = v.h2;
+        document.getElementById('v-sub').value = v.sub;
+        document.getElementById('v-marquee').value = v.marquee;
+    }
+
+    function saveVisual() {
+        const data = {
+            h1: document.getElementById('v-hero-1').value,
+            h2: document.getElementById('v-hero-2').value,
+            sub: document.getElementById('v-sub').value,
+            marquee: document.getElementById('v-marquee').value
+        };
+        localStorage.setItem(KEYS.visual, JSON.stringify(data));
+        addLog("Visual website diperbarui.");
+        alert("Visual Tersimpan!");
+    }
+
+    // --- LOGS & EXCEL ---
+    function addLog(msg) {
+        let logs = JSON.parse(localStorage.getItem(KEYS.logs)) || [];
+        logs.unshift({ msg, time: new Date().toLocaleTimeString() });
+        localStorage.setItem(KEYS.logs, JSON.stringify(logs.slice(0, 5)));
+        renderLogs();
+    }
+
+    function renderLogs() {
+        const container = document.getElementById('log-list');
+        const logs = JSON.parse(localStorage.getItem(KEYS.logs)) || [];
+        container.innerHTML = logs.map(l => `
+            <div class="flex gap-3 items-center bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl border dark:border-slate-600 transition-all hover:translate-x-1">
+                <div class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-bold dark:text-slate-200">${l.msg}</p>
+                    <p class="text-[8px] text-slate-400 uppercase font-black tracking-widest">${l.time}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function exportToExcel() {
+        const ws = XLSX.utils.json_to_sheet(globalData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Pendaftar");
+        XLSX.writeFile(wb, "Data_Pendaftar_PagarNusa.xlsx");
+    }
+
+    // --- INITIAL LOAD ---
+    window.onload = () => {
+        fetchDataFromSheet();
+        setInterval(fetchDataFromSheet, 300000); // Auto sync 5 menit
+    };
+</script>
+</body>
+</html>

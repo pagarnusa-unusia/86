@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Detail Berita - Pagar Nusa UNUSIA</title>
+    <link rel="icon" href="logopn.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B7548',
+                        primaryDark: '#145c38',
+                        accent: '#FFB800',
+                        slate900: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .hero-gradient { background: linear-gradient(135deg, #1B7548 0%, #064e3b 100%); }
+        .content-area p { margin-bottom: 1.5rem; line-height: 1.8; color: #475569; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #1B7548; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+
+    <header class="sticky top-0 z-[100] bg-primary/95 backdrop-blur-md text-white shadow-xl">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-3 group">
+                <div class="bg-white p-1 rounded-lg transform group-hover:rotate-12 transition">
+                    <img src="logopn.png" alt="Logo" class="h-10">
+                </div>
+                <div class="leading-tight">
+                    <span class="block text-lg font-black tracking-tighter">PAGAR NUSA</span>
+                    <span class="block text-[8px] uppercase tracking-[0.3em] text-accent font-bold">UNUSIA JAKARTA</span>
+                </div>
+            </a>
+            
+            <nav class="hidden lg:flex items-center space-x-6 font-bold text-[11px] tracking-widest uppercase">
+                <a href="index.html" class="hover:text-accent transition">Beranda</a>
+                <a href="index.html#profil" class="hover:text-accent transition">Profil</a>
+                <a href="index.html#informasi" class="text-accent transition border-b-2 border-accent">Berita</a>
+                <a href="daftar.html" class="bg-accent text-slate-900 px-5 py-2 rounded-full font-black hover:bg-white transition shadow-lg">DAFTAR UKT</a>
+            </nav>
+
+            <a href="index.html" class="lg:hidden text-white text-sm font-bold flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> KEMBALI
+            </a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 md:py-20">
+        <div class="flex flex-col lg:flex-row gap-16">
+            
+            <article class="lg:w-2/3" data-aos="fade-up">
+                <nav class="flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">
+                    <a href="index.html" class="hover:text-primary transition">Beranda</a>
+                    <i class="fas fa-chevron-right text-[8px]"></i>
+                    <a href="index.html#informasi" class="hover:text-primary transition">Berita</a>
+                    <i class="fas fa-chevron-right text-[8px]"></i>
+                    <span class="text-slate-900" id="breadcrumb-title">Detail Artikel</span>
+                </nav>
+
+                <header class="mb-10">
+                    <span id="detail-category" class="inline-block bg-primary/10 text-primary text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter mb-4">
+                        KATEGORI
+                    </span>
+                    <h1 id="detail-title" class="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tighter mb-6 uppercase italic">
+                        Memuat Judul Berita...
+                    </h1>
+                    <div class="flex items-center space-x-6 py-6 border-y border-slate-100">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase leading-none">Penulis</p>
+                                <p class="text-xs font-bold text-slate-900">Admin Pagar Nusa</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase leading-none">Diterbitkan</p>
+                                <p id="detail-date" class="text-xs font-bold text-slate-900">-- --- 202X</p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="rounded-[2.5rem] overflow-hidden shadow-2xl mb-12 border-4 border-white">
+                    <img id="detail-image" src="" alt="Thumbnail" class="w-full h-auto min-h-[300px] object-cover">
+                </div>
+
+                <div id="detail-content" class="content-area text-lg text-slate-600 leading-relaxed font-medium mb-16">
+                    </div>
+
+                <div class="bg-slate-100 p-8 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p class="font-black text-xs uppercase tracking-widest text-slate-500">Bagikan Informasi Ini:</p>
+                    <div class="flex gap-4">
+                        <button onclick="window.open('https://wa.me/?text='+encodeURIComponent(window.location.href))" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-500 hover:bg-emerald-500 hover:text-white transition shadow-sm"><i class="fab fa-whatsapp text-xl"></i></button>
+                        <button onclick="navigator.clipboard.writeText(window.location.href); alert('Link disalin!')" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-900 hover:bg-slate-900 hover:text-white transition shadow-sm"><i class="fas fa-link text-xl"></i></button>
+                    </div>
+                </div>
+            </article>
+
+            <aside class="lg:w-1/3 space-y-10">
+                <div class="bg-primary p-10 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl shadow-primary/30" data-aos="fade-left">
+                    <i class="fas fa-fist-raised absolute -right-6 -bottom-6 text-9xl opacity-10 rotate-12"></i>
+                    <h4 class="text-2xl font-black mb-4 relative z-10 leading-tight">Gabung Menjadi <br><span class="text-accent italic">Pendekar PN!</span></h4>
+                    <p class="text-xs text-emerald-100 mb-8 relative z-10 font-medium">Jadilah bagian dari penjaga Ulama dan Bangsa. Pendaftaran UKT IV dibuka sekarang.</p>
+                    <a href="daftar.html" class="block w-full bg-white text-primary text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-accent hover:text-slate-900 transition relative z-10 shadow-xl">Daftar UKT Sekarang</a>
+                </div>
+
+                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm" data-aos="fade-left" data-aos-delay="200">
+                    <h4 class="font-black text-slate-900 mb-8 uppercase tracking-tighter flex items-center">
+                        <span class="w-2 h-6 bg-accent mr-3 rounded-full"></span> Warta Terkait
+                    </h4>
+                    <div id="other-news-list" class="space-y-6">
+                        </div>
+                </div>
+            </aside>
+
+        </div>
+    </main>
+
+    <footer class="bg-slate900 text-white pt-24 pb-12 relative">
+        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16">
+            <div class="lg:col-span-1 space-y-6">
+                <div class="flex items-center space-x-4">
+                    <img src="logopn.png" class="h-16 bg-white p-2 rounded-2xl">
+                    <div class="leading-none">
+                        <span class="text-2xl font-black block tracking-tighter uppercase">PAGAR NUSA</span>
+                        <span class="text-[9px] text-accent tracking-[0.3em] uppercase font-bold">UNUSIA JAKARTA</span>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed font-medium italic">"Bela Diri, Bela Bangsa, Bela Agama. Satu Komando di bawah naungan Nahdlatul Ulama."</p>
+            </div>
+            
+            <div>
+                <h5 class="text-lg font-black mb-8 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-accent mr-3 rounded-full"></span> Navigasi</h5>
+                <ul class="space-y-3 text-sm text-slate-400 font-bold uppercase tracking-tighter">
+                    <li><a href="index.html" class="hover:text-accent transition">Beranda Utama</a></li>
+                    <li><a href="index.html#profil" class="hover:text-accent transition">Profil Organisasi</a></li>
+                    <li><a href="daftar.html" class="hover:text-accent transition">Pendaftaran UKT</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h5 class="text-lg font-black mb-8 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-primary mr-3 rounded-full"></span> Markas</h5>
+                <p class="text-xs text-slate-400 leading-relaxed font-bold italic">
+                    Gedung UKM Lt. 2 UNUSIA Jakarta<br>
+                    Jl. Taman Amir Hamzah No.5, Jakarta Pusat
+                </p>
+            </div>
+
+            <div class="bg-white/5 p-8 rounded-[2rem] border border-white/5 text-center">
+                <h5 class="text-[10px] font-black mb-6 uppercase tracking-widest text-accent italic">Didukung Oleh</h5>
+                <div class="flex justify-center gap-4 opacity-40 hover:opacity-100 transition duration-500">
+                    <span class="font-black text-xs">UNUSIA</span>
+                    <span class="font-black text-xs">NU ONLINE</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container mx-auto px-6 mt-20 pt-8 border-t border-white/5 text-center">
+            <p class="text-[10px] text-slate-500 font-black tracking-widest uppercase">&copy; 2026 PAGAR NUSA RAYON UNUSIA JAKARTA.</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+
+        function loadDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const newsData = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
+            const post = newsData[id];
+
+            if (post) {
+                // Set Data Utama
+                document.title = post.title + " - Pagar Nusa UNUSIA";
+                document.getElementById('detail-image').src = post.image || 'logopn.png';
+                document.getElementById('detail-category').innerText = post.category;
+                document.getElementById('detail-title').innerText = post.title;
+                document.getElementById('detail-date').innerText = post.date;
+                document.getElementById('breadcrumb-title').innerText = post.title;
+                
+                // Format Content
+                const contentHtml = post.content
+                    .split('\n')
+                    .filter(para => para.trim() !== '')
+                    .map(para => `<p>${para}</p>`)
+                    .join('');
+                document.getElementById('detail-content').innerHTML = contentHtml;
+
+                // Load Berita Lainnya (Sidebar)
+                loadOtherNews(id, newsData);
+
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function loadOtherNews(currentId, allData) {
+            const container = document.getElementById('other-news-list');
+            // Filter berita selain yang sedang dibuka, ambil max 3
+            const others = allData.filter((_, idx) => idx != currentId).slice(0, 3);
+
+            if (others.length === 0) {
+                container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada berita lainnya.</p>';
+                return;
+            }
+
+            container.innerHTML = others.map((post, index) => `
+                <a href="detail_berita.html?id=${allData.indexOf(post)}" class="flex items-center gap-4 group">
+                    <img src="${post.image || 'logopn.png'}" class="w-16 h-16 rounded-xl object-cover shrink-0 grayscale group-hover:grayscale-0 transition duration-500 shadow-sm">
+                    <div class="min-w-0">
+                        <h5 class="text-xs font-black text-slate-900 line-clamp-2 uppercase tracking-tighter group-hover:text-primary transition">${post.title}</h5>
+                        <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-widest">${post.date}</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDetail);
+    </script>
+</body>
+</html>
