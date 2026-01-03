@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detail Berita - Pagar Nusa UNUSIA</title>
-    <link rel="icon" href="logopn.png">
+    <meta property="og:type" content="article">
+<meta id="og-title" property="og:title" content="Detail Berita - Pagar Nusa UNUSIA">
+<meta id="og-image" property="og:image" content="logopn.png">
+<meta id="og-url" property="og:url" content="">
+<meta property="og:description" content="Portal Berita Resmi Pagar Nusa UNUSIA Jakarta">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -194,11 +198,11 @@
     </footer>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
+    // Inisialisasi AOS jika ada
     if (typeof AOS !== 'undefined') AOS.init({ duration: 800, once: true });
 
+    // Fungsi Pembantu: Membuat Slug
     function createSlug(text) {
         return text.toString().toLowerCase()
             .replace(/\s+/g, '-')
@@ -215,11 +219,10 @@
 
         let newsData = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
         
-        // --- LOGIKA DIRECT FETCH (FITUR UTAMA UNTUK TEMAN ANDA) ---
+        // --- LOGIKA FETCH JIKA DATA LOKAL KOSONG ---
         if (newsData.length === 0) {
             try {
                 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9D5CY0eB7vfHJPW-_jxPboZUSPM82q7cjjjOBH10Uf5a8NeO4QVWlmB2EE2pTp4tX1A/exec";
-                // Tampilkan pesan loading di judul saat fetch
                 document.getElementById('detail-title').innerText = "Menghubungkan ke Pusat Komando...";
                 
                 const response = await fetch(`${SCRIPT_URL}?type=getAllData`);
@@ -238,11 +241,15 @@
         const post = newsData[postIndex];
 
         if (post) {
+            // 1. Update Konten Visual Halaman
             document.getElementById('detail-title').innerText = post.title;
             document.getElementById('breadcrumb-title').innerText = post.title;
             document.getElementById('detail-category').innerText = post.category || 'Warta Pendekar';
             document.getElementById('detail-date').innerText = post.date;
-            document.getElementById('detail-image').src = post.image || 'logopn.png';
+            
+            const mainImg = document.getElementById('detail-image');
+            const finalImage = post.image || 'logopn.png';
+            mainImg.src = finalImage;
             
             const contentContainer = document.getElementById('detail-content');
             if (contentContainer) {
@@ -251,7 +258,26 @@
                     .map(p => p.trim() ? `<p class="mb-4 text-slate-600 leading-relaxed italic text-sm md:text-base">"${p}"</p>` : '')
                     .join('');
             }
+
+            // 2. Update Browser Title
             document.title = post.title + " - Pagar Nusa UNUSIA";
+
+            // 3. LOGIKA UPDATE META UNTUK PREVIEW WHATSAPP
+            try {
+                // Update Meta Title
+                document.getElementById('og-title').setAttribute('content', post.title);
+                // Update Meta Image (Foto Berita)
+                document.getElementById('og-image').setAttribute('content', finalImage);
+                // Update Meta URL
+                document.getElementById('og-url').setAttribute('content', window.location.href);
+                // Update Meta Description (Potongan konten)
+                const shortDesc = post.content.substring(0, 100) + "...";
+                document.getElementById('og-description').setAttribute('content', shortDesc);
+            } catch (e) {
+                console.warn("Meta tags tidak ditemukan, mengabaikan update preview.");
+            }
+
+            // Load Berita Lainnya
             loadOtherNews(postIndex, newsData);
         } else {
             window.location.href = 'index.html';
@@ -261,7 +287,10 @@
     function loadOtherNews(currentIndex, allData) {
         const container = document.getElementById('other-news-list');
         if (!container) return;
+        
+        // Mengambil berita selain yang sedang dibuka
         const others = allData.filter((_, idx) => idx !== currentIndex).slice(0, 3);
+        
         container.innerHTML = others.map((post) => {
             const originalId = allData.indexOf(post) + 1; 
             const slug = createSlug(post.title);
@@ -276,9 +305,10 @@
         }).join('');
     }
 
+    // Fungsi Share WhatsApp
     function shareToWA() {
         const title = document.getElementById('detail-title').innerText;
-        const text = `*BERITA PAGAR NUSA UNUSIA*\n\n${title}\n\nBaca selengkapnya:\n${window.location.href}`;
+        const text = `*BERITA PAGAR NUSA UNUSIA*\n\n${title}\n\nBaca selengkapnya di sini:\n${window.location.href}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
