@@ -97,7 +97,7 @@
                         <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">${post.date}</p>
                         <h4 class="font-black text-slate-900 mb-4 line-clamp-2 text-xl uppercase tracking-tighter italic group-hover:text-primary transition">${post.title}</h4>
                         <p class="text-sm text-slate-500 line-clamp-3 mb-8 font-medium italic">"${post.content}"</p>
-                        <a href="detail_berita.html?id=${index}" class="inline-flex items-center gap-3 text-slate-900 font-black text-xs uppercase tracking-widest group/btn">
+                        <a href="detail_berita.html?id=${allNews.indexOf(post) + 1}" class="inline-flex items-center gap-3 text-slate-900 font-black text-xs uppercase tracking-widest group/btn">
                             Baca Selengkapnya 
                             <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover/btn:bg-primary group-hover/btn:text-white transition-all">
                                 <i class="fas fa-arrow-right"></i>

@@ -49,8 +49,8 @@
             </a>
             
             <nav id="main-nav" class="hidden lg:flex items-center space-x-2 font-bold text-[11px] tracking-widest">
-                <a href="#" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent">BERANDA</a>
-                <a href="#profil" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Profil</a>
+                <a href="index.html" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent">BERANDA</a>
+                <a href="index.html" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Profil</a>
                 <a href="#informasi" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Berita</a>
                 <a href="#galeri" class="px-4 py-2 hover:text-accent transition border-b-2 border-transparent hover:border-accent uppercase">Gallery</a>
                 <a href="login.html" class="lg:ml-6 bg-accent text-slate-900 px-7 py-3 rounded-full font-black hover:bg-white hover:scale-105 transition-all shadow-xl shadow-black/20 text-center">Login</a>
@@ -194,62 +194,95 @@
     </footer>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 800, once: true });
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script>
+    if (typeof AOS !== 'undefined') AOS.init({ duration: 800, once: true });
 
-        function loadDetail() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
-            const newsData = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
-            const post = newsData[id];
+    function createSlug(text) {
+        return text.toString().toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
+    }
 
-            if (post) {
-                // Set Data Utama
-                document.title = post.title + " - Pagar Nusa UNUSIA";
-                document.getElementById('detail-image').src = post.image || 'logopn.png';
-                document.getElementById('detail-category').innerText = post.category;
-                document.getElementById('detail-title').innerText = post.title;
-                document.getElementById('detail-date').innerText = post.date;
-                document.getElementById('breadcrumb-title').innerText = post.title;
+    async function loadDetail() {
+        const params = new URLSearchParams(window.location.search);
+        const idFromUrl = params.get('id'); 
+        if (!idFromUrl) { window.location.href = 'index.html'; return; }
+
+        let newsData = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
+        
+        // --- LOGIKA DIRECT FETCH (FITUR UTAMA UNTUK TEMAN ANDA) ---
+        if (newsData.length === 0) {
+            try {
+                const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9D5CY0eB7vfHJPW-_jxPboZUSPM82q7cjjjOBH10Uf5a8NeO4QVWlmB2EE2pTp4tX1A/exec";
+                // Tampilkan pesan loading di judul saat fetch
+                document.getElementById('detail-title').innerText = "Menghubungkan ke Pusat Komando...";
                 
-                // Format Content
-                const contentHtml = post.content
-                    .split('\n')
-                    .filter(para => para.trim() !== '')
-                    .map(para => `<p>${para}</p>`)
-                    .join('');
-                document.getElementById('detail-content').innerHTML = contentHtml;
-
-                // Load Berita Lainnya (Sidebar)
-                loadOtherNews(id, newsData);
-
-            } else {
-                window.location.href = 'index.html';
+                const response = await fetch(`${SCRIPT_URL}?type=getAllData`);
+                const data = await response.json();
+                
+                if (data.berita && data.berita.length > 0) {
+                    newsData = data.berita;
+                    localStorage.setItem('pagarnusa_news', JSON.stringify(data.berita));
+                }
+            } catch (err) {
+                console.error("Gagal mengambil data:", err);
             }
         }
 
-        function loadOtherNews(currentId, allData) {
-            const container = document.getElementById('other-news-list');
-            // Filter berita selain yang sedang dibuka, ambil max 3
-            const others = allData.filter((_, idx) => idx != currentId).slice(0, 3);
+        const postIndex = parseInt(idFromUrl) - 1;
+        const post = newsData[postIndex];
 
-            if (others.length === 0) {
-                container.innerHTML = '<p class="text-xs text-slate-400 italic">Belum ada berita lainnya.</p>';
-                return;
+        if (post) {
+            document.getElementById('detail-title').innerText = post.title;
+            document.getElementById('breadcrumb-title').innerText = post.title;
+            document.getElementById('detail-category').innerText = post.category || 'Warta Pendekar';
+            document.getElementById('detail-date').innerText = post.date;
+            document.getElementById('detail-image').src = post.image || 'logopn.png';
+            
+            const contentContainer = document.getElementById('detail-content');
+            if (contentContainer) {
+                contentContainer.innerHTML = post.content
+                    .split('\n')
+                    .map(p => p.trim() ? `<p class="mb-4 text-slate-600 leading-relaxed italic text-sm md:text-base">"${p}"</p>` : '')
+                    .join('');
             }
+            document.title = post.title + " - Pagar Nusa UNUSIA";
+            loadOtherNews(postIndex, newsData);
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
 
-            container.innerHTML = others.map((post, index) => `
-                <a href="detail_berita.html?id=${allData.indexOf(post)}" class="flex items-center gap-4 group">
+    function loadOtherNews(currentIndex, allData) {
+        const container = document.getElementById('other-news-list');
+        if (!container) return;
+        const others = allData.filter((_, idx) => idx !== currentIndex).slice(0, 3);
+        container.innerHTML = others.map((post) => {
+            const originalId = allData.indexOf(post) + 1; 
+            const slug = createSlug(post.title);
+            return `
+                <a href="detail_berita.html?id=${originalId}&title=${slug}" class="flex items-center gap-4 group transition-all">
                     <img src="${post.image || 'logopn.png'}" class="w-16 h-16 rounded-xl object-cover shrink-0 grayscale group-hover:grayscale-0 transition duration-500 shadow-sm">
                     <div class="min-w-0">
                         <h5 class="text-xs font-black text-slate-900 line-clamp-2 uppercase tracking-tighter group-hover:text-primary transition">${post.title}</h5>
                         <p class="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-widest">${post.date}</p>
                     </div>
-                </a>
-            `).join('');
-        }
+                </a>`;
+        }).join('');
+    }
 
-        document.addEventListener('DOMContentLoaded', loadDetail);
-    </script>
+    function shareToWA() {
+        const title = document.getElementById('detail-title').innerText;
+        const text = `*BERITA PAGAR NUSA UNUSIA*\n\n${title}\n\nBaca selengkapnya:\n${window.location.href}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDetail);
+</script>
 </body>
 </html>

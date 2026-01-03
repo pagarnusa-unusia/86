@@ -280,129 +280,132 @@
     </footer>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
-    // 1. KONFIGURASI - Ganti dengan URL Web App Google Script Anda
+    // 1. KONFIGURASI
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw9D5CY0eB7vfHJPW-_jxPboZUSPM82q7cjjjOBH10Uf5a8NeO4QVWlmB2EE2pTp4tX1A/exec";
 
-    // 2. FUNGSI UTAMA: MENGAMBIL DATA DARI GOOGLE SHEETS
+    // Fungsi Pembantu: Membuat Slug dari Judul
+    function createSlug(text) {
+        return text.toString().toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-')
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
+    }
+
+    // 2. MENGAMBIL DATA (Dengan Auto-Save ke LocalStorage)
     async function loadLiveContent() {
         try {
-            // Menambahkan timestamp agar browser tidak mengambil data lama (cache)
             const response = await fetch(`${SCRIPT_URL}?type=getAllData&nocache=${new Date().getTime()}`);
-            if (!response.ok) throw new Error("Network response was not ok");
-            
+            if (!response.ok) throw new Error("Gagal terhubung ke server");
             const data = await response.json();
 
-            // SINKRONISASI VISUAL (Hero Text & Marquee)
+            // Simpan Visual
             if (data.visual) {
                 updateVisualDOM(data.visual);
-                // Simpan ke lokal untuk penggunaan berikutnya
                 localStorage.setItem('pagarnusa_visual', JSON.stringify(data.visual));
             }
 
-            // SINKRONISASI BERITA
+            // Simpan Berita
             if (data.berita && data.berita.length > 0) {
                 renderNewsToGrid(data.berita);
-                // Simpan ke lokal sebagai cadangan
                 localStorage.setItem('pagarnusa_news', JSON.stringify(data.berita));
             } else {
                 syncFromLocalFallback();
             }
-
         } catch (err) {
-            console.error("Gagal memuat data live. Mengaktifkan Mode Offline.");
+            console.error("Mode Offline: Menggunakan data lokal.");
             syncFromLocalFallback();
         }
     }
 
-    // 3. FUNGSI UPDATE TAMPILAN VISUAL
-    function updateVisualDOM(visualData) {
-        const mappings = {
-            'hero-1': visualData.hero1,
-            'hero-2': visualData.hero2,
-            'hero-sub': visualData.heroSub,
-            'marquee-content': visualData.marquee
-        };
-
-        for (const [id, value] of Object.entries(mappings)) {
-            const el = document.getElementById(id);
-            if (el && value) el.innerText = value;
+// 3. UPDATE VISUAL (Taruh di sini atau Ganti fungsi yang lama dengan ini)
+function updateVisualDOM(visualData) {
+    const mappings = {
+        'hero-1': visualData.hero1,
+        'hero-2': visualData.hero2,
+        'hero-sub': visualData.heroSub || visualData.sub,
+        'marquee-content': visualData.marquee
+    };
+    for (const [id, value] of Object.entries(mappings)) {
+        const el = document.getElementById(id);
+        // Jika value ada di Sheet, gunakan. Jika kosong, biarkan teks asli di HTML muncul.
+        if (el && value && value.trim() !== "") { 
+            el.innerText = value;
         }
     }
+}
 
-    // 4. FUNGSI RENDER KARTU BERITA
+    // 4. RENDER KARTU BERITA
     function renderNewsToGrid(newsData) {
         const newsContainer = document.getElementById('news-grid-index');
         if (!newsContainer) return;
 
-        newsContainer.innerHTML = newsData.map((post, index) => `
-            <div class="news-card bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500" data-aos="fade-up" data-aos-delay="${index * 100}">
-                <div class="relative h-56 md:h-64 overflow-hidden">
-                    <img src="${post.image || 'logopn.png'}" 
-                         alt="News Image"
-                         class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
-                    <span class="absolute top-4 left-4 md:top-6 md:left-6 bg-accent text-slate-900 text-[8px] md:text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-lg">
-                        ${post.category || 'Warta Pendekar'}
-                    </span>
-                </div>
-                <div class="p-6 md:p-8">
-                    <div class="flex items-center gap-2 mb-4">
-                        <div class="w-1 h-4 bg-primary rounded-full"></div>
-                        <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${post.date}</p>
-                    </div>
-                    <h4 class="font-black text-slate-900 mb-4 line-clamp-2 leading-tight text-lg md:text-xl uppercase tracking-tighter group-hover:text-primary transition italic">${post.title}</h4>
-                    <p class="text-sm text-slate-500 line-clamp-3 mb-6 md:mb-8 font-medium italic">"${post.content}"</p>
-                    <a href="detail_berita.html?id=${post.id || index}" class="inline-flex items-center gap-3 text-slate-900 font-black text-[10px] md:text-xs uppercase tracking-widest group/btn">
-                        Baca Selengkapnya 
-                        <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover/btn:bg-primary group-hover/btn:text-white transition-all">
-                            <i class="fas fa-arrow-right"></i>
+        newsContainer.innerHTML = newsData.map((post, index) => {
+            const postId = index + 1; 
+            const slug = createSlug(post.title);
+            
+            return `
+                <div class="news-card bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500" 
+                     data-aos="fade-up" data-aos-delay="${(index % 3) * 100}">
+                    <div class="relative h-56 md:h-64 overflow-hidden">
+                        <img src="${post.image || 'logopn.png'}" alt="News Image" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                        <span class="absolute top-4 left-4 md:top-6 md:left-6 bg-accent text-slate-900 text-[8px] md:text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-lg">
+                            ${post.category || 'Warta Pendekar'}
                         </span>
-                    </a>
+                    </div>
+                    <div class="p-6 md:p-8">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-1 h-4 bg-primary rounded-full"></div>
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${post.date}</p>
+                        </div>
+                        <h4 class="font-black text-slate-900 mb-4 line-clamp-2 leading-tight text-lg md:text-xl uppercase tracking-tighter group-hover:text-primary transition italic">
+                            ${post.title}
+                        </h4>
+                        <p class="text-sm text-slate-500 line-clamp-3 mb-6 md:mb-8 font-medium italic">
+                            "${post.content}"
+                        </p>
+                        <a href="detail_berita.html?id=${postId}&title=${slug}" class="inline-flex items-center gap-3 text-slate-900 font-black text-[10px] md:text-xs uppercase tracking-widest group/btn">
+                            Baca Selengkapnya 
+                            <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center group-hover/btn:bg-primary group-hover/btn:text-white transition-all">
+                                <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    // 5. FUNGSI FALLBACK (JIKA OFFLINE)
     function syncFromLocalFallback() {
         const visualData = JSON.parse(localStorage.getItem('pagarnusa_visual'));
         if (visualData) updateVisualDOM(visualData);
-
         const newsData = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
-        renderNewsToGrid(newsData);
+        if (newsData.length > 0) renderNewsToGrid(newsData);
     }
 
-    // 6. INISIALISASI SAAT HALAMAN DIBUKA
     document.addEventListener('DOMContentLoaded', () => {
-        // Tampilkan data lokal dulu (agar tidak blank putih)
         syncFromLocalFallback();
-        // Kemudian ambil data terbaru dari server
         loadLiveContent();
-        
-        // Inisialisasi AOS (Animation On Scroll)
-        if (typeof AOS !== 'undefined') {
-            AOS.init({ duration: 1000, once: true, offset: 100 });
-        }
+        if (typeof AOS !== 'undefined') AOS.init({ duration: 1000, once: true, offset: 100 });
     });
 
-    // 7. LOGIKA MOBILE MENU
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const nav = document.getElementById('main-nav');
-    
     if (mobileBtn && nav) {
         mobileBtn.addEventListener('click', () => {
             nav.classList.toggle('hidden');
-            if (!nav.classList.contains('hidden')) {
-                nav.classList.add('mobile-active', 'absolute', 'top-full', 'left-0', 'w-full', 'bg-primary', 'p-8', 'flex-col', 'space-y-4', 'text-center', 'shadow-2xl', 'z-[110]');
+            nav.classList.toggle('mobile-active');
+            if (nav.classList.contains('mobile-active')) {
+                nav.className = 'mobile-active absolute top-full left-0 w-full bg-primary p-8 flex flex-col space-y-4 text-center shadow-2xl z-[110] lg:hidden';
             }
         });
     }
 
-    // Pantau perubahan dari Admin di tab yang sama
     window.addEventListener('storage', (e) => {
-        if (e.key === 'pagarnusa_news' || e.key === 'pagarnusa_visual') {
-            syncFromLocalFallback();
-        }
+        if (e.key === 'pagarnusa_news' || e.key === 'pagarnusa_visual') syncFromLocalFallback();
     });
 </script>
 </body>
