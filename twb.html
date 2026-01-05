@@ -2,323 +2,254 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Twibbon Maker | PAGARNUSA UNUSIA</title>
-    <link rel="icon" href="https://lh3.googleusercontent.com/d/1drM76LlU3sdqpwo-Urq7ZULoyORC0UMQ">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Twibbon | PSNU PAGARNUSA UNUSIA</title>
+    
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#1B7548',
-                        primaryDark: '#145c38',
-                        whatsapp: '#25D366',
-                    },
-                    animation: {
-                        'bounce-slow': 'bounce 3s infinite',
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'float': 'float 3s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        }
-                    }
+                    colors: { primary: '#1B7548', accent: '#0f172a' },
+                    animation: { 'float': 'float 3s ease-in-out infinite' },
+                    keyframes: { float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } } }
                 }
             }
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        body { font-family: 'Poppins', sans-serif; scroll-behavior: smooth; background-color: #f0f4f2; overflow-x: hidden; }
-        .glass-effect { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.4); }
-        
-        /* Preloader Animation */
-        #preloader { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; transition: all 0.8s cubic-bezier(0.77, 0, 0.175, 1); }
-        .loader-circle { width: 80px; height: 80px; border: 4px solid #f3f3f3; border-top: 4px solid #1B7548; border-radius: 50%; animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
-        
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Canvas Style */
-        .canvas-container { position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1; margin: 0 auto; border-radius: 2rem; overflow: hidden; touch-action: none; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; transition: transform 0.3s ease; }
-        .canvas-container:hover { transform: scale(1.02); }
-        canvas { width: 100%; height: 100%; cursor: grab; }
-        canvas:active { cursor: grabbing; }
-
-        /* Floating Animation for Buttons */
-        .btn-animate { transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .btn-animate:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
-        .btn-animate:active { transform: scale(0.95); }
-
-        .chat-bubble { position: relative; background: #e8f5e9; border-radius: 1rem; padding: 1rem; border-left: 4px solid #1B7548; animation: float 3s ease-in-out infinite; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); border: 1px solid #e2e8f0; }
+        .canvas-container { 
+            position: relative; width: 100%; max-width: 450px; aspect-ratio: 1/1; 
+            margin: 0 auto; border-radius: 1.5rem; overflow: hidden; touch-action: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); background: #eee; border: 4px solid white;
+        }
+        canvas { width: 100% !important; height: auto !important; display: block; }
+        .step-locked { opacity: 0.3; pointer-events: none; filter: grayscale(1) blur(2px); transition: all 0.5s ease; }
+        .step-unlocked { opacity: 1; pointer-events: auto; filter: none; }
     </style>
 </head>
-<body class="text-slate-800 antialiased">
+<body class="min-h-screen flex flex-col select-none" oncontextmenu="return false;">
 
-    <div id="preloader">
-        <div class="relative flex flex-col items-center">
-            <div class="loader-circle"></div>
-            <img src="logopn.png" class="absolute top-5 h-10 w-10 object-contain animate-pulse" alt="">
-            <p class="mt-6 text-primary font-bold text-xs tracking-[0.5em] uppercase animate-pulse">Pagar Nusa</p>
-        </div>
-    </div>
-
-    <header class="sticky top-0 z-50 glass-effect shadow-sm py-3 px-4 transition-all duration-500">
-        <div class="max-w-xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3 animate-float">
-                <div class="bg-primary p-1.5 rounded-lg shadow-inner rotate-3 hover:rotate-0 transition-transform">
-                    <img src="logopn.png" alt="Logo PN" class="h-7 w-7">
-                </div>
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md py-4 px-5 border-b border-slate-100">
+        <div class="max-w-xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="logopn.png" alt="Logo" class="h-9 animate-float" onerror="this.src='https://via.placeholder.com/50x50?text=PN'">
                 <div>
-                    <h1 class="text-xs font-black text-primary leading-none tracking-tighter uppercase">PN UNUSIA</h1>
-                    <span class="text-[9px] font-medium text-slate-500 uppercase tracking-widest italic">UKT IV & HARLAH</span>
+                    <h1 class="text-[11px] font-black text-primary leading-none uppercase">PSNU PAGARNUSA UNUSIA</h1>
+                    <p class="text-[8px] text-slate-400 font-bold tracking-widest uppercase">UKT IV & HARLAH 2026</p>
                 </div>
             </div>
-            <button onclick="location.reload()" class="h-10 w-10 flex items-center justify-center rounded-2xl bg-white shadow-sm text-slate-500 hover:text-primary hover:rotate-180 transition-all duration-500">
-                <i class="fas fa-sync-alt text-sm"></i>
+            <button onclick="window.location.reload()" class="w-9 h-9 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center active:bg-slate-200 transition-colors">
+                <i class="fas fa-rotate-right text-xs"></i>
             </button>
         </div>
     </header>
 
-    <main class="max-w-xl mx-auto px-4 py-8 space-y-12">
-        
-        <section class="space-y-4" data-aos="fade-up">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-emerald-200 animate-bounce-slow">1</div>
-                <h2 class="font-bold text-slate-700 tracking-tight text-lg">Siapa Nama Anda?</h2>
+    <main class="flex-1 max-w-xl mx-auto w-full px-5 py-8 space-y-12 pb-20">
+        <section data-aos="fade-up">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold">1</span>
+                <h2 class="font-bold text-slate-800 text-lg">Atur Foto</h2>
             </div>
-            <div class="glass-effect rounded-[2rem] p-5 shadow-sm hover:shadow-md transition-shadow">
-                <div class="relative group">
-                    <i class="fas fa-signature absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors"></i>
-                    <input type="text" id="inputNama" oninput="updatePreviewName()" placeholder="Nama panggilan / lengkap..." 
-                        class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-50/50 border-2 border-transparent focus:border-primary/20 focus:bg-white outline-none transition-all text-sm font-semibold">
+            <div class="glass-card rounded-[2.5rem] p-4 space-y-6">
+                <div class="canvas-container" id="containerCanvas">
+                    <canvas id="twibbonCanvas" width="1080" height="1080"></canvas>
                 </div>
-            </div>
-        </section>
-
-        <section class="space-y-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-emerald-200">2</div>
-                <h2 class="font-bold text-slate-700 tracking-tight text-lg">Kreasikan Foto</h2>
-            </div>
-            
-            <div class="glass-effect rounded-[3rem] p-5 shadow-sm space-y-6">
-                <div class="canvas-container shadow-2xl overflow-hidden" id="targetCanvas">
-                    <canvas id="twibbonCanvas" width="1000" height="1000"></canvas>
-                </div>
-
-                <div class="px-2" data-aos="zoom-in">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i class="fas fa-eye animate-pulse text-primary"></i> Live Caption Preview
-                    </p>
-                    <div class="chat-bubble shadow-sm">
-                        <p id="liveName" class="text-[11px] leading-relaxed text-slate-600 italic">
-                            Salam Pagar Nusa! ♆ <br><br>
-                            Saya <b><< Nama anda >></b> siap mendukung Harlah & UKT IV...
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-4 gap-3">
-                    <label class="btn-animate col-span-4 flex items-center justify-center gap-3 bg-slate-900 text-white py-5 rounded-3xl font-bold text-sm cursor-pointer hover:bg-black shadow-xl">
-                        <i class="fas fa-cloud-upload-alt text-xl"></i>
-                        <span>UNGGAH FOTO TERBAIK</span>
+                <div class="grid grid-cols-4 gap-2">
+                    <label class="col-span-4 flex items-center justify-center gap-3 bg-slate-900 text-white py-5 rounded-3xl font-bold text-sm cursor-pointer shadow-xl mb-2 active:scale-95 transition-all">
+                        <i class="fas fa-camera text-lg"></i> PILIH FOTO
                         <input type="file" id="inputFoto" accept="image/*" class="hidden">
                     </label>
-                    
-                    <button onclick="changeZoom(1.1)" class="btn-animate bg-white h-14 rounded-2xl text-slate-600 shadow-sm flex items-center justify-center border border-slate-50 hover:text-primary"><i class="fas fa-plus"></i></button>
-                    <button onclick="changeZoom(0.9)" class="btn-animate bg-white h-14 rounded-2xl text-slate-600 shadow-sm flex items-center justify-center border border-slate-50 hover:text-primary"><i class="fas fa-minus"></i></button>
-                    <button onclick="rotateImg()" class="btn-animate bg-white h-14 rounded-2xl text-slate-600 shadow-sm flex items-center justify-center border border-slate-50 hover:text-primary"><i class="fas fa-sync-alt"></i></button>
-                    <button onclick="resetTransform()" class="btn-animate bg-red-50 h-14 rounded-2xl text-red-500 shadow-sm flex items-center justify-center border border-red-100 hover:bg-red-500 hover:text-white"><i class="fas fa-trash-alt"></i></button>
+                    <button onclick="changeZoom(1.1)" class="bg-white border-2 border-slate-50 h-14 rounded-2xl text-slate-600 active:bg-slate-100"><i class="fas fa-plus"></i></button>
+                    <button onclick="changeZoom(0.9)" class="bg-white border-2 border-slate-50 h-14 rounded-2xl text-slate-600 active:bg-slate-100"><i class="fas fa-minus"></i></button>
+                    <button onclick="rotateImg()" class="bg-white border-2 border-slate-50 h-14 rounded-2xl text-slate-600 active:bg-slate-100"><i class="fas fa-sync-alt"></i></button>
+                    <button onclick="resetTransform()" class="bg-red-50 h-14 rounded-2xl text-red-500 active:bg-red-100"><i class="fas fa-trash-can"></i></button>
                 </div>
             </div>
         </section>
 
-        <section class="space-y-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-emerald-200">3</div>
-                <h2 class="font-bold text-slate-700 tracking-tight text-lg">Bagikan Karya</h2>
+        <section id="sectionNama" class="step-locked" data-aos="fade-up">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold">2</span>
+                <h2 class="font-bold text-slate-800 text-lg">Masukkan Nama</h2>
             </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button id="downloadBtn" disabled onclick="downloadImage()" class="btn-animate flex flex-col items-center justify-center gap-2 bg-primary text-white py-6 rounded-[2rem] font-bold shadow-xl shadow-emerald-100 disabled:opacity-50 disabled:grayscale group">
-                    <div class="relative">
-                        <i class="fas fa-download text-2xl"></i>
-                        <span class="absolute -top-1 -right-1 flex h-3 w-3">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
-                        </span>
-                    </div>
-                    <span class="text-xs tracking-widest">SIMPAN GAMBAR</span>
-                </button>
-
-                <button id="waBtn" onclick="shareToWhatsApp()" class="btn-animate flex flex-col items-center justify-center gap-2 bg-whatsapp text-white py-6 rounded-[2rem] font-bold shadow-xl shadow-green-100 group">
-                    <i class="fab fa-whatsapp text-3xl animate-bounce"></i>
-                    <span class="text-xs tracking-widest">POST KE STATUS</span>
-                </button>
+            <div class="glass-card rounded-[2rem] p-6">
+                <input type="text" id="inputNama" oninput="checkFlow()" placeholder="Nama lengkap Anda..." 
+                    class="w-full px-6 py-5 rounded-2xl bg-slate-50 border-2 border-transparent focus:border-primary/30 outline-none text-sm font-bold text-slate-700 uppercase">
             </div>
+        </section>
 
-            <div class="bg-blue-50 border border-blue-100 rounded-3xl p-5 flex gap-4 items-start" data-aos="flip-left">
-                <div class="bg-blue-500 p-2 rounded-xl">
-                    <i class="fas fa-lightbulb text-white text-sm"></i>
+        <section id="sectionCopy" class="step-locked" data-aos="fade-up">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold">3</span>
+                <h2 class="font-bold text-slate-800 text-lg">Salin Caption</h2>
+            </div>
+            <div class="glass-card rounded-[2rem] p-6 space-y-4">
+                <div id="previewText" class="p-4 bg-slate-50 rounded-xl text-[10px] text-slate-600 leading-relaxed border border-slate-100 whitespace-pre-line">
+                    Lengkapi langkah 1 & 2 untuk melihat caption...
                 </div>
-                <p class="text-[11px] text-blue-800 leading-relaxed">
-                    <b>Tip:</b> Teks status sudah tersalin otomatis saat tombol <b>Share</b> ditekan. Tinggal tempel (paste) di caption WhatsApp Anda!
-                </p>
+                <button onclick="copyCaption()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:bg-primary transition-all">
+                    <i class="fas fa-copy"></i>
+                    <span id="btnCopyText">SALIN TEKS</span>
+                </button>
             </div>
+        </section>
+
+        <section id="sectionDownload" class="step-locked" data-aos="fade-up">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center font-bold">4</span>
+                <h2 class="font-bold text-slate-800 text-lg">Unduh Hasil</h2>
+            </div>
+            <button onclick="downloadTwibbon()" class="w-full bg-primary text-white py-6 rounded-3xl font-bold shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all">
+                <i class="fas fa-download text-xl"></i>
+                <span>SIMPAN KE GALERI</span>
+            </button>
         </section>
     </main>
 
-    <footer class="py-12 px-4 text-center space-y-6" data-aos="fade-in">
-        <div class="flex justify-center items-center gap-6">
-            <div class="h-[1px] w-16 bg-gradient-to-r from-transparent to-slate-300"></div>
-            <img src="logopn.png" class="h-8 grayscale opacity-50 hover:grayscale-0 transition-all cursor-pointer" alt="">
-            <div class="h-[1px] w-16 bg-gradient-to-l from-transparent to-slate-300"></div>
-        </div>
-        <div class="space-y-1">
-            <p class="text-[10px] font-black text-primary tracking-[0.5em] uppercase">Lā gāliba illā billāh</p>
-            <p class="text-[9px] text-slate-400 font-medium tracking-tighter">Official Twibbon System © 2026 PN UNUSIA Jakarta</p>
-        </div>
+    <footer class="py-12 text-center opacity-30">
+        <p class="text-[9px] font-bold text-slate-500 tracking-[0.5em] uppercase">PSNU PAGARNUSA UNUSIA</p>
     </footer>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Inisialisasi AOS
-        AOS.init({
-            duration: 1000,
-            once: true,
-            easing: 'ease-out-back'
-        });
-
-        // Preloader Logic
-        window.addEventListener('load', () => {
-            const preloader = document.getElementById('preloader');
-            preloader.style.opacity = '0';
-            preloader.style.transform = 'translateY(-100%)';
-            setTimeout(() => preloader.style.display = 'none', 800);
-        });
+        AOS.init({ duration: 800, once: true });
 
         const canvas = document.getElementById('twibbonCanvas');
         const ctx = canvas.getContext('2d');
-        const inputFoto = document.getElementById('inputFoto');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const inputNama = document.getElementById('inputNama');
-        const liveName = document.getElementById('liveName');
-
+        
         const frameImg = new Image();
         frameImg.crossOrigin = "anonymous";
         frameImg.src = 'https://lh3.googleusercontent.com/d/1v2vvRNo6oFOoBOX-XAxBtkuvLIjfpk5k'; 
 
         let userImg = new Image();
         let imgLoaded = false;
-        let scale = 1, posX = 500, posY = 500, rotation = 0;
-        let isDragging = false, startX, startY;
+        let frameLoaded = false;
+        let scale = 1, posX = 540, posY = 540, rotation = 0;
 
-        frameImg.onload = () => draw();
+        frameImg.onload = () => {
+            frameLoaded = true;
+            draw();
+        };
 
-        function updatePreviewName() {
-            const val = inputNama.value.trim();
-            liveName.style.transform = "scale(1.05)";
-            setTimeout(() => liveName.style.transform = "scale(1)", 100);
+        frameImg.onerror = () => {
+            console.error("File template.png tidak ditemukan!");
+            ctx.fillStyle = "#1B7548";
+            ctx.fillRect(0, 0, 1080, 1080);
+            ctx.fillStyle = "white";
+            ctx.font = "bold 40px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("File template.png tidak ditemukan", 540, 540);
+        };
 
-            if(val) {
-                liveName.innerHTML = `Salam Pagar Nusa! ♆ <br><br>Saya <b>${val}</b> siap mendukung Harlah & UKT IV...`;
-            } else {
-                liveName.innerHTML = `Salam Pagar Nusa! ♆ <br><br>Saya <b><< Nama anda >></b> siap mendukung Harlah & UKT IV...`;
-            }
-        }
-
-        inputFoto.onchange = (e) => {
+        document.getElementById('inputFoto').onchange = (e) => {
             if (!e.target.files[0]) return;
             const reader = new FileReader();
             reader.onload = (event) => {
                 userImg.onload = () => {
                     imgLoaded = true;
-                    downloadBtn.disabled = false;
+                    document.getElementById('sectionNama').classList.replace('step-locked', 'step-unlocked');
                     resetTransform();
-                    // Smooth scroll ke canvas
-                    document.getElementById('targetCanvas').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    checkFlow();
                 };
                 userImg.src = event.target.result;
             };
             reader.readAsDataURL(e.target.files[0]);
         };
 
+        function checkFlow() {
+            const nama = document.getElementById('inputNama').value.trim();
+            const isValid = imgLoaded && nama.length >= 3;
+            
+            ['sectionDownload', 'sectionCopy'].forEach(id => {
+                const el = document.getElementById(id);
+                if (isValid) {
+                    el.classList.replace('step-locked', 'step-unlocked');
+                } else {
+                    el.classList.replace('step-unlocked', 'step-locked');
+                }
+            });
+
+            if (isValid) updateCaptionPreview(nama);
+        }
+
+        function updateCaptionPreview(nama) {
+            const caption = `Salam Pagar Nusa! ♆\n\nSaya *${nama.toUpperCase()}* siap mensukseskan UKT IV & HARLAH 2026 PSNU PAGARNUSA UNUSIA.\n\nLā gāliba illā billāh! 🛡️\n\nBuat foto kamu di sini: ${window.location.href}`;
+            document.getElementById('previewText').innerText = caption;
+        }
+
         function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, 1080, 1080);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, 1080, 1080);
+            
             if (imgLoaded) {
                 ctx.save();
                 ctx.translate(posX, posY);
                 ctx.rotate(rotation * Math.PI / 180);
-                const w = userImg.width * scale;
-                const h = userImg.height * scale;
-                ctx.drawImage(userImg, -w / 2, -h / 2, w, h);
+                ctx.drawImage(userImg, -(userImg.width * scale) / 2, -(userImg.height * scale) / 2, userImg.width * scale, userImg.height * scale);
                 ctx.restore();
             }
-            ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+            
+            if (frameLoaded) {
+                ctx.drawImage(frameImg, 0, 0, 1080, 1080);
+            }
         }
 
-        // Tools
         function changeZoom(factor) { if (imgLoaded) { scale *= factor; draw(); } }
         function rotateImg() { if (imgLoaded) { rotation += 90; draw(); } }
         function resetTransform() {
             if (!imgLoaded) return;
-            scale = Math.max(canvas.width / userImg.width, canvas.height / userImg.height);
-            posX = 500; posY = 500; rotation = 0;
+            scale = Math.max(1080 / userImg.width, 1080 / userImg.height);
+            posX = 540; posY = 540; rotation = 0;
             draw();
         }
 
-        // Mouse/Touch Interaction
-        const getPos = (e) => ({ x: e.touches ? e.touches[0].clientX : e.clientX, y: e.touches ? e.touches[0].clientY : e.clientY });
-        const startDrag = (e) => { if (imgLoaded) { isDragging = true; const p = getPos(e); startX = p.x; startY = p.y; } };
-        const moveDrag = (e) => {
-            if (!isDragging) return;
-            if (e.cancelable) e.preventDefault();
-            const p = getPos(e);
-            posX += (p.x - startX) * (canvas.width / canvas.offsetWidth);
-            posY += (p.y - startY) * (canvas.height / canvas.offsetHeight);
-            startX = p.x; startY = p.y;
+        const mc = new Hammer.Manager(canvas);
+        mc.add(new Hammer.Pinch());
+        mc.add(new Hammer.Pan());
+
+        let lastScale = 1;
+        mc.on("pinchstart", () => { lastScale = scale; });
+        mc.on("pinchmove", (e) => { scale = lastScale * e.scale; draw(); });
+
+        let lastPosX, lastPosY;
+        mc.on("panstart", () => { lastPosX = posX; lastPosY = posY; });
+        mc.on("panmove", (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const ratio = 1080 / rect.width;
+            posX = lastPosX + (e.deltaX * ratio);
+            posY = lastPosY + (e.deltaY * ratio);
             draw();
-        };
+        });
 
-        canvas.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', moveDrag);
-        window.addEventListener('mouseup', () => isDragging = false);
-        canvas.addEventListener('touchstart', startDrag);
-        window.addEventListener('touchmove', moveDrag, { passive: false });
-        window.addEventListener('touchend', () => isDragging = false);
-
-        function downloadImage() {
+        function downloadTwibbon() {
+            const nama = document.getElementById('inputNama').value.trim().toUpperCase() || 'PAGAR_NUSA';
             const link = document.createElement('a');
-            const safeName = inputNama.value.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            link.download = `Twibbon_PN_UKT_${safeName || 'Peserta'}.png`;
+            link.download = `Twibbon_PN_${nama}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         }
 
-        async function shareToWhatsApp() {
-            const nama = inputNama.value.trim() || "<<Nama anda disini>>";
-            const pesan = `Salam Pagar Nusa! ♆ 
-
-Saya *${nama}* siap mendukung dan mensukseskan Harlah & Ujian Kenaikan Tingkat (UKT) IV yang diselenggarakan oleh PSNU PAGARNUSA UNUSIA.
-
-Momentum ini bukan sekadar ujian fisik, melainkan ajang memperkuat mental, spiritual, dan loyalitas kita terhadap organisasi di bawah naungan Nahdlatul Ulama. Mari bersama-sama melestarikan budaya bangsa dan menjaga marwah ulama.
-
-Lā gāliba illā billāh! 🛡️
-
-Buat twibbon kamu di sini: ${window.location.href}`;
-
+        async function copyCaption() {
+            const caption = document.getElementById('previewText').innerText;
+            const btnText = document.getElementById('btnCopyText');
             try {
-                await navigator.clipboard.writeText(pesan);
-            } catch (err) {}
-
-            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(pesan)}`, '_blank');
+                await navigator.clipboard.writeText(caption);
+                btnText.innerText = "BERHASIL DISALIN!";
+                setTimeout(() => { btnText.innerText = "SALIN TEKS"; }, 2000);
+            } catch (err) {
+                alert("Gagal menyalin. Silakan tekan lama teks di atas untuk menyalin manual.");
+            }
         }
     </script>
 </body>
