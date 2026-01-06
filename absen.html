@@ -3,190 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scanner UKT Final</title>
+    <title>Scanner UKT | Pagar Nusa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        :root {
-            --primary: #00d2ff;
-            --success: #00ff88;
-            --dark-bg: #0a0a0b;
-            --glass: rgba(255, 255, 255, 0.1);
-            --pn-green: #166534;
-        }
-
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: var(--dark-bg);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            color: white; overflow: hidden;
-        }
-
-        .app-container { display: flex; flex-direction: column; height: 100vh; }
-        #reader { flex: 1; width: 100% !important; background: #000; }
-
-        .header {
-            position: absolute; top: 0; width: 100%;
-            padding: 40px 0 20px; text-align: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            z-index: 10;
-        }
-        .header h1 { margin: 0; font-size: 20px; letter-spacing: 2px; color: var(--primary); }
-        .header p { margin: 5px 0 0; font-size: 11px; opacity: 0.6; }
-
-        .scan-region {
-            position: absolute; top: 40%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 260px; height: 260px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 40px; pointer-events: none; z-index: 5;
-        }
-        .scan-region::after {
-            content: ''; position: absolute; inset: -2px;
-            border: 2px solid var(--primary); border-radius: 40px;
-            animation: pulse 2s infinite;
-        }
-
-        .bottom-panel {
-            background: #16161a; padding: 20px;
-            border-radius: 30px 30px 0 0; max-height: 45%;
-            z-index: 11; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-        }
-
-        #feedback {
-            padding: 15px; border-radius: 15px; text-align: center;
-            font-weight: bold; margin-bottom: 15px; font-size: 14px;
-            background: rgba(255,255,255,0.05); color: #888;
-        }
-
-        .bg-success { background: #064e3b !important; color: var(--success) !important; border: 1px solid var(--success); }
-        .bg-loading { background: var(--primary) !important; color: white !important; }
-
-        /* Popup / Modal Style */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            display: none; align-items: center; justify-content: center; z-index: 100;
-            backdrop-filter: blur(5px);
-        }
-        .modal-content {
-            background: white; color: #333; width: 85%; max-width: 350px;
-            padding: 25px; border-radius: 25px; text-align: center;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal-content h2 { color: var(--pn-green); margin: 0 0 15px; font-size: 20px; }
-        .modal-info { background: #f8fafc; padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 20px; }
-        .modal-info div { margin-bottom: 8px; font-size: 13px; }
-        .modal-info label { display: block; font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase; }
-        .btn-close {
-            background: var(--pn-green); color: white; border: none;
-            padding: 12px 30px; border-radius: 12px; font-weight: bold; width: 100%;
-        }
-
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        body { background-color: #000; overflow: hidden; font-family: sans-serif; }
+        #reader { width: 100vw; height: 100vh; }
+        #reader video { object-fit: cover !important; }
         
-        .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .log-name { font-weight: 600; flex: 1; margin-left: 12px; font-size: 13px; }
-        .log-time { font-size: 11px; color: #666; }
+        .overlay-top {
+            position: fixed; top: 0; width: 100%; z-index: 10;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            padding: 40px 0 20px; text-align: center;
+        }
+
+        /* Modal / Popup */
+        #modalAbsen {
+            display: none; position: fixed; inset: 0; 
+            background: rgba(0,0,0,0.9); z-index: 100;
+            align-items: center; justify-content: center; backdrop-filter: blur(8px);
+        }
+        .modal-card {
+            background: white; width: 85%; max-width: 340px;
+            border-radius: 24px; padding: 30px; text-align: center;
+            border-top: 6px solid #166534;
+        }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header">
-        <h1>PANITIA UKT</h1>
-        <p>SCAN ID CARD PESERTA</p>
+    <div class="overlay-top">
+        <h1 class="text-[10px] font-bold tracking-[0.3em] text-slate-300 uppercase">Sistem Absensi UKT</h1>
+        <p class="text-emerald-500 font-bold text-sm tracking-widest uppercase mt-1">Pagarnusa UNUSIA</p>
+        <div id="status-text" class="mt-4 text-[10px] text-white/50 animate-pulse">SIAP MEMINDAI...</div>
     </div>
 
     <div id="reader"></div>
-    <div class="scan-region"></div>
 
-    <div class="bottom-panel">
-        <div id="feedback">SIAP MEMINDAI...</div>
-        <div id="logItems" class="log-list"></div>
-    </div>
-</div>
+    <div id="modalAbsen">
+        <div class="modal-card shadow-2xl">
+            <div class="text-5xl mb-4">✅</div>
+            <h2 class="text-xl font-bold text-slate-800 mb-4">Absen Berhasil</h2>
+            
+            <div class="bg-slate-50 rounded-xl p-4 text-left space-y-3 mb-6">
+                <div>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nama Peserta</p>
+                    <p id="pop-nama" class="text-sm font-bold text-slate-700 uppercase">---</p>
+                </div>
+                <div class="flex justify-between border-t border-slate-200 pt-3">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Strip</p>
+                        <p id="pop-strip" class="text-xs font-bold text-emerald-700 italic">---</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Waktu</p>
+                        <p id="pop-waktu" class="text-xs font-bold text-slate-600">---</p>
+                    </div>
+                </div>
+            </div>
 
-<div id="modalAbsen" class="modal-overlay">
-    <div class="modal-content">
-        <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
-        <h2>Absen Berhasil</h2>
-        <div class="modal-info">
-            <div><label>Nama Peserta</label><strong id="pop-nama">-</strong></div>
-            <div><label>Tingkatan / Strip</label><strong id="pop-strip">-</strong></div>
-            <div><label>Waktu</label><strong id="pop-waktu">-</strong></div>
+            <button onclick="closeModal()" class="w-full bg-[#166534] hover:bg-[#064e3b] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">
+                OK, Lanjut Scan
+            </button>
         </div>
-        <button class="btn-close" onclick="closeModal()">OK, LANJUT SCAN</button>
     </div>
-</div>
 
-<script>
-    let scanning = false;
+    <script>
+        let isProcessing = false;
+        const html5QrCode = new Html5Qrcode("reader");
 
-    function onScanSuccess(decodedText) {
-        if (scanning) return;
-        scanning = true;
+        function onScanSuccess(decodedText) {
+            if (isProcessing) return;
+            isProcessing = true;
 
-        const feedback = document.getElementById('feedback');
-        feedback.innerText = "⌛ MENGIRIM DATA...";
-        feedback.className = "bg-loading";
+            document.getElementById('status-text').innerText = "⌛ MENGIRIM KE DATABASE...";
 
-        if (navigator.vibrate) navigator.vibrate(100);
+            if (navigator.vibrate) navigator.vibrate(100);
 
-        google.script.run
-            .withSuccessHandler(function(res) {
-                if (res.status === "success") {
-                    feedback.innerText = res.msg;
-                    feedback.className = "bg-success";
-                    
-                    // Tampilkan Popup
-                    showModal(res.nama, res.strip, res.jam);
-                    updateLog(res.nama, res.jam, res.strip);
-                } else {
-                    feedback.innerText = res.msg;
-                    feedback.className = "";
-                    scanning = false;
-                }
-            })
-            .withFailureHandler(function(err) {
-                feedback.innerText = "GAGAL TERHUBUNG";
-                feedback.className = "";
-                scanning = false;
-            })
-            .prosesAbsen(decodedText);
-    }
-
-    function showModal(nama, strip, waktu) {
-        document.getElementById('pop-nama').innerText = nama;
-        document.getElementById('pop-strip').innerText = strip;
-        document.getElementById('pop-waktu').innerText = waktu + " WIB";
-        document.getElementById('modalAbsen').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('modalAbsen').style.display = 'none';
-        const feedback = document.getElementById('feedback');
-        feedback.innerText = "SIAP MEMINDAI...";
-        feedback.className = "";
-        scanning = false; // Izinkan scan lagi setelah modal ditutup
-    }
-
-    function updateLog(nama, jam, strip) {
-        const list = document.getElementById('logItems');
-        const item = document.createElement('div');
-        item.className = 'log-item';
-        item.innerHTML = `<span class="log-time">${jam}</span><span class="log-name">${nama}</span><span style="font-size:10px; color:var(--primary)">${strip}</span>`;
-        list.insertBefore(item, list.firstChild);
-        if (list.children.length > 3) list.lastChild.remove();
-    }
-
-    const html5QrCode = new Html5Qrcode("reader");
-    Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length > 0) {
-            let backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
-            html5QrCode.start(backCamera.id, { fps: 20, qrbox: 250 }, onScanSuccess);
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    if (res.status === "success") {
+                        showModal(res.nama, res.strip, res.jam);
+                    } else {
+                        alert("ERROR: " + res.msg);
+                        resetScanner();
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    alert("GAGAL TERHUBUNG KE SERVER: " + err);
+                    resetScanner();
+                })
+                .prosesAbsen(decodedText);
         }
-    });
-</script>
 
+        function showModal(nama, strip, waktu) {
+            document.getElementById('pop-nama').innerText = nama;
+            document.getElementById('pop-strip').innerText = strip;
+            document.getElementById('pop-waktu').innerText = waktu + " WIB";
+            document.getElementById('modalAbsen').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalAbsen').style.display = 'none';
+            resetScanner();
+        }
+
+        function resetScanner() {
+            document.getElementById('status-text').innerText = "SIAP MEMINDAI...";
+            isProcessing = false;
+        }
+
+        Html5Qrcode.getCameras().then(cameras => {
+            if (cameras && cameras.length > 0) {
+                // Gunakan kamera belakang (biasanya urutan terakhir)
+                const backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
+                html5QrCode.start(backCamera.id, { fps: 20, qrbox: 250 }, onScanSuccess);
+            }
+        }).catch(err => {
+            alert("Kamera tidak ditemukan atau izin ditolak.");
+        });
+    </script>
 </body>
 </html>
