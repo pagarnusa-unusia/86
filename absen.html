@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Scanner UKT Final</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --primary: #00d2ff;
+            --success: #00ff88;
+            --dark-bg: #0a0a0b;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--dark-bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: white; overflow: hidden;
+        }
+
+        .app-container {
+            display: flex; flex-direction: column; height: 100vh;
+        }
+
+        /* Scanner Area */
+        #reader {
+            flex: 1;
+            width: 100% !important;
+            background: #000;
+        }
+
+        /* Overlay UI */
+        .header {
+            position: absolute; top: 0; width: 100%;
+            padding: 40px 0 20px; text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 10;
+        }
+
+        .header h1 { margin: 0; font-size: 20px; letter-spacing: 2px; color: var(--primary); }
+        .header p { margin: 5px 0 0; font-size: 11px; opacity: 0.6; }
+
+        /* Focus Square */
+        .scan-region {
+            position: absolute; top: 40%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 260px; height: 260px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 40px; pointer-events: none; z-index: 5;
+        }
+        .scan-region::after {
+            content: ''; position: absolute; inset: -2px;
+            border: 2px solid var(--primary); border-radius: 40px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Result & Log Panel */
+        .bottom-panel {
+            background: #16161a;
+            padding: 20px;
+            border-radius: 30px 30px 0 0;
+            max-height: 45%;
+            z-index: 11;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+
+        #feedback {
+            padding: 15px; border-radius: 15px;
+            text-align: center; font-weight: bold; margin-bottom: 15px;
+            font-size: 14px; transition: 0.3s;
+            background: rgba(255,255,255,0.05); color: #888;
+        }
+
+        .bg-success { background: #064e3b !important; color: var(--success) !important; border: 1px solid var(--success); }
+        .bg-loading { background: var(--primary) !important; color: white !important; }
+
+        .log-list { margin-top: 10px; }
+        .log-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            animation: slideUp 0.4s ease;
+        }
+        .log-name { font-weight: 600; flex: 1; margin-left: 12px; }
+        .log-time { font-size: 12px; color: #666; }
+        .log-strip { 
+            font-size: 10px; padding: 2px 8px; border-radius: 5px;
+            border: 1px solid var(--primary); color: var(--primary);
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>PANITIA UKT</h1>
+        <p>SCAN ID CARD PESERTA</p>
+    </div>
+
+    <div id="reader"></div>
+    <div class="scan-region"></div>
+
+    <div class="bottom-panel">
+        <div id="feedback">SIAP MEMINDAI...</div>
+        <div class="log-list" id="logItems">
+            </div>
+    </div>
+</div>
+
+<script>
+    let scanning = false;
+
+    function onScanSuccess(decodedText) {
+        if (scanning) return;
+        scanning = true;
+
+        const feedback = document.getElementById('feedback');
+        feedback.innerText = "⌛ MENGIRIM DATA...";
+        feedback.className = "bg-loading";
+
+        if (navigator.vibrate) navigator.vibrate(100);
+
+        google.script.run
+            .withSuccessHandler(function(res) {
+                if (res.status === "success") {
+                    feedback.innerText = res.msg;
+                    feedback.className = "bg-success";
+                    updateLog(res.nama, res.jam, res.strip);
+                } else {
+                    feedback.innerText = res.msg;
+                    feedback.className = "";
+                }
+                
+                setTimeout(() => {
+                    feedback.innerText = "SIAP MEMINDAI...";
+                    feedback.className = "";
+                    scanning = false;
+                }, 3000);
+            })
+            .prosesAbsen(decodedText);
+    }
+
+    function updateLog(nama, jam, strip) {
+        const list = document.getElementById('logItems');
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.innerHTML = `
+            <span class="log-time">${jam}</span>
+            <span class="log-name">${nama}</span>
+            <span class="log-strip">${strip}</span>
+        `;
+        list.insertBefore(item, list.firstChild);
+        if (list.children.length > 4) list.lastChild.remove();
+    }
+
+    // Inisialisasi Kamera Belakang Otomatis
+    const html5QrCode = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length > 0) {
+            let backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
+            html5QrCode.start(
+                backCamera.id, 
+                { fps: 20, qrbox: 250 }, 
+                onScanSuccess
+            );
+        }
+    }).catch(err => {
+        document.getElementById('feedback').innerText = "❌ AKSES KAMERA DITOLAK";
+    });
+</script>
+
+</body>
+</html>
