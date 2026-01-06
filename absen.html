@@ -3,141 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scanner Pagar Nusa Pro - Final</title>
+    <title>Scanner Pagar Nusa Pro - Auto Mode</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --pn-green: #166534; }
-        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; }
+        body { background-color: #f9fafb; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
+        /* Container Scanner Persegi */
         #reader { 
             border: none !important; 
-            border-radius: 1.5rem; 
+            border-radius: 2rem; 
             overflow: hidden;
             aspect-ratio: 1 / 1; 
             background: #000;
             position: relative;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
 
-        /* PERBAIKAN: Memaksa video menutupi seluruh area persegi tanpa kotak hitam */
+        /* Menghilangkan Kotak Hitam: Memaksa video kamera menutupi seluruh area persegi */
         #reader video {
             object-fit: cover !important;
             width: 100% !important;
             height: 100% !important;
         }
 
-        /* Menyembunyikan elemen teks bawaan library */
+        /* Efek Flash saat Scan Berhasil */
+        @keyframes scan-flash {
+            0% { background-color: rgba(255, 255, 255, 0.9); }
+            100% { background-color: transparent; }
+        }
+        .flash-effect {
+            animation: scan-flash 0.4s ease-out;
+        }
+
+        /* Sembunyikan elemen sampah library */
         #reader__dashboard_section_csr span, 
-        #reader__status_span {
+        #reader__status_span,
+        #reader__dashboard_section_fsr {
             display: none !important;
         }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .nav-item.active { color: #166534; border-top: 2px solid #166534; }
+        .nav-item.active { color: #166534; border-top: 3px solid #166534; background: #f0fdf4; }
         .rotate-btn:active i { transform: rotate(180deg); transition: 0.3s; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen pb-20">
+<body class="flex flex-col min-h-screen pb-24">
 
-    <header class="bg-[#166534] text-white p-5 text-center shadow-lg sticky top-0 z-40">
-        <h1 class="text-xs font-black tracking-[0.2em] uppercase">Digital Attendance System</h1>
-        <p class="text-[9px] opacity-70 uppercase mt-1">Pagar Nusa UNUSIA</p>
+    <header class="bg-[#166534] text-white p-6 text-center shadow-lg sticky top-0 z-40">
+        <h1 class="text-xs font-black tracking-[0.3em] uppercase">Digital Attendance System</h1>
+        <p class="text-[9px] opacity-70 uppercase mt-1">Pagar Nusa UNUSIA - Auto Scan Mode</p>
     </header>
 
     <main id="scan-page" class="tab-content active p-6 flex flex-col items-center">
-        <div class="w-full max-w-sm bg-white rounded-[2.5rem] shadow-xl p-4 mb-6 border border-gray-100 relative">
-            <button onclick="switchCamera()" class="absolute top-8 right-8 z-10 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg text-[#166534] rotate-btn hover:bg-white active:scale-90 transition-all border border-gray-100">
-                <i class="fas fa-camera-rotate text-lg"></i>
+        <div class="w-full max-w-sm bg-white rounded-[3rem] p-4 mb-6 border border-gray-100 relative">
+            
+            <button onclick="switchCamera()" class="absolute top-8 right-8 z-30 bg-white/90 backdrop-blur-md p-4 rounded-full shadow-xl text-[#166534] rotate-btn hover:bg-white active:scale-90 transition-all">
+                <i class="fas fa-camera-rotate text-xl"></i>
             </button>
 
             <div id="reader" class="bg-black"></div>
             
-            <div id="status-info" class="mt-4 text-center py-3 px-4 bg-gray-50 rounded-2xl text-[10px] font-black text-gray-400 uppercase tracking-widest transition-all">
-                Siap Memindai QR...
+            <div id="status-info" class="mt-6 text-center py-4 px-6 bg-gray-50 rounded-2xl text-[11px] font-black text-gray-400 uppercase tracking-widest transition-all">
+                Mencari Kode QR...
             </div>
         </div>
         
-        <div class="bg-emerald-50 p-4 rounded-2xl w-full max-w-sm border border-emerald-100">
-            <h3 class="text-[10px] font-bold text-emerald-800 uppercase mb-2">Sistem Validasi:</h3>
-            <p class="text-[11px] text-emerald-700 leading-relaxed text-justify">
-                Aplikasi akan menolak secara otomatis jika ID yang sama dipindai lebih dari satu kali dalam satu sesi.
+        <div class="bg-blue-50 p-4 rounded-2xl w-full max-w-sm border border-blue-100 flex items-start gap-3">
+            <i class="fas fa-info-circle mt-1 text-blue-600"></i>
+            <p class="text-[11px] text-blue-700 leading-relaxed font-medium">
+                <b>Mode Otomatis Aktif:</b> Cukup arahkan kamera ke QR. Sistem akan langsung mencatat tanpa perlu menekan tombol konfirmasi.
             </p>
         </div>
     </main>
 
     <main id="history-page" class="tab-content p-6">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="font-black text-gray-800 tracking-tight text-xl text-center">RIWAYAT SCAN</h2>
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="font-black text-gray-800 tracking-tight text-xl uppercase">Riwayat Scan</h2>
             <div class="flex gap-2">
-                <button onclick="downloadCSV()" class="p-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">
-                    <i class="fas fa-file-export"></i> CSV
+                <button onclick="downloadCSV()" class="p-2 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold shadow-sm">
+                    <i class="fas fa-file-export mr-1"></i> CSV
                 </button>
-                <button onclick="clearAllHistory()" class="p-2 bg-red-100 text-red-700 rounded-lg text-xs font-bold">
-                    <i class="fas fa-trash"></i> Reset
+                <button onclick="clearAllHistory()" class="p-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100">
+                    <i class="fas fa-trash"></i>
                 </button>
             </div>
         </div>
-        <div id="history-list" class="space-y-3"></div>
+        <div id="history-list" class="space-y-4"></div>
     </main>
-
-    <div id="modalAbsen" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-6 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-xs rounded-[2.5rem] overflow-hidden shadow-2xl transition-all">
-            <div class="bg-emerald-600 py-8 text-center text-white">
-                <div class="text-5xl mb-2">🎉</div>
-                <h2 class="text-lg font-black tracking-widest uppercase">Berhasil Absen</h2>
-            </div>
-            <div class="p-8 space-y-4">
-                <div>
-                    <span class="text-[9px] font-bold text-gray-400 uppercase">Nama Peserta</span>
-                    <p id="pop-nama" class="font-bold text-gray-800 text-lg uppercase leading-tight">---</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <span class="text-[9px] font-bold text-gray-400 uppercase">Kategori</span>
-                        <p id="pop-strip" class="font-bold text-emerald-700 uppercase">---</p>
-                    </div>
-                    <div>
-                        <span class="text-[9px] font-bold text-gray-400 uppercase">Waktu</span>
-                        <p id="pop-waktu" class="font-bold text-gray-500 italic font-mono">---</p>
-                    </div>
-                </div>
-            </div>
-            <div class="px-6 pb-6 text-center">
-                <button onclick="closeModal()" class="w-full bg-gray-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">
-                    OK, LANJUTKAN
-                </button>
-            </div>
-        </div>
-    </div>
 
     <div id="modalWarning" class="fixed inset-0 bg-black/80 z-[60] hidden items-center justify-center p-6 backdrop-blur-md">
         <div class="bg-white w-full max-w-xs rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-orange-400">
-            <div class="bg-orange-50 py-8 text-center">
-                <div class="text-6xl mb-2">⚠️</div>
-                <h2 class="text-lg font-black text-orange-700 tracking-widest uppercase">Gagal!</h2>
+            <div class="bg-orange-50 py-10 text-center">
+                <div class="text-6xl mb-4 animate-bounce">⚠️</div>
+                <h2 class="text-lg font-black text-orange-700 tracking-widest uppercase">SUDAH ABSEN!</h2>
             </div>
             <div class="p-8 text-center">
-                <p class="text-gray-500 text-xs font-bold uppercase mb-2">Sistem Mendeteksi:</p>
-                <h3 class="text-lg font-black text-gray-800 leading-tight">SUDAH DIABSEN SEBELUMNYA</h3>
+                <p class="text-gray-500 text-[10px] font-bold uppercase mb-2">Sistem Mendeteksi:</p>
+                <h3 id="warn-name" class="text-lg font-black text-gray-800 leading-tight uppercase">DUPLIKAT DATA</h3>
             </div>
             <div class="px-6 pb-6">
                 <button onclick="closeWarning()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all shadow-lg">
-                    TUTUP
+                    LANJUTKAN SCAN
                 </button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-        <button onclick="switchTab('scan')" id="nav-scan" class="nav-item active flex flex-col items-center justify-center w-full h-full text-gray-400">
-            <i class="fas fa-qrcode text-lg"></i>
-            <span class="text-[9px] font-bold mt-1 uppercase">Scanner</span>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t border-gray-100 flex justify-around items-center h-20 z-40">
+        <button onclick="switchTab('scan')" id="nav-scan" class="nav-item active flex flex-col items-center justify-center w-full h-full text-gray-400 transition-all">
+            <i class="fas fa-qrcode text-xl"></i>
+            <span class="text-[10px] font-bold mt-1 uppercase">Scanner</span>
         </button>
-        <button onclick="switchTab('history')" id="nav-history" class="nav-item flex flex-col items-center justify-center w-full h-full text-gray-400">
-            <i class="fas fa-history text-lg"></i>
-            <span class="text-[9px] font-bold mt-1 uppercase">Riwayat</span>
+        <button onclick="switchTab('history')" id="nav-history" class="nav-item flex flex-col items-center justify-center w-full h-full text-gray-400 transition-all">
+            <i class="fas fa-history text-xl"></i>
+            <span class="text-[10px] font-bold mt-1 uppercase">Riwayat</span>
         </button>
     </nav>
 
@@ -149,9 +132,8 @@
         let currentFacingMode = "environment";
 
         function startCamera() {
-            // PERBAIKAN: Menambahkan videoConstraints agar browser lebih patuh pada rasio 1:1
             const config = { 
-                fps: 20, 
+                fps: 25, 
                 qrbox: { width: 250, height: 250 }, 
                 aspectRatio: 1.0,
                 videoConstraints: {
@@ -180,36 +162,48 @@
 
             const parts = decodedText.split('|');
             const scId = parts[0] || 'N/A';
+            const scNama = parts[1] || 'Peserta';
             
-            const isExist = historyData.some(item => item.id === scId);
-            
-            if (isExist) {
-                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            // 1. Cek Duplikat
+            if (historyData.some(item => item.id === scId)) {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+                document.getElementById('warn-name').innerText = scNama;
                 showWarning();
                 return;
             }
 
-            updateStatus("⌛ MENGIRIM...", "bg-orange-50 text-orange-600");
+            // 2. Scan Berhasil (Otomatis)
             if (navigator.vibrate) navigator.vibrate(100);
+            
+            // Efek Flash visual
+            const readerElem = document.getElementById('reader');
+            readerElem.classList.add('flash-effect');
+            setTimeout(() => readerElem.classList.remove('flash-effect'), 400);
+
+            updateStatus("✅ BERHASIL DICATAT", "bg-emerald-500 text-white shadow-lg shadow-emerald-200");
 
             const dataObj = {
                 id: scId,
-                nama: parts[1] || 'Peserta',
+                nama: scNama,
                 strip: parts[2] || '-',
                 waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB",
                 tanggal: new Date().toLocaleDateString('id-ID')
             };
 
+            // Simpan Ke Riwayat Lokal
+            saveToHistory(dataObj);
+
+            // Kirim ke Server Google (No-Cors)
             fetch(SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
                 body: JSON.stringify({ data: decodedText })
             }).then(() => {
-                saveToHistory(dataObj);
-                showModal(dataObj.nama, dataObj.strip, dataObj.waktu);
-            }).catch(err => {
-                alert("Koneksi Error");
-                resetScanner();
+                // Jeda 1.5 detik agar scanner tidak terlalu liar menangkap QR yang sama
+                setTimeout(() => resetScanner(), 1500); 
+            }).catch(() => {
+                updateStatus("⚠️ ERROR KONEKSI", "bg-red-500 text-white");
+                setTimeout(() => resetScanner(), 2000);
             });
         }
 
@@ -222,24 +216,26 @@
         function renderHistory() {
             const container = document.getElementById('history-list');
             if (historyData.length === 0) {
-                container.innerHTML = '<div class="text-center py-10 opacity-30 italic text-sm text-gray-500 uppercase font-bold tracking-widest">Belum ada data</div>';
+                container.innerHTML = '<div class="text-center py-20 opacity-20 italic text-sm font-black tracking-widest uppercase">Kosong</div>';
                 return;
             }
             container.innerHTML = historyData.map((item, index) => `
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                <div class="bg-white p-5 rounded-[1.5rem] shadow-sm border border-gray-100 flex items-center justify-between animate-fade-in">
                     <div>
-                        <h4 class="font-bold text-gray-800 text-sm uppercase">${item.nama}</h4>
-                        <p class="text-[10px] text-gray-400 font-bold">ID: ${item.id} • ${item.waktu}</p>
+                        <h4 class="font-black text-gray-800 text-[13px] uppercase tracking-tight">${item.nama}</h4>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">
+                            <span class="text-[#166534]">ID: ${item.id}</span> • ${item.waktu}
+                        </p>
                     </div>
-                    <button onclick="deleteHistoryItem(${index})" class="text-gray-300 hover:text-red-500 p-2">
-                        <i class="fas fa-times-circle"></i>
+                    <button onclick="deleteHistoryItem(${index})" class="text-gray-200 hover:text-red-400 p-2 transition-colors">
+                        <i class="fas fa-circle-xmark text-xl"></i>
                     </button>
                 </div>
             `).join('');
         }
 
         function deleteHistoryItem(index) {
-            if(confirm('Hapus data ini?')) {
+            if(confirm('Hapus riwayat ini?')) {
                 historyData.splice(index, 1);
                 localStorage.setItem('attendance_history', JSON.stringify(historyData));
                 renderHistory();
@@ -247,7 +243,7 @@
         }
 
         function clearAllHistory() {
-            if(confirm('Hapus semua riwayat?')) {
+            if(confirm('Hapus SEMUA riwayat secara permanen?')) {
                 historyData = [];
                 localStorage.removeItem('attendance_history');
                 renderHistory();
@@ -255,12 +251,12 @@
         }
 
         function downloadCSV() {
-            if (historyData.length === 0) return alert("Kosong");
-            let csvContent = "data:text/csv;charset=utf-8,ID,Nama,Strip,Waktu,Tanggal\n";
+            if (historyData.length === 0) return alert("Riwayat kosong.");
+            let csvContent = "data:text/csv;charset=utf-8,ID,Nama,Kategori,Waktu,Tanggal\n";
             historyData.forEach(row => { csvContent += `${row.id},${row.nama},${row.strip},${row.waktu},${row.tanggal}\n`; });
             const link = document.createElement("a");
             link.setAttribute("href", encodeURI(csvContent));
-            link.setAttribute("download", "Absensi_PN.csv");
+            link.setAttribute("download", "Absensi_PagarNusa_Otomatis.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -281,13 +277,6 @@
             }
         }
 
-        function showModal(nama, strip, waktu) {
-            document.getElementById('pop-nama').innerText = nama;
-            document.getElementById('pop-strip').innerText = strip;
-            document.getElementById('pop-waktu').innerText = waktu;
-            document.getElementById('modalAbsen').style.display = 'flex';
-        }
-
         function showWarning() {
             document.getElementById('modalWarning').style.display = 'flex';
         }
@@ -297,19 +286,14 @@
             resetScanner();
         }
 
-        function closeModal() {
-            document.getElementById('modalAbsen').style.display = 'none';
-            resetScanner();
-        }
-
         function updateStatus(text, classes) {
             const statusInfo = document.getElementById('status-info');
             statusInfo.innerText = text;
-            statusInfo.className = `mt-4 text-center py-3 px-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${classes}`;
+            statusInfo.className = `mt-6 text-center py-4 px-6 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all ${classes}`;
         }
 
         function resetScanner() {
-            updateStatus("Siap Memindai QR...", "bg-gray-50 text-gray-400");
+            updateStatus("Mencari Kode QR...", "bg-gray-50 text-gray-400");
             isProcessing = false;
         }
 
