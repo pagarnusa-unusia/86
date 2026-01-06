@@ -2,121 +2,191 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Scanner UKT | Pagarnusa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scanner UKT Final</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { pn: '#166534', darkPN: '#064e3b' }
-                }
-            }
-        }
-    </script>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
-        #reader { width: 100% !important; height: 100% !important; }
-        #reader video { object-fit: cover !important; }
-        
+        :root {
+            --primary: #00d2ff;
+            --success: #00ff88;
+            --dark-bg: #0a0a0b;
+            --glass: rgba(255, 255, 255, 0.1);
+            --pn-green: #166534;
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--dark-bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: white; overflow: hidden;
+        }
+
+        .app-container { display: flex; flex-direction: column; height: 100vh; }
+        #reader { flex: 1; width: 100% !important; background: #000; }
+
+        .header {
+            position: absolute; top: 0; width: 100%;
+            padding: 40px 0 20px; text-align: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 10;
+        }
+        .header h1 { margin: 0; font-size: 20px; letter-spacing: 2px; color: var(--primary); }
+        .header p { margin: 5px 0 0; font-size: 11px; opacity: 0.6; }
+
         .scan-region {
-            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
-            width: 240px; height: 240px; pointer-events: none; z-index: 10;
+            position: absolute; top: 40%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 260px; height: 260px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 40px; pointer-events: none; z-index: 5;
         }
         .scan-region::after {
-            content: ''; position: absolute; inset: 0;
-            border: 2px solid #166534; border-radius: 40px;
+            content: ''; position: absolute; inset: -2px;
+            border: 2px solid var(--primary); border-radius: 40px;
             animation: pulse 2s infinite;
         }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+
+        .bottom-panel {
+            background: #16161a; padding: 20px;
+            border-radius: 30px 30px 0 0; max-height: 45%;
+            z-index: 11; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+
+        #feedback {
+            padding: 15px; border-radius: 15px; text-align: center;
+            font-weight: bold; margin-bottom: 15px; font-size: 14px;
+            background: rgba(255,255,255,0.05); color: #888;
+        }
+
+        .bg-success { background: #064e3b !important; color: var(--success) !important; border: 1px solid var(--success); }
+        .bg-loading { background: var(--primary) !important; color: white !important; }
+
+        /* Popup / Modal Style */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: white; color: #333; width: 85%; max-width: 350px;
+            padding: 25px; border-radius: 25px; text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-content h2 { color: var(--pn-green); margin: 0 0 15px; font-size: 20px; }
+        .modal-info { background: #f8fafc; padding: 15px; border-radius: 15px; text-align: left; margin-bottom: 20px; }
+        .modal-info div { margin-bottom: 8px; font-size: 13px; }
+        .modal-info label { display: block; font-size: 10px; color: #94a3b8; font-weight: bold; text-transform: uppercase; }
+        .btn-close {
+            background: var(--pn-green); color: white; border: none;
+            padding: 12px 30px; border-radius: 12px; font-weight: bold; width: 100%;
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         
-        .log-item { animation: slideUp 0.4s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .log-name { font-weight: 600; flex: 1; margin-left: 12px; font-size: 13px; }
+        .log-time { font-size: 11px; color: #666; }
     </style>
 </head>
-<body class="antialiased font-sans text-white">
+<body>
 
-    <div class="relative flex flex-col h-screen w-full">
-        <header class="absolute top-0 inset-x-0 z-20 pt-10 pb-10 bg-gradient-to-b from-black/80 to-transparent text-center">
-            <h1 class="text-[10px] font-bold tracking-[0.3em] text-slate-300 uppercase">Sistem Absensi Digital</h1>
-            <p class="text-pn font-bold text-sm tracking-widest uppercase">Pagarnusa UNUSIA</p>
-        </header>
-
-        <div id="reader" class="flex-1"></div>
-        <div class="scan-region"></div>
-
-        <div class="absolute bottom-0 inset-x-0 z-30 bg-white rounded-t-[32px] p-6 shadow-2xl overflow-hidden">
-            <div id="feedback" class="w-full py-3 mb-4 rounded-xl text-center font-bold text-xs uppercase tracking-widest bg-slate-100 text-slate-400 transition-all duration-300">
-                Siap Memindai...
-            </div>
-
-            <div id="logItems" class="space-y-3 min-h-[120px]">
-                <p class="text-center text-[10px] text-slate-300 mt-10">Belum ada riwayat absensi</p>
-            </div>
-            
-            <p class="text-[8px] text-center text-slate-300 mt-4 uppercase tracking-tighter">Official Database Pagarnusa</p>
-        </div>
+<div class="app-container">
+    <div class="header">
+        <h1>PANITIA UKT</h1>
+        <p>SCAN ID CARD PESERTA</p>
     </div>
 
-    <script>
-        let scanning = false;
+    <div id="reader"></div>
+    <div class="scan-region"></div>
 
-        function onScanSuccess(decodedText) {
-            if (scanning) return;
-            scanning = true;
+    <div class="bottom-panel">
+        <div id="feedback">SIAP MEMINDAI...</div>
+        <div id="logItems" class="log-list"></div>
+    </div>
+</div>
 
-            const feedback = document.getElementById('feedback');
-            feedback.innerText = "⌛ Memproses...";
-            feedback.className = "w-full py-3 mb-4 rounded-xl text-center font-bold text-xs bg-pn text-white animate-pulse";
+<div id="modalAbsen" class="modal-overlay">
+    <div class="modal-content">
+        <div style="font-size: 40px; margin-bottom: 10px;">✅</div>
+        <h2>Absen Berhasil</h2>
+        <div class="modal-info">
+            <div><label>Nama Peserta</label><strong id="pop-nama">-</strong></div>
+            <div><label>Tingkatan / Strip</label><strong id="pop-strip">-</strong></div>
+            <div><label>Waktu</label><strong id="pop-waktu">-</strong></div>
+        </div>
+        <button class="btn-close" onclick="closeModal()">OK, LANJUT SCAN</button>
+    </div>
+</div>
 
-            if (navigator.vibrate) navigator.vibrate(100);
+<script>
+    let scanning = false;
 
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    if (res.status === "success") {
-                        feedback.innerText = "✅ " + res.msg;
-                        feedback.className = "w-full py-3 mb-4 rounded-xl text-center font-bold text-xs bg-emerald-100 text-emerald-700 border border-emerald-200";
-                        updateLog(res.nama, res.jam, res.strip);
-                    } else {
-                        feedback.innerText = res.msg;
-                        feedback.className = "w-full py-3 mb-4 rounded-xl text-center font-bold text-xs bg-red-100 text-red-700";
-                    }
+    function onScanSuccess(decodedText) {
+        if (scanning) return;
+        scanning = true;
+
+        const feedback = document.getElementById('feedback');
+        feedback.innerText = "⌛ MENGIRIM DATA...";
+        feedback.className = "bg-loading";
+
+        if (navigator.vibrate) navigator.vibrate(100);
+
+        google.script.run
+            .withSuccessHandler(function(res) {
+                if (res.status === "success") {
+                    feedback.innerText = res.msg;
+                    feedback.className = "bg-success";
                     
-                    setTimeout(() => {
-                        feedback.innerText = "Siap Memindai...";
-                        feedback.className = "w-full py-3 mb-4 rounded-xl text-center font-bold text-xs bg-slate-100 text-slate-400 uppercase tracking-widest";
-                        scanning = false;
-                    }, 3500);
-                })
-                .prosesAbsen(decodedText);
+                    // Tampilkan Popup
+                    showModal(res.nama, res.strip, res.jam);
+                    updateLog(res.nama, res.jam, res.strip);
+                } else {
+                    feedback.innerText = res.msg;
+                    feedback.className = "";
+                    scanning = false;
+                }
+            })
+            .withFailureHandler(function(err) {
+                feedback.innerText = "GAGAL TERHUBUNG";
+                feedback.className = "";
+                scanning = false;
+            })
+            .prosesAbsen(decodedText);
+    }
+
+    function showModal(nama, strip, waktu) {
+        document.getElementById('pop-nama').innerText = nama;
+        document.getElementById('pop-strip').innerText = strip;
+        document.getElementById('pop-waktu').innerText = waktu + " WIB";
+        document.getElementById('modalAbsen').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('modalAbsen').style.display = 'none';
+        const feedback = document.getElementById('feedback');
+        feedback.innerText = "SIAP MEMINDAI...";
+        feedback.className = "";
+        scanning = false; // Izinkan scan lagi setelah modal ditutup
+    }
+
+    function updateLog(nama, jam, strip) {
+        const list = document.getElementById('logItems');
+        const item = document.createElement('div');
+        item.className = 'log-item';
+        item.innerHTML = `<span class="log-time">${jam}</span><span class="log-name">${nama}</span><span style="font-size:10px; color:var(--primary)">${strip}</span>`;
+        list.insertBefore(item, list.firstChild);
+        if (list.children.length > 3) list.lastChild.remove();
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length > 0) {
+            let backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
+            html5QrCode.start(backCamera.id, { fps: 20, qrbox: 250 }, onScanSuccess);
         }
+    });
+</script>
 
-        function updateLog(nama, jam, strip) {
-            const list = document.getElementById('logItems');
-            if (list.querySelector('p')) list.innerHTML = ''; // Clear empty message
-
-            const item = document.createElement('div');
-            item.className = 'log-item flex justify-between items-center py-2 border-b border-slate-50';
-            item.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <span class="text-[10px] text-slate-400 font-mono">${jam}</span>
-                    <span class="text-xs font-bold text-slate-700 uppercase">${nama}</span>
-                </div>
-                <span class="text-[9px] font-bold text-pn bg-emerald-50 px-2 py-1 rounded border border-emerald-100 uppercase">${strip}</span>
-            `;
-            list.insertBefore(item, list.firstChild);
-            if (list.children.length > 4) list.lastChild.remove();
-        }
-
-        const html5QrCode = new Html5Qrcode("reader");
-        Html5Qrcode.getCameras().then(cameras => {
-            if (cameras && cameras.length > 0) {
-                let backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
-                html5QrCode.start(backCamera.id, { fps: 20, qrbox: 250 }, onScanSuccess);
-            }
-        });
-    </script>
 </body>
 </html>
