@@ -2,175 +2,135 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Scanner UKT Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Digital | Pagar Nusa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { pn: '#166534' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --primary: #00d2ff;
-            --success: #00ff88;
-            --dark-bg: #0a0a0b;
-            --glass: rgba(255, 255, 255, 0.1);
+        body { background-color: #f8fafc; }
+        .official-card { background: white; border: 1px solid #e2e8f0; border-top: 4px solid #166534; }
+        #reader { border: none !important; border-radius: 12px; overflow: hidden; }
+        #reader__dashboard_section_csr button {
+            background-color: #166534 !important; color: white !important;
+            padding: 8px 16px !important; border-radius: 8px !important; font-size: 12px !important;
         }
-
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: var(--dark-bg);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            color: white; overflow: hidden;
-        }
-
-        .app-container {
-            display: flex; flex-direction: column; height: 100vh;
-        }
-
-        /* Scanner Area */
-        #reader {
-            flex: 1;
-            width: 100% !important;
-            background: #000;
-        }
-
-        /* Overlay UI */
-        .header {
-            position: absolute; top: 0; width: 100%;
-            padding: 40px 0 20px; text-align: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            z-index: 10;
-        }
-
-        .header h1 { margin: 0; font-size: 20px; letter-spacing: 2px; color: var(--primary); }
-        .header p { margin: 5px 0 0; font-size: 11px; opacity: 0.6; }
-
-        /* Focus Square */
-        .scan-region {
-            position: absolute; top: 40%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 260px; height: 260px;
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 40px; pointer-events: none; z-index: 5;
-        }
-        .scan-region::after {
-            content: ''; position: absolute; inset: -2px;
-            border: 2px solid var(--primary); border-radius: 40px;
-            animation: pulse 2s infinite;
-        }
-
-        /* Result & Log Panel */
-        .bottom-panel {
-            background: #16161a;
-            padding: 20px;
-            border-radius: 30px 30px 0 0;
-            max-height: 45%;
-            z-index: 11;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-        }
-
-        #feedback {
-            padding: 15px; border-radius: 15px;
-            text-align: center; font-weight: bold; margin-bottom: 15px;
-            font-size: 14px; transition: 0.3s;
-            background: rgba(255,255,255,0.05); color: #888;
-        }
-
-        .bg-success { background: #064e3b !important; color: var(--success) !important; border: 1px solid var(--success); }
-        .bg-loading { background: var(--primary) !important; color: white !important; }
-
-        .log-list { margin-top: 10px; }
-        .log-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-            animation: slideUp 0.4s ease;
-        }
-        .log-name { font-weight: 600; flex: 1; margin-left: 12px; }
-        .log-time { font-size: 12px; color: #666; }
-        .log-strip { 
-            font-size: 10px; padding: 2px 8px; border-radius: 5px;
-            border: 1px solid var(--primary); color: var(--primary);
-        }
-
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .label-text { font-size: 0.65rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-<div class="app-container">
-    <div class="header">
-        <h1>PANITIA UKT</h1>
-        <p>SCAN ID CARD PESERTA</p>
-    </div>
+    <main class="min-h-screen flex flex-col items-center px-4 py-8">
+        
+        <div class="mb-6 text-center">
+            <h1 class="text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase leading-relaxed">
+                Sistem Absensi UKT Digital<br>
+                <span class="text-pn text-sm">Pagar Nusa UNUSIA</span>
+            </h1>
+        </div>
 
-    <div id="reader"></div>
-    <div class="scan-region"></div>
-
-    <div class="bottom-panel">
-        <div id="feedback">SIAP MEMINDAI...</div>
-        <div class="log-list" id="logItems">
+        <div class="official-card w-full max-w-md rounded-xl shadow-sm p-4 mb-4">
+            <div id="reader" class="bg-black"></div>
+            <div id="feedback" class="mt-4 text-center p-3 rounded-lg bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-widest">
+                Menunggu Pemindaian...
             </div>
-    </div>
-</div>
+        </div>
 
-<script>
-    let scanning = false;
+        <div id="result-card" class="hidden official-card w-full max-w-md rounded-xl shadow-sm overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="px-6 py-6">
+                <div class="flex items-center gap-2 mb-6 text-emerald-700 bg-emerald-50 w-fit px-3 py-1 rounded-full border border-emerald-100">
+                    <i class="fas fa-check-circle text-[10px]"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Verifikasi Berhasil</span>
+                </div>
 
-    function onScanSuccess(decodedText) {
-        if (scanning) return;
-        scanning = true;
+                <div class="space-y-4">
+                    <div>
+                        <p class="label-text mb-1">Nama Peserta</p>
+                        <h2 id="res-nama" class="text-lg font-bold text-slate-800">---</h2>
+                    </div>
+                    <div class="flex justify-between">
+                        <div>
+                            <p class="label-text mb-1">Tingkatan/Strip</p>
+                            <p id="res-strip" class="text-sm font-medium text-pn font-bold italic">---</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="label-text mb-1">Waktu Masuk</p>
+                            <p id="res-jam" class="text-sm font-medium text-slate-600">---</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-between items-center">
+                <p class="text-[9px] font-bold text-slate-400 uppercase">ID Referensi</p>
+                <p id="res-id" class="text-[10px] font-mono font-bold text-pn uppercase">---</p>
+            </div>
+        </div>
 
-        const feedback = document.getElementById('feedback');
-        feedback.innerText = "⌛ MENGIRIM DATA...";
-        feedback.className = "bg-loading";
+        <p class="mt-6 text-[9px] text-slate-400 text-center max-w-xs leading-relaxed">
+            Data absensi tersinkronisasi otomatis dengan database pusat <strong>Pagar Nusa</strong>.
+        </p>
 
-        if (navigator.vibrate) navigator.vibrate(100);
+    </main>
 
-        google.script.run
-            .withSuccessHandler(function(res) {
-                if (res.status === "success") {
-                    feedback.innerText = res.msg;
-                    feedback.className = "bg-success";
-                    updateLog(res.nama, res.jam, res.strip);
-                } else {
-                    feedback.innerText = res.msg;
-                    feedback.className = "";
-                }
-                
-                setTimeout(() => {
-                    feedback.innerText = "SIAP MEMINDAI...";
-                    feedback.className = "";
-                    scanning = false;
-                }, 3000);
-            })
-            .prosesAbsen(decodedText);
-    }
+    <script>
+        let isProcessing = false;
 
-    function updateLog(nama, jam, strip) {
-        const list = document.getElementById('logItems');
-        const item = document.createElement('div');
-        item.className = 'log-item';
-        item.innerHTML = `
-            <span class="log-time">${jam}</span>
-            <span class="log-name">${nama}</span>
-            <span class="log-strip">${strip}</span>
-        `;
-        list.insertBefore(item, list.firstChild);
-        if (list.children.length > 4) list.lastChild.remove();
-    }
+        function onScanSuccess(decodedText) {
+            if (isProcessing) return;
+            isProcessing = true;
 
-    // Inisialisasi Kamera Belakang Otomatis
-    const html5QrCode = new Html5Qrcode("reader");
-    Html5Qrcode.getCameras().then(cameras => {
-        if (cameras && cameras.length > 0) {
-            let backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
-            html5QrCode.start(
-                backCamera.id, 
-                { fps: 20, qrbox: 250 }, 
-                onScanSuccess
-            );
+            const feedback = document.getElementById('feedback');
+            feedback.innerText = "⏳ MEMPROSES...";
+            feedback.className = "mt-4 text-center p-3 rounded-lg bg-pn text-white font-bold text-xs animate-pulse";
+
+            if (navigator.vibrate) navigator.vibrate(100);
+
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    if (res.status === "success") {
+                        showResult(res);
+                        feedback.innerText = "✅ " + res.msg;
+                        feedback.className = "mt-4 text-center p-3 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs";
+                    } else {
+                        feedback.innerText = res.msg;
+                        feedback.className = "mt-4 text-center p-3 rounded-lg bg-red-100 text-red-700 font-bold text-xs";
+                    }
+                    
+                    setTimeout(() => {
+                        feedback.innerText = "Menunggu Pemindaian...";
+                        feedback.className = "mt-4 text-center p-3 rounded-lg bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-widest";
+                        isProcessing = false;
+                    }, 4000);
+                })
+                .prosesAbsen(decodedText);
         }
-    }).catch(err => {
-        document.getElementById('feedback').innerText = "❌ AKSES KAMERA DITOLAK";
-    });
-</script>
 
+        function showResult(data) {
+            document.getElementById('result-card').classList.remove('hidden');
+            document.getElementById('res-nama').innerText = data.nama;
+            document.getElementById('res-strip').innerText = data.strip;
+            document.getElementById('res-jam').innerText = data.jam + " WIB";
+            document.getElementById('res-id').innerText = data.id;
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        Html5Qrcode.getCameras().then(cameras => {
+            if (cameras && cameras.length > 0) {
+                let cameraId = cameras[cameras.length - 1].id;
+                html5QrCode.start(cameraId, { fps: 15, qrbox: 200 }, onScanSuccess);
+            }
+        });
+    </script>
 </body>
 </html>
