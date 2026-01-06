@@ -3,68 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scanner UKT | Pagar Nusa</title>
+    <title>Scanner Pagar Nusa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { background-color: #000; overflow: hidden; font-family: sans-serif; }
-        #reader { width: 100vw; height: 100vh; }
-        #reader video { object-fit: cover !important; }
-        
-        .overlay-top {
-            position: fixed; top: 0; width: 100%; z-index: 10;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            padding: 40px 0 20px; text-align: center;
+        :root { --pn-green: #166534; }
+        body { background-color: #f3f4f6; font-family: sans-serif; }
+        #reader { border: none !important; border-radius: 15px; overflow: hidden; }
+        #reader__dashboard_section_csr button {
+            background: var(--pn-green) !important; color: white !important;
+            padding: 8px 15px !important; border-radius: 10px !important; font-size: 12px !important;
         }
-
-        /* Modal / Popup */
-        #modalAbsen {
-            display: none; position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.9); z-index: 100;
-            align-items: center; justify-content: center; backdrop-filter: blur(8px);
-        }
-        .modal-card {
-            background: white; width: 85%; max-width: 340px;
-            border-radius: 24px; padding: 30px; text-align: center;
-            border-top: 6px solid #166534;
-        }
+        .modal-active { display: flex !important; }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
 
-    <div class="overlay-top">
-        <h1 class="text-[10px] font-bold tracking-[0.3em] text-slate-300 uppercase">Sistem Absensi UKT</h1>
-        <p class="text-emerald-500 font-bold text-sm tracking-widest uppercase mt-1">Pagarnusa UNUSIA</p>
-        <div id="status-text" class="mt-4 text-[10px] text-white/50 animate-pulse">SIAP MEMINDAI...</div>
-    </div>
+    <header class="bg-[#166534] text-white p-5 text-center shadow-lg">
+        <h1 class="text-sm font-bold tracking-widest uppercase">Absensi UKT Digital</h1>
+        <p class="text-[10px] opacity-80 uppercase mt-1">Pagar Nusa UNUSIA</p>
+    </header>
 
-    <div id="reader"></div>
+    <main class="flex-1 p-5 flex flex-col items-center justify-start">
+        <div class="w-full max-w-sm bg-white rounded-3xl shadow-md p-4 mb-5">
+            <div id="reader" class="bg-black"></div>
+            <div id="status-info" class="mt-4 text-center py-2 px-4 bg-gray-100 rounded-full text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                Siap Memindai...
+            </div>
+        </div>
 
-    <div id="modalAbsen">
-        <div class="modal-card shadow-2xl">
-            <div class="text-5xl mb-4">✅</div>
-            <h2 class="text-xl font-bold text-slate-800 mb-4">Absen Berhasil</h2>
+        <p class="text-[9px] text-gray-400 text-center uppercase tracking-tighter">
+            Arahkan kamera ke QR Code pada ID Card Peserta
+        </p>
+    </main>
+
+    <div id="modalAbsen" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-xs rounded-3xl overflow-hidden shadow-2xl animate-in zoom-in duration-300">
+            <div class="bg-emerald-50 py-6 text-center">
+                <div class="text-5xl mb-2 text-emerald-600">✅</div>
+                <h2 class="text-lg font-bold text-emerald-800">ABSEN BERHASIL</h2>
+            </div>
             
-            <div class="bg-slate-50 rounded-xl p-4 text-left space-y-3 mb-6">
+            <div class="p-6 space-y-4 text-sm">
                 <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nama Peserta</p>
-                    <p id="pop-nama" class="text-sm font-bold text-slate-700 uppercase">---</p>
+                    <label class="text-[9px] font-bold text-gray-400 uppercase">Nama Peserta</label>
+                    <p id="pop-nama" class="font-bold text-gray-800 uppercase border-b pb-1">---</p>
                 </div>
-                <div class="flex justify-between border-t border-slate-200 pt-3">
+                <div class="flex justify-between">
                     <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Strip</p>
-                        <p id="pop-strip" class="text-xs font-bold text-emerald-700 italic">---</p>
+                        <label class="text-[9px] font-bold text-gray-400 uppercase">Strip</label>
+                        <p id="pop-strip" class="font-bold text-pn-green uppercase italic text-xs">---</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Waktu</p>
-                        <p id="pop-waktu" class="text-xs font-bold text-slate-600">---</p>
+                        <label class="text-[9px] font-bold text-gray-400 uppercase">Waktu</label>
+                        <p id="pop-waktu" class="font-bold text-gray-600 text-xs">---</p>
                     </div>
                 </div>
             </div>
 
-            <button onclick="closeModal()" class="w-full bg-[#166534] hover:bg-[#064e3b] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all">
-                OK, Lanjut Scan
-            </button>
+            <div class="p-4 bg-gray-50">
+                <button onclick="closeModal()" class="w-full bg-[#166534] text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest active:scale-95 transition-all">
+                    OK, LANJUT SCAN
+                </button>
+            </div>
         </div>
     </div>
 
@@ -76,10 +77,13 @@
             if (isProcessing) return;
             isProcessing = true;
 
-            document.getElementById('status-text').innerText = "⌛ MENGIRIM KE DATABASE...";
+            const statusInfo = document.getElementById('status-info');
+            statusInfo.innerText = "⏳ MEMPROSES DATA...";
+            statusInfo.classList.replace('text-gray-400', 'text-emerald-600');
 
             if (navigator.vibrate) navigator.vibrate(100);
 
+            // Memanggil fungsi di Code.gs
             google.script.run
                 .withSuccessHandler(function(res) {
                     if (res.status === "success") {
@@ -90,7 +94,7 @@
                     }
                 })
                 .withFailureHandler(function(err) {
-                    alert("GAGAL TERHUBUNG KE SERVER: " + err);
+                    alert("KONEKSI GAGAL: " + err);
                     resetScanner();
                 })
                 .prosesAbsen(decodedText);
@@ -100,27 +104,33 @@
             document.getElementById('pop-nama').innerText = nama;
             document.getElementById('pop-strip').innerText = strip;
             document.getElementById('pop-waktu').innerText = waktu + " WIB";
-            document.getElementById('modalAbsen').style.display = 'flex';
+            document.getElementById('modalAbsen').classList.add('modal-active');
         }
 
         function closeModal() {
-            document.getElementById('modalAbsen').style.display = 'none';
+            document.getElementById('modalAbsen').classList.remove('modal-active');
             resetScanner();
         }
 
         function resetScanner() {
-            document.getElementById('status-text').innerText = "SIAP MEMINDAI...";
+            const statusInfo = document.getElementById('status-info');
+            statusInfo.innerText = "SIAP MEMINDAI...";
+            statusInfo.classList.replace('text-emerald-600', 'text-gray-400');
             isProcessing = false;
         }
 
+        // Jalankan Kamera
         Html5Qrcode.getCameras().then(cameras => {
             if (cameras && cameras.length > 0) {
-                // Gunakan kamera belakang (biasanya urutan terakhir)
                 const backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back')) || cameras[cameras.length - 1];
-                html5QrCode.start(backCamera.id, { fps: 20, qrbox: 250 }, onScanSuccess);
+                html5QrCode.start(
+                    backCamera.id, 
+                    { fps: 15, qrbox: { width: 220, height: 220 } }, 
+                    onScanSuccess
+                );
             }
         }).catch(err => {
-            alert("Kamera tidak ditemukan atau izin ditolak.");
+            alert("Kamera tidak ditemukan.");
         });
     </script>
 </body>
