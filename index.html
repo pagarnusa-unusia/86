@@ -278,7 +278,8 @@
             </div>
         </div>
     </footer>
-
+    <p class="line-clamp-3 text-slate-600">
+    </p>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
@@ -295,20 +296,43 @@
             .replace(/-+$/, '');
     }
 
-    // 2. MENGAMBIL DATA (Dengan Auto-Save ke LocalStorage)
+    // Fungsi Pembantu: Membersihkan Tag HTML dari Quill agar kartu rapi
+    function stripHtml(html) {
+        let tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
+
+    // Fungsi Loading State
+    function showSkeleton() {
+        const grid = document.getElementById('news-grid-index');
+        if (!grid) return;
+        const skeleton = `
+            <div class="animate-pulse space-y-4">
+                <div class="bg-slate-200 rounded-[2.5rem] h-64 w-full"></div>
+                <div class="h-4 bg-slate-200 rounded w-3/4 mx-auto"></div>
+                <div class="h-4 bg-slate-200 rounded w-1/2 mx-auto"></div>
+            </div>
+        `.repeat(3);
+        grid.innerHTML = skeleton;
+    }
+
+    // 2. MENGAMBIL DATA (Utama)
     async function loadLiveContent() {
+        showSkeleton(); 
         try {
+            // Menggunakan type=getAllData sesuai struktur admin Anda
             const response = await fetch(`${SCRIPT_URL}?type=getAllData&nocache=${new Date().getTime()}`);
             if (!response.ok) throw new Error("Gagal terhubung ke server");
             const data = await response.json();
 
-            // Simpan Visual
+            // Simpan & Update Visual
             if (data.visual) {
                 updateVisualDOM(data.visual);
                 localStorage.setItem('pagarnusa_visual', JSON.stringify(data.visual));
             }
 
-            // Simpan Berita
+            // Simpan & Update Berita
             if (data.berita && data.berita.length > 0) {
                 renderNewsToGrid(data.berita);
                 localStorage.setItem('pagarnusa_news', JSON.stringify(data.berita));
@@ -316,27 +340,26 @@
                 syncFromLocalFallback();
             }
         } catch (err) {
-            console.error("Mode Offline: Menggunakan data lokal.");
+            console.error("Mode Offline/Error: Menggunakan data lokal.");
             syncFromLocalFallback();
         }
     }
 
-// 3. UPDATE VISUAL (Taruh di sini atau Ganti fungsi yang lama dengan ini)
-function updateVisualDOM(visualData) {
-    const mappings = {
-        'hero-1': visualData.hero1,
-        'hero-2': visualData.hero2,
-        'hero-sub': visualData.heroSub || visualData.sub,
-        'marquee-content': visualData.marquee
-    };
-    for (const [id, value] of Object.entries(mappings)) {
-        const el = document.getElementById(id);
-        // Jika value ada di Sheet, gunakan. Jika kosong, biarkan teks asli di HTML muncul.
-        if (el && value && value.trim() !== "") { 
-            el.innerText = value;
+    // 3. UPDATE VISUAL DOM
+    function updateVisualDOM(visualData) {
+        const mappings = {
+            'hero-1': visualData.hero1,
+            'hero-2': visualData.hero2,
+            'hero-sub': visualData.heroSub || visualData.sub,
+            'marquee-content': visualData.marquee
+        };
+        for (const [id, value] of Object.entries(mappings)) {
+            const el = document.getElementById(id);
+            if (el && value && value.trim() !== "") { 
+                el.innerText = value;
+            }
         }
     }
-}
 
     // 4. RENDER KARTU BERITA
     function renderNewsToGrid(newsData) {
@@ -346,12 +369,14 @@ function updateVisualDOM(visualData) {
         newsContainer.innerHTML = newsData.map((post, index) => {
             const postId = index + 1; 
             const slug = createSlug(post.title);
+            // Bersihkan konten dari tag HTML Quill dan potong jika terlalu panjang
+            const cleanContent = stripHtml(post.content);
             
             return `
                 <div class="news-card bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500" 
                      data-aos="fade-up" data-aos-delay="${(index % 3) * 100}">
                     <div class="relative h-56 md:h-64 overflow-hidden">
-                        <img src="${post.image || 'logopn.png'}" alt="News Image" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
+                        <img src="${post.image || 'logopn.png'}" alt="${post.title}" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-700">
                         <span class="absolute top-4 left-4 md:top-6 md:left-6 bg-accent text-slate-900 text-[8px] md:text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-tighter shadow-lg">
                             ${post.category || 'Warta Pendekar'}
                         </span>
@@ -359,13 +384,13 @@ function updateVisualDOM(visualData) {
                     <div class="p-6 md:p-8">
                         <div class="flex items-center gap-2 mb-4">
                             <div class="w-1 h-4 bg-primary rounded-full"></div>
-                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${post.date}</p>
+                            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${post.date || ''}</p>
                         </div>
                         <h4 class="font-black text-slate-900 mb-4 line-clamp-2 leading-tight text-lg md:text-xl uppercase tracking-tighter group-hover:text-primary transition italic">
                             ${post.title}
                         </h4>
                         <p class="text-sm text-slate-500 line-clamp-3 mb-6 md:mb-8 font-medium italic">
-                            "${post.content}"
+                            "${cleanContent}"
                         </p>
                         <a href="detail_berita.html?id=${postId}&title=${slug}" class="inline-flex items-center gap-3 text-slate-900 font-black text-[10px] md:text-xs uppercase tracking-widest group/btn">
                             Baca Selengkapnya 
@@ -379,19 +404,31 @@ function updateVisualDOM(visualData) {
         }).join('');
     }
 
+    // 5. FALLBACK LOCAL STORAGE
     function syncFromLocalFallback() {
         const visualData = JSON.parse(localStorage.getItem('pagarnusa_visual'));
         if (visualData) updateVisualDOM(visualData);
+        
         const newsData = JSON.parse(localStorage.getItem('pagarnusa_news')) || [];
-        if (newsData.length > 0) renderNewsToGrid(newsData);
+        if (newsData.length > 0) {
+            renderNewsToGrid(newsData);
+        } else {
+            const grid = document.getElementById('news-grid-index');
+            if (grid) grid.innerHTML = `<p class="text-center col-span-full py-10 opacity-50 font-bold uppercase tracking-widest text-xs">Belum ada berita yang diterbitkan.</p>`;
+        }
     }
 
+    // 6. INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
-        syncFromLocalFallback();
-        loadLiveContent();
-        if (typeof AOS !== 'undefined') AOS.init({ duration: 1000, once: true, offset: 100 });
+        syncFromLocalFallback(); // Tampilkan cache dulu
+        loadLiveContent();       // Ambil data terbaru dari cloud
+        
+        if (typeof AOS !== 'undefined') {
+            AOS.init({ duration: 1000, once: true, offset: 100 });
+        }
     });
 
+    // Mobile Menu Logic
     const mobileBtn = document.getElementById('mobile-menu-btn');
     const nav = document.getElementById('main-nav');
     if (mobileBtn && nav) {
@@ -404,26 +441,10 @@ function updateVisualDOM(visualData) {
         });
     }
 
+    // Sync across tabs
     window.addEventListener('storage', (e) => {
         if (e.key === 'pagarnusa_news' || e.key === 'pagarnusa_visual') syncFromLocalFallback();
     });
-    // Tambahkan fungsi ini di dalam script index.html Anda
-function showSkeleton() {
-    const grid = document.getElementById('news-grid');
-    const skeleton = `
-        <div class="animate-pulse bg-slate-200 rounded-[2rem] h-80 w-full"></div>
-    `.repeat(3);
-    grid.innerHTML = skeleton;
-}
-
-// Panggil showSkeleton() di awal fungsi loadLiveContent()
-async function loadLiveContent() {
-    showSkeleton(); // Jalankan loading state
-    try {
-        const res = await fetch(SCRIPT_URL + "?type=getBerita");
-        // ... sisa kode fetch Anda
-    } catch (e) { /* handle error */ }
-}
 </script>
 </body>
 
