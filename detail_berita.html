@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Detail Berita - Pagar Nusa UNUSIA</title>
+    
     <meta property="og:type" content="article">
     <meta property="og:title" id="og-title" content="Detail Berita - Pagar Nusa UNUSIA">
     <meta property="og:description" id="og-description" content="Portal Berita Resmi Pagar Nusa UNUSIA Jakarta">
     <meta property="og:image" id="og-image" content="https://uktpagarnusa.my.id/logopn.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
+    <meta property="og:url" id="og-url" content="">
+    
     <meta name="twitter:card" content="summary_large_image">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,9 +39,13 @@
         .content-area p { margin-bottom: 1.5rem; line-height: 1.8; color: #475569; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: #1B7548; border-radius: 10px; }
+        /* Style untuk progress bar pembacaan */
+        #scroll-progress { transition: width 0.1s ease-out; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+
+    <div id="scroll-progress" class="fixed top-0 left-0 h-1 bg-accent z-[110]" style="width: 0%"></div>
 
     <header class="sticky top-0 z-[100] bg-primary/95 backdrop-blur-md text-white shadow-2xl transition-all duration-300">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -77,7 +82,7 @@
                 <span class="opacity-30">/</span>
                 <a href="berita.html" class="hover:text-primary">Warta</a>
                 <span class="opacity-30">/</span>
-                <span class="text-primary" id="breadcrumb-title italic">Reading Now</span>
+                <span class="text-primary italic" id="breadcrumb-title">Reading Now</span>
             </nav>
 
             <header class="mb-8">
@@ -123,7 +128,6 @@
                         <div class="flex flex-wrap gap-2">
                             <span class="bg-slate-100 px-4 py-2 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-primary hover:text-white transition cursor-pointer uppercase">#PagarNusa</span>
                             <span class="bg-slate-100 px-4 py-2 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-primary hover:text-white transition cursor-pointer uppercase">#UNUSIA</span>
-                            <span class="bg-slate-100 px-4 py-2 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-primary hover:text-white transition cursor-pointer uppercase">#PencakSilat</span>
                         </div>
                     </div>
                     
@@ -144,7 +148,6 @@
             <div class="bg-gradient-to-br from-primary to-emerald-900 p-8 rounded-[2.5rem] text-white relative overflow-hidden shadow-2xl group" data-aos="fade-left">
                 <i class="fas fa-dragon absolute -right-4 -bottom-4 text-9xl opacity-10 -rotate-12 group-hover:rotate-0 transition duration-1000"></i>
                 <h4 class="text-2xl font-black mb-4 relative z-10 leading-tight italic">Ingin Menjadi <br><span class="text-accent uppercase">Pendekar?</span></h4>
-                <p class="text-[11px] text-emerald-100 mb-8 relative z-10 font-medium leading-relaxed">Bergabunglah bersama keluarga besar PSNU Pagar Nusa UNUSIA Jakarta. Jaga Ulama, Jaga Bangsa!</p>
                 <a href="daftar.html" class="block w-full bg-accent text-slate-900 text-center py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white hover:scale-105 transition-all shadow-xl shadow-black/20 relative z-10">Daftar Sekarang</a>
             </div>
 
@@ -152,75 +155,27 @@
                 <h4 class="font-black text-slate-900 mb-8 uppercase tracking-tighter flex items-center text-sm">
                     <span class="w-1.5 h-5 bg-accent mr-3 rounded-full"></span> Warta Terpopuler
                 </h4>
-                <div id="other-news-list" class="space-y-6">
-                    </div>
+                <div id="other-news-list" class="space-y-6"></div>
             </div>
         </aside>
     </div>
 </main>
 
-    <footer class="bg-slate900 text-white pt-20 md:pt-32 pb-12 relative">
-        <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 md:gap-20">
-            <div class="lg:col-span-1 space-y-8">
-                <div class="flex items-center space-x-4">
-                    <img src="logopn.png" class="h-14 md:h-16 bg-white p-2 rounded-2xl">
-                    <div class="leading-none">
-                        <span class="text-xl md:text-2xl font-black block tracking-tighter uppercase">PAGARNUSA</span>
-                        <span class="text-[9px] text-accent tracking-[0.3em] uppercase font-bold">UNUSIA JAKARTA</span>
-                    </div>
-                </div>
-                <p class="text-slate-400 text-sm leading-relaxed font-medium">"Bela Diri, Bela Bangsa, Bela Agama. Satu Komando di bawah naungan Nahdlatul Ulama."</p>
-                <div class="flex space-x-4">
-                    <a href="https://www.instagram.com/pagarnusaunusia/" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-primary transition text-xl"><i class="fab fa-instagram"></i></a>
-                    <a href="https://wa.me/6285715232441" class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center hover:bg-primary transition text-xl"><i class="fab fa-whatsapp"></i></a>
-                </div>
-            </div>
-            
-            <div>
-                <h5 class="text-lg font-black mb-6 md:mb-10 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-accent mr-3 rounded-full"></span> Navigasi</h5>
-                <ul class="space-y-4 text-sm text-slate-400 font-bold uppercase tracking-tighter">
-                    <li><a href="index.html" class="hover:text-accent transition">Beranda Utama</a></li>
-                    <li><a href="index.html#profil" class="hover:text-accent transition">Profil Organisasi</a></li>
-                    <li><a href="berita.html" class="hover:text-accent transition">Berita Terkini</a></li>
-                    <li><a href="daftar.html" class="hover:text-accent transition">Pendaftaran UKT</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h5 class="text-lg font-black mb-6 md:mb-10 flex items-center uppercase tracking-widest"><span class="w-2 h-6 bg-primary mr-3 rounded-full"></span> Alamat</h5>
-                <p class="text-sm text-slate-400 leading-relaxed font-bold">
-                    Jl. Taman Amir Hamzah No. 5, Pegangsaan, Menteng, Jakarta Pusat, DKI Jakarta 10430<br>
-                    <br>________<br>
-                    Jl. Parung Hijau, Pondok Udik, Kemang, Kabupaten Bogor, Jawa Barat<br>
-                </p>
-            </div>
-
-            <div class="bg-white/5 p-6 md:p-8 rounded-[2rem] border border-white/5 text-center">
-                <h5 class="text-xs font-black mb-6 uppercase tracking-widest text-accent">Supported By</h5>
-                <div class="grid grid-cols-2 gap-4 opacity-50 grayscale hover:grayscale-0 transition duration-700">
-                    <div class="h-10 md:h-12 bg-white/10 rounded-xl flex items-center justify-center font-black text-[10px]">Mundzir</div>
-                    <div class="h-10 md:h-12 bg-white/10 rounded-xl flex items-center justify-center font-black text-[10px]">Fauzan</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="container mx-auto px-6 mt-20 md:mt-32 pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
-            <p class="text-[9px] md:text-[10px] text-slate-500 font-black tracking-widest">&copy; 2026 PAGARNUSA UNUSIA Jakarta. Hak Cipta Dilindungi.</p>
-            <div class="flex gap-6 text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest">
-                <a href="#" class="hover:text-white transition">Privacy Policy</a>
-                <a href="#" class="hover:text-white transition">Terms of Service</a>
-            </div>
+    <footer class="bg-slate900 text-white pt-20 pb-12 relative">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-[10px] text-slate-500 font-black tracking-widest uppercase">&copy; 2026 PAGARNUSA UNUSIA Jakarta.</p>
         </div>
     </footer>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
-        // 1. Progress Bar Scroll Logic
+    // 1. Progress Bar Logic
     window.onscroll = function() {
         let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         let scrolled = (winScroll / height) * 100;
-        document.getElementById("scroll-progress").style.width = scrolled + "%";
+        let progressBar = document.getElementById("scroll-progress");
+        if(progressBar) progressBar.style.width = scrolled + "%";
     };
 
     // 2. Load Detail Data
@@ -247,13 +202,22 @@
         const post = newsData[postIndex];
 
         if (post) {
-            // Mapping Content
+            // Mapping Content ke HTML
             document.getElementById('detail-title').innerText = post.title;
             document.getElementById('detail-category').innerText = post.category || 'WARTA';
             document.getElementById('detail-date').innerText = post.date;
             document.getElementById('detail-image').src = post.image || 'logopn.png';
             
-            // Render Konten (Rapih)
+            // --- UPDATE META TAGS SECARA DINAMIS ---
+            // Ini agar saat di-share, gambar berita yang muncul
+            const newsImage = post.image || 'https://uktpagarnusa.my.id/logopn.png';
+            document.getElementById('og-title').setAttribute('content', post.title);
+            document.getElementById('og-image').setAttribute('content', newsImage);
+            document.getElementById('og-url').setAttribute('content', window.location.href);
+            document.getElementById('og-description').setAttribute('content', post.content.substring(0, 160).replace(/\n/g, ' ') + '...');
+            // ---------------------------------------
+
+            // Render Konten
             const contentContainer = document.getElementById('detail-content');
             contentContainer.innerHTML = post.content
                 .split('\n')
@@ -291,7 +255,7 @@
 
     function copyToClipboard() {
         navigator.clipboard.writeText(window.location.href);
-        alert('Tautan berhasil disalin ke clipboard!');
+        alert('Tautan berhasil disalin!');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
