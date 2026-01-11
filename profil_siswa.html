@@ -320,14 +320,14 @@
 
                 if (!sessionStorage.getItem('swalShown')) {
                     Swal.fire({
-                        title: 'PASANG FOTO TERKERENMU!',
-                        html: 'Selamat Anda memenuhi <b>Kualifikasi UKT IV</b>.<br>Yuk, pasang foto profil terbaikmu sekarang!',
+                        title: 'Selamat',
+                        html: 'Anda <b>Telah Lulus</b>.<br>dalam Ujian Kenaikan Tingkat IV',
                         icon: 'success',
                         showCancelButton: true,
                         confirmButtonColor: '#1B7548',
                         cancelButtonColor: '#64748b',
-                        confirmButtonText: '<i class="fas fa-camera"></i> Pasang Sekarang',
-                        cancelButtonText: 'Nanti Saja',
+                        confirmButtonText: '<i class="fas fa-camera"></i> Twibbon',
+                        cancelButtonText: 'Alhamdulillah',
                         allowOutsideClick: false
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -385,3 +385,4 @@
     </script>
 </body>
 </html>
+
