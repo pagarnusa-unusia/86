@@ -29,7 +29,7 @@
         body::before {
             content: "";
             position: fixed;
-            top: -10%; /* Area tambahan agar saat bergerak ke atas tidak kosong */
+            top: -10%; 
             left: -10%;
             width: 120%;
             height: 120%;
@@ -40,21 +40,15 @@
             background-position: center;
             background-repeat: no-repeat;
             
-            /* Animasi gabungan Zoom & Bergerak ke Atas yang sangat halus */
             animation: cinematicRise 25s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
             
-            /* Memaksa HP menggunakan GPU untuk kelancaran maksimal */
             will-change: transform;
             transform: translateZ(0);
         }
 
         @keyframes cinematicRise {
-            0% {
-                transform: scale(1) translateY(0);
-            }
-            100% {
-                transform: scale(1.15) translateY(-5%);
-            }
+            0% { transform: scale(1) translateY(0); }
+            100% { transform: scale(1.15) translateY(-5%); }
         }
 
         .glass { 
@@ -79,7 +73,6 @@
             to { opacity: 1; transform: translateY(0); } 
         }
 
-        /* Checkbox Logic Styling */
         .check-card input:checked + .card-content { 
             background: rgba(16, 185, 129, 0.08); 
             border-color: rgba(16, 185, 129, 0.5); 
@@ -97,7 +90,6 @@
             color: var(--primary);
         }
 
-        /* Custom Loading */
         .shimmer {
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
             background-size: 200% 100%;
@@ -127,25 +119,23 @@
 
         <div class="space-y-4">
             <p class="text-slate-500 text-[11px] font-bold uppercase tracking-widest ml-1">Pilih Lokasi Latihan</p>
-            
             <button onclick="navToPelet('Jakarta')" class="w-full glass p-5 rounded-3xl flex items-center gap-4 transition-all active:scale-[0.97]">
                 <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                     <i class="fas fa-building-circle-check text-xl"></i>
                 </div>
                 <div class="text-left flex-1">
                     <h3 class="font-bold text-white uppercase text-sm tracking-wide">Cabang Jakarta</h3>
-                    <p class="text-[10px] text-slate-500 font-medium">Rooftop L3 UNUSIA Jakarta</p>
+                    <p class="text-[10px] text-slate-500 font-medium">Pusat & Matraman</p>
                 </div>
                 <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
             </button>
-
             <button onclick="navToPelet('Bogor')" class="w-full glass p-5 rounded-3xl flex items-center gap-4 transition-all active:scale-[0.97]">
                 <div class="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-500">
                     <i class="fas fa-mountain-sun text-xl"></i>
                 </div>
                 <div class="text-left flex-1">
                     <h3 class="font-bold text-white uppercase text-sm tracking-wide">Cabang Bogor</h3>
-                    <p class="text-[10px] text-slate-500 font-medium">GOR UNUSIA Bogor</p>
+                    <p class="text-[10px] text-slate-500 font-medium">Kampus Parung Kuripan</p>
                 </div>
                 <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
             </button>
@@ -159,7 +149,6 @@
             </button>
             <h2 id="display-kampus" class="text-xl font-extrabold text-white tracking-tight uppercase">Kampus</h2>
         </div>
-
         <div id="pelet-list" class="space-y-8"></div>
     </div>
 
@@ -187,7 +176,6 @@
                 <input type="text" id="search-input" onkeyup="filterSantri()" placeholder="Cari nama santri..." 
                     class="w-full bg-slate-800/60 border border-white/10 pl-12 pr-28 py-4 rounded-2xl text-white text-sm outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/5 transition-all shadow-inner">
                 <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 text-sm transition-colors group-focus-within:text-emerald-500"></i>
-                
                 <button onclick="toggleSelectAll()" class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-extrabold text-emerald-500/80 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-xl transition-colors uppercase tracking-wider">
                     Hadir Semua
                 </button>
@@ -332,34 +320,45 @@
         }
 
         async function submitAbsen() {
-            const hadir = Array.from(document.querySelectorAll('#santri-grid input:checked')).map(cb => cb.value);
             const btn = document.getElementById('btn-submit');
             const btnText = document.getElementById('btn-text');
+            const hadir = Array.from(document.querySelectorAll('#santri-grid input:checked')).map(cb => cb.value);
             
             btn.disabled = true;
             btn.classList.add('opacity-50');
-            btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> PROSES...`;
+            btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> MENGAMBIL LOKASI...`;
 
-            const payload = {
-                timestamp: new Date().toISOString(),
-                kampus: state.kampus, 
-                pelet: state.pelet, 
-                hadir: hadir.join(", "),
-                lokasi: "Lat: ... Long: ..." // Bisa ditambahkan fungsi koordinat jika perlu
-            };
+            // PERBAIKAN: Mengambil Lokasi GPS Otomatis
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> MENGIRIM...`;
 
-            try {
-                await fetch(CONFIG.API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                alert("Berhasil disimpan!");
-                location.reload();
-            } catch (e) {
-                alert("Gagal mengirim.");
+                const payload = {
+                    timestamp: new Date().toISOString(),
+                    kampus: state.kampus, 
+                    pelet: state.pelet, 
+                    hadir: hadir.join(", "),
+                    lokasi: `${lat},${lon}` // Mengirim koordinat murni untuk diproses backend
+                };
+
+                try {
+                    await fetch(CONFIG.API, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                    alert("Berhasil disimpan!");
+                    location.reload();
+                } catch (e) {
+                    alert("Gagal mengirim.");
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                    btnText.innerText = "SIMPAN ABSENSI";
+                }
+            }, (error) => {
+                alert("Gagal mengambil lokasi. Pastikan GPS aktif.");
                 btn.disabled = false;
                 btn.classList.remove('opacity-50');
                 btnText.innerText = "SIMPAN ABSENSI";
-            }
+            }, { enableHighAccuracy: true });
         }
     </script>
 </body>
 </html>
-
