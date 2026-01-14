@@ -6,6 +6,7 @@
     <title>E-Absensi | PSNU PAGARNUSA UNUSIA</title>
     <link rel="icon" type="image/png" href="logopn.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -220,12 +221,26 @@
     </div>
 
     <div id="page-rekap" class="page">
-        <div class="mt-10 mb-8">
-            <h2 class="text-white text-2xl font-extrabold tracking-tight">Rekap Kehadiran</h2>
-            <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-1">Total Kehadiran Santri</p>
+        <div class="mt-10 mb-6 flex justify-between items-end">
+            <div>
+                <h2 class="text-white text-2xl font-extrabold tracking-tight">Rekap Kehadiran</h2>
+                <p class="text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-1">Total Kehadiran Santri</p>
+            </div>
+            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 text-white p-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-900/20">
+                <i class="fas fa-file-excel"></i>
+            </button>
         </div>
+
+        <div class="space-y-3 mb-6">
+            <div class="relative">
+                <input type="text" id="search-rekap" onkeyup="filterRekap()" placeholder="Cari nama atau pelet..." 
+                    class="w-full bg-slate-800/60 border border-white/10 pl-10 pr-4 py-3 rounded-xl text-white text-xs outline-none focus:border-emerald-500/50 transition-all">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            </div>
+        </div>
+
         <div id="rekap-container" class="space-y-3 mb-24">
-        </div>
+            </div>
     </div>
 
     <nav class="fixed bottom-0 left-0 w-full nav-blur z-[100] px-6 py-4 flex justify-around items-center">
@@ -248,7 +263,8 @@
             }
         };
 
-        let state = { kampus: '', tingkat: '', pelet: '', data: [] };
+        // Tambahkan rekapData: []
+        let state = { kampus: '', tingkat: '', pelet: '', data: [], rekapData: [] };
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -410,27 +426,60 @@
 
         // FUNGSI REKAP BARU
         async function loadRekap() {
-            showPage('page-rekap');
-            const container = document.getElementById('rekap-container');
-            container.innerHTML = `<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-emerald-500"></i></div>`;
-            try {
-                const res = await fetch(CONFIG.API + "?action=getRekap");
-                const data = await res.json();
-                container.innerHTML = data.map(item => `
-                    <div class="glass p-4 rounded-2xl flex items-center justify-between border border-white/5">
-                        <div class="overflow-hidden">
-                            <h4 class="text-white font-bold text-sm truncate uppercase">${item.nama}</h4>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Pelet ${item.pelet}</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <span class="text-emerald-500 font-black text-lg">${item.total}</span>
-                            <p class="text-[8px] text-slate-500 font-bold uppercase">Hadir</p>
-                        </div>
-                    </div>`).join('');
-            } catch (e) {
-                container.innerHTML = `<p class="text-center text-red-400 text-xs py-10">Gagal memuat rekap.</p>`;
-            }
+        showPage('page-rekap');
+        const container = document.getElementById('rekap-container');
+        container.innerHTML = `<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-emerald-500"></i></div>`;
+        
+        try {
+            const res = await fetch(CONFIG.API + "?action=getRekap");
+            state.rekapData = await res.json(); // Simpan ke state
+            renderRekap(state.rekapData); // Gunakan fungsi render terpisah
+        } catch (e) {
+            container.innerHTML = `<p class="text-center text-red-400 text-xs py-10">Gagal memuat rekap.</p>`;
         }
+        }
+
+        // Fungsi render baru agar mudah difilter
+        function renderRekap(dataList) {
+            const container = document.getElementById('rekap-container');
+            container.innerHTML = dataList.map(item => `
+                <div class="rekap-card glass p-4 rounded-2xl flex items-center justify-between border border-white/5">
+                    <div class="overflow-hidden">
+                        <h4 class="text-white font-bold text-sm truncate uppercase">${item.nama}</h4>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Pelet ${item.pelet}</p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-emerald-500 font-black text-lg">${item.total}</span>
+                        <p class="text-[8px] text-slate-500 font-bold uppercase">Hadir</p>
+                    </div>
+                </div>`).join('');
+        }
+        function filterRekap() {
+    const query = document.getElementById('search-rekap').value.toLowerCase();
+    const filtered = state.rekapData.filter(item => 
+        item.nama.toLowerCase().includes(query) || 
+        item.pelet.toLowerCase().includes(query)
+    );
+    renderRekap(filtered);
+}
+
+function exportToExcel() {
+    if (state.rekapData.length === 0) return alert("Tidak ada data untuk diekspor");
+    
+    // Format data untuk Excel
+    const dataToExport = state.rekapData.map(item => ({
+        "Nama Santri": item.nama,
+        "Pelet": item.pelet,
+        "Total Kehadiran": item.total
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absensi");
+    
+    // Download file
+    XLSX.writeFile(workbook, `Rekap_Absensi_PagarNusa_${new Date().toLocaleDateString()}.xlsx`);
+}
     </script>
 </body>
 </html>
