@@ -40,9 +40,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            
             animation: cinematicRise 25s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
-            
             will-change: transform;
             transform: translateZ(0);
         }
@@ -105,9 +103,9 @@
         .header-gradient {
             background: linear-gradient(to bottom, var(--bg-dark) 80%, transparent);
         }
-        /* Bottom Navigation Style */
+
         .nav-blur {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
@@ -139,29 +137,35 @@
         </div>
 
         <div class="space-y-4">
-            <p class="text-slate-500 text-[11px] font-bold uppercase tracking-widest ml-1">Pilih Lokasi Latihan</p>
-            <button onclick="navToPelet('Jakarta')" class="w-full glass p-5 rounded-3xl flex items-center gap-4 transition-all active:scale-[0.97]">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                    <i class="fas fa-building-circle-check text-xl"></i>
-                </div>
-                <div class="text-left flex-1">
-                    <h3 class="font-bold text-white uppercase text-sm tracking-wide">Cabang Jakarta</h3>
-                    <p class="text-[10px] text-slate-500 font-medium">Pusat & Matraman</p>
-                </div>
-                <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
-            </button>
-            <button onclick="navToPelet('Bogor')" class="w-full glass p-5 rounded-3xl flex items-center gap-4 transition-all active:scale-[0.97]">
-                <div class="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center text-sky-500">
-                    <i class="fas fa-mountain-sun text-xl"></i>
-                </div>
-                <div class="text-left flex-1">
-                    <h3 class="font-bold text-white uppercase text-sm tracking-wide">Cabang Bogor</h3>
-                    <p class="text-[10px] text-slate-500 font-medium">Kampus Parung Kuripan</p>
-                </div>
-                <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
-            </button>
-        </div>
+        <p class="text-slate-500 text-[11px] font-bold uppercase tracking-widest ml-1">Pilih Lokasi Latihan</p>
+
+<button onclick="navToPelet('Jakarta')" class="w-full glass p-5 rounded-3xl flex items-center gap-4 transition-all active:scale-[0.97]">
+    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center overflow-hidden">
+        <img src="icona.png" 
+             onerror="this.src='https://img.icons8.com/color/48/monument.png'"
+             alt="Jakarta" class="w-9 h-9 object-contain">
     </div>
+    <div class="text-left flex-1">
+        <h3 class="font-bold text-white uppercase text-sm tracking-wide">KAMPUS JAKARTA</h3>
+        <p class="text-[10px] text-slate-500 font-medium">Rooftop UNUSIA Jakarta</p>
+    </div>
+    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
+</button>
+
+<button onclick="navToPelet('Bogor')" class="w-full glass p-5 rounded-3xl flex items-center gap-4 transition-all active:scale-[0.97]">
+    <div class="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center overflow-hidden">
+        <img src="iconb.png" 
+             onerror="this.src='https://img.icons8.com/color/48/sword.png'"
+             alt="Bogor" class="w-9 h-9 object-contain">
+    </div>
+    <div class="text-left flex-1">
+        <h3 class="font-bold text-white uppercase text-sm tracking-wide">KAMPUS BOGOR</h3>
+        <p class="text-[10px] text-slate-500 font-medium">GOR UNUSIA Bogor</p>
+    </div>
+    <i class="fas fa-chevron-right text-slate-700 text-xs"></i>
+</button>
+        </div>
+        <div class="h-32"></div> </div>
 
     <div id="page-pelet" class="page">
         <div class="flex items-center gap-4 mb-10">
@@ -170,7 +174,7 @@
             </button>
             <h2 id="display-kampus" class="text-xl font-extrabold text-white tracking-tight uppercase">Kampus</h2>
         </div>
-        <div id="pelet-list" class="space-y-8"></div>
+        <div id="pelet-list" class="space-y-8 pb-32"></div>
     </div>
 
     <div id="page-daftar" class="page">
@@ -202,7 +206,6 @@
                 </button>
             </div>
         </div>
-        
 
         <div id="loading" class="hidden space-y-4 mt-6">
             <div class="h-20 w-full glass rounded-2xl shimmer"></div>
@@ -210,12 +213,13 @@
             <div class="h-20 w-full glass rounded-2xl shimmer"></div>
         </div>
 
-        <div id="santri-grid" class="grid grid-cols-1 gap-3 mt-6 mb-36"></div>
+        <div id="santri-grid" class="grid grid-cols-1 gap-3 mt-6 pb-60"></div>
 
-        <div class="fixed bottom-20 left-0 w-full p-6 z-[60]">
-            <button id="btn-submit" onclick="confirmSubmit()" class="w-full max-w-[432px] mx-auto py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-2xl shadow-emerald-900/40 transition-all active:scale-[0.98] flex items-center justify-center gap-3 border border-emerald-400/20">
-                <span id="btn-text" class="text-sm tracking-widest uppercase">SIMPAN ABSENSI</span>
-                <i class="fas fa-paper-plane text-[12px] opacity-70"></i>
+        <div class="fixed bottom-[100px] left-0 right-0 flex justify-center px-8 z-[60]">
+            <button id="btn-submit" onclick="confirmSubmit()" 
+                class="w-full max-w-[380px] py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all active:scale-[0.95] flex items-center justify-center gap-3 border border-white/10">
+                <span id="btn-text" class="text-xs tracking-[0.2em] font-black uppercase">SIMPAN ABSENSI</span>
+                <i class="fas fa-paper-plane text-[10px] opacity-70"></i>
             </button>
         </div>
     </div>
@@ -239,11 +243,10 @@
             </div>
         </div>
 
-        <div id="rekap-container" class="space-y-3 mb-24">
-            </div>
+        <div id="rekap-container" class="space-y-3 pb-40"></div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 w-full nav-blur z-[100] px-6 py-4 flex justify-around items-center">
+    <nav class="fixed bottom-0 left-0 w-full nav-blur z-[100] px-6 pt-4 pb-8 flex justify-around items-center">
         <button onclick="showPage('page-kampus')" class="nav-item flex flex-col items-center gap-1 text-slate-500 active" id="nav-absen">
             <i class="fas fa-user-check text-lg"></i>
             <span class="text-[9px] font-bold uppercase tracking-wider">Absen</span>
@@ -263,14 +266,12 @@
             }
         };
 
-        // Tambahkan rekapData: []
         let state = { kampus: '', tingkat: '', pelet: '', data: [], rekapData: [] };
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             
-            // Nav Highlighting
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             if(id === 'page-rekap') {
                 document.getElementById('nav-rekap').classList.add('active');
@@ -412,36 +413,42 @@
                     location.reload();
                 } catch (e) {
                     alert("Gagal mengirim.");
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50');
-                    btnText.innerText = "SIMPAN ABSENSI";
+                    resetSubmitButton();
                 }
             }, (error) => {
                 alert("Gagal mengambil lokasi. Pastikan GPS aktif.");
-                btn.disabled = false;
-                btn.classList.remove('opacity-50');
-                btnText.innerText = "SIMPAN ABSENSI";
+                resetSubmitButton();
             }, { enableHighAccuracy: true });
         }
 
-        // FUNGSI REKAP BARU
-        async function loadRekap() {
-        showPage('page-rekap');
-        const container = document.getElementById('rekap-container');
-        container.innerHTML = `<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-emerald-500"></i></div>`;
-        
-        try {
-            const res = await fetch(CONFIG.API + "?action=getRekap");
-            state.rekapData = await res.json(); // Simpan ke state
-            renderRekap(state.rekapData); // Gunakan fungsi render terpisah
-        } catch (e) {
-            container.innerHTML = `<p class="text-center text-red-400 text-xs py-10">Gagal memuat rekap.</p>`;
-        }
+        function resetSubmitButton() {
+            const btn = document.getElementById('btn-submit');
+            const btnText = document.getElementById('btn-text');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50');
+            btnText.innerText = "SIMPAN ABSENSI";
         }
 
-        // Fungsi render baru agar mudah difilter
+        async function loadRekap() {
+            showPage('page-rekap');
+            const container = document.getElementById('rekap-container');
+            container.innerHTML = `<div class="text-center py-10"><i class="fas fa-circle-notch fa-spin text-emerald-500 text-2xl"></i></div>`;
+            
+            try {
+                const res = await fetch(CONFIG.API + "?action=getRekap");
+                state.rekapData = await res.json();
+                renderRekap(state.rekapData);
+            } catch (e) {
+                container.innerHTML = `<p class="text-center text-red-400 text-xs py-10">Gagal memuat rekap.</p>`;
+            }
+        }
+
         function renderRekap(dataList) {
             const container = document.getElementById('rekap-container');
+            if(dataList.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-500 text-xs py-10">Data tidak ditemukan</p>`;
+                return;
+            }
             container.innerHTML = dataList.map(item => `
                 <div class="rekap-card glass p-4 rounded-2xl flex items-center justify-between border border-white/5">
                     <div class="overflow-hidden">
@@ -454,32 +461,28 @@
                     </div>
                 </div>`).join('');
         }
+
         function filterRekap() {
-    const query = document.getElementById('search-rekap').value.toLowerCase();
-    const filtered = state.rekapData.filter(item => 
-        item.nama.toLowerCase().includes(query) || 
-        item.pelet.toLowerCase().includes(query)
-    );
-    renderRekap(filtered);
-}
+            const query = document.getElementById('search-rekap').value.toLowerCase();
+            const filtered = state.rekapData.filter(item => 
+                item.nama.toLowerCase().includes(query) || 
+                item.pelet.toLowerCase().includes(query)
+            );
+            renderRekap(filtered);
+        }
 
-function exportToExcel() {
-    if (state.rekapData.length === 0) return alert("Tidak ada data untuk diekspor");
-    
-    // Format data untuk Excel
-    const dataToExport = state.rekapData.map(item => ({
-        "Nama Santri": item.nama,
-        "Pelet": item.pelet,
-        "Total Kehadiran": item.total
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absensi");
-    
-    // Download file
-    XLSX.writeFile(workbook, `Rekap_Absensi_PagarNusa_${new Date().toLocaleDateString()}.xlsx`);
-}
+        function exportToExcel() {
+            if (state.rekapData.length === 0) return alert("Tidak ada data untuk diekspor");
+            const dataToExport = state.rekapData.map(item => ({
+                "Nama Santri": item.nama,
+                "Pelet": item.pelet,
+                "Total Kehadiran": item.total
+            }));
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Absensi");
+            XLSX.writeFile(workbook, `Rekap_Absensi_PagarNusa_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
     </script>
 </body>
 </html>
