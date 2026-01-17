@@ -297,10 +297,12 @@
         if (d === 1) return t <= 1439;
         if (d === 2) return true;
         if (d === 3 || d === 4 || d === 5) return t <= 1439;
-        if (d === 6) return (t <= 420) || (t >= 720);
+        
+        // Perubahan di sini: Sabtu (d === 6) tutup jam 14.00 (840) sampai 18.00 (1080)
+        if (d === 6) return (t < 840) || (t > 1080);
+        
         if (d === 0) return true;
     } else if (kampus === "Jakarta") {
-        // Kembali ke semula: Senin & Rabu jam 18.00-23.59 (1080 menit - 1439 menit) dilarang
         if ((d === 1 || d === 3) && (t >= 1080 && t <= 1439)) return false;
         return true;
     }
@@ -501,4 +503,5 @@
 </script>
 
 </body>
+
 </html>
