@@ -136,7 +136,7 @@
                 </button>
                     <div class="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
                     <button onclick="exportExcel()" class="w-full flex items-center gap-4 px-5 py-4 text-sm font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-2xl transition-all">
-                        <i class="fas fa-file-excel w-5 text-lg"></i> Download
+                        <i class="fas fa-file-excel w-5 text-lg"></i> Export
                     </button>
 
                 </div>
@@ -166,7 +166,7 @@
                     </div>
 
                     <div class="glass-card p-7 rounded-[2rem] bg-gradient-to-br from-primary to-emerald-800 text-white shadow-xl shadow-primary/20">
-                        <p class="text-xs font-bold opacity-80 uppercase tracking-wider">Saldo Bersih Saat Ini</p>
+                        <p class="text-xs font-bold opacity-80 uppercase tracking-wider">TOTAL (Saat Ini)</p>
                         <h2 id="saldoAkhir" class="text-3xl font-extrabold mt-3">Rp 0</h2>
                         <div class="mt-4 h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
                             <div class="h-full bg-secondary animate-pulse" style="width: 100%"></div>
@@ -223,7 +223,7 @@
                                 <tr>
                                     <th class="p-4 text-left">Tanggal</th>
                                     <th class="p-4 text-left">Nama Santri</th>
-                                    <th class="p-4 text-left">Bulan</th>
+                                    <th class="p-4 text-left">Masuk/Keluar</th>
                                     <th class="p-4 text-right">Jumlah</th>
                                     <th class="p-4 text-center">Aksi</th> </tr>
                             </thead>
@@ -255,7 +255,7 @@
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="text-[11px] text-slate-400 uppercase tracking-widest bg-slate-50/50 dark:bg-slate-800/50">
-                                    <th class="p-6 text-left">Tgl Bayar</th>
+                                    <th class="p-6 text-left">Tanggal</th>
                                     <th class="p-6 text-left">Nama Lengkap</th>
                                     <th class="p-6 text-left">Bulan / Periode</th>
                                     <th class="p-6 text-right">Jumlah</th>
@@ -761,5 +761,6 @@ function editIuran(fullDesc, amount, date) {
 </body>
 
 </html>
+
 
 
