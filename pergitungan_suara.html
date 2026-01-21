@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scoring System Final - Anto</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --blue: #007bff;
+            --red: #dc3545;
+            --green: #28a745;
+            --dark: #1a1a1a;
+            --header-h: 80px; /* Tinggi header fix */
+            --status-h: 30px; /* Tinggi status fix */
+        }
+
+        /* MENGHILANGKAN SCROLL TOTAL */
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: var(--bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Header Tetap */
+        header { 
+            height: var(--header-h);
+            background: white; 
+            padding: 0 20px; 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 0.7rem; color: #888; font-weight: bold; text-transform: uppercase; }
+        .stat-number { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+
+        #target-input {
+            border: 2px solid var(--green); border-radius: 10px;
+            font-size: 1.2rem; width: 70px; text-align: center; color: var(--green);
+            font-weight: bold; outline: none; background: #f0fff4;
+        }
+
+        /* Status Bar */
+        #status { 
+            height: var(--status-h);
+            font-size: 0.7rem; 
+            text-align: center; 
+            line-height: var(--status-h);
+            font-weight: bold; 
+            color: var(--green);
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Layout Utama: Kalkulasi sisa tinggi layar */
+        .container { 
+            display: flex; 
+            flex-direction: row; 
+            gap: 15px; 
+            padding: 15px; 
+            box-sizing: border-box;
+            height: calc(100vh - var(--header-h) - var(--status-h));
+            max-width: 100%;
+        }
+
+        /* Card menyesuaikan tinggi container */
+        .card { 
+            flex: 1; 
+            background: white; 
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            position: relative; 
+            border-bottom: 10px solid #ddd;
+            overflow: hidden; /* Mencegah card meluber */
+        }
+
+        .card.blue-side { border-color: var(--blue); }
+        .card.red-side { border-color: var(--red); }
+
+        .name-tag {
+            font-size: 2rem; font-weight: 900; border: none; 
+            text-align: center; width: 100%; margin-bottom: 10px;
+            text-transform: uppercase; outline: none; background: transparent;
+        }
+
+        /* Area Turus: Scroll hanya di dalam kotak ini jika kepenuhan */
+        .tally-area {
+            display: flex; flex-wrap: wrap; gap: 8px; 
+            justify-content: center; align-content: flex-start;
+            overflow-y: auto; 
+            flex-grow: 1; 
+            padding-bottom: 40px;
+            scrollbar-width: none; /* Hilangkan scrollbar Firefox */
+        }
+        .tally-area::-webkit-scrollbar { display: none; } /* Hilangkan scrollbar Chrome/Safari */
+
+        .tally-box {
+            font-size: 1.5rem; font-family: monospace; font-weight: bold;
+            background: #f8f9fa; padding: 5px 12px; border-radius: 10px;
+            border: 1px solid #eee; letter-spacing: 3px; position: relative;
+        }
+
+        .slash {
+            position: absolute; left: 5px; right: 5px; top: 50%;
+            height: 3px; background: var(--red);
+            transform: translateY(-50%) rotate(-25deg);
+            border-radius: 2px;
+        }
+
+        /* Angka Total Tetap Menempel di Bawah Card */
+        .big-number-bg {
+            font-size: 6rem; font-weight: 900; 
+            color: rgba(40, 167, 69, 0.35); 
+            position: absolute; bottom: -5px; right: 15px;
+            pointer-events: none; line-height: 1;
+            z-index: 10;
+        }
+
+        /* Popup Konfirmasi */
+        #popup {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 1000;
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        }
+
+        .popup-card {
+            background: white; padding: 40px; border-radius: 30px;
+            text-align: center; width: 80%; max-width: 400px;
+        }
+
+        /* Penyesuaian HP */
+        @media (max-width: 768px) {
+            .container { flex-direction: column; overflow-y: hidden; }
+            .name-tag { font-size: 1.5rem; }
+            .big-number-bg { font-size: 4rem; }
+            .stat-number { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="popup">
+    <div class="popup-card">
+        <h2 style="color:#aaa; letter-spacing:2px; font-size: 0.8rem;">KONFIRMASI SUARA</h2>
+        <h1 id="pending-name" style="font-size: 2.5rem; margin: 15px 0;">NAMA</h1>
+        <div style="background: var(--green); color: white; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 1.2rem;">TEKAN [ ENTER ]</div>
+        <p style="margin-top: 10px; color: #888; font-size: 0.8rem;">ESC untuk Batal</p>
+    </div>
+</div>
+
+<header>
+    <div class="stat-box">
+        <div class="stat-label">Total Suara</div>
+        <input type="number" id="target-input" value="20" onchange="updateTarget()">
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">MASUK</div>
+        <div id="total-masuk" class="stat-number">0</div>
+    </div>
+    <div class="stat-box">
+        <div class="stat-label">Sisa Suara</div>
+        <div id="total-sisa" class="stat-number" style="color:var(--red)">0</div>
+    </div>
+</header>
+<div id="status">● Lifetime Sync Active</div>
+
+<div class="container">
+    <div class="card blue-side">
+        <input type="text" id="name-kiri" class="name-tag" value="CALON 01" style="color:var(--blue)" onchange="updateNames()">
+        <div id="tally-kiri" class="tally-area"></div>
+        <div id="num-kiri" class="big-number-bg">0</div>
+    </div>
+
+    <div class="card red-side">
+        <input type="text" id="name-kanan" class="name-tag" value="CALON 02" style="color:var(--red)" onchange="updateNames()">
+        <div id="tally-kanan" class="tally-area"></div>
+        <div id="num-kanan" class="big-number-bg">0</div>
+    </div>
+</div>
+
+<script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbzzVF6ytK7_KCtKOWzZGTSqGXIm99JlmHT-rtdvsdK0KQC2nwDo-yLFwxXz0HAxYzFK/exec'; 
+
+    let localData = { kiri: 0, kanan: 0, target: 20 };
+    let pendingSide = null;
+    let isSyncing = false;
+
+    function render() {
+        const total = localData.kiri + localData.kanan;
+        document.getElementById('target-input').value = localData.target;
+        document.getElementById('total-masuk').innerText = total;
+        document.getElementById('total-sisa').innerText = Math.max(0, localData.target - total);
+        
+        document.getElementById('num-kiri').innerText = localData.kiri;
+        document.getElementById('num-kanan').innerText = localData.kanan;
+
+        document.getElementById('tally-kiri').innerHTML = getTallyHTML(localData.kiri);
+        document.getElementById('tally-kanan').innerHTML = getTallyHTML(localData.kanan);
+    }
+
+    function getTallyHTML(num) {
+        let html = '';
+        for (let i = 0; i < Math.floor(num/5); i++) html += '<div class="tally-box">IIII<div class="slash"></div></div>';
+        if (num % 5 > 0) html += `<div class="tally-box">${'I'.repeat(num % 5)}</div>`;
+        return html;
+    }
+
+    async function fetchCloudData() {
+        if (isSyncing) return;
+        try {
+            const res = await fetch(scriptURL);
+            const cloud = await res.json();
+            localData.kiri = cloud.kiri;
+            localData.kanan = cloud.kanan;
+            localData.target = cloud.target;
+            document.getElementById('name-kiri').value = cloud.nameKiri;
+            document.getElementById('name-kanan').value = cloud.nameKanan;
+            render();
+        } catch (e) { console.error("Sync error"); }
+    }
+
+    async function syncToCloud() {
+        isSyncing = true;
+        const nameKiri = document.getElementById('name-kiri').value;
+        const nameKanan = document.getElementById('name-kanan').value;
+        const params = new URLSearchParams({
+            action: 'updateAll',
+            kiri: localData.kiri,
+            kanan: localData.kanan,
+            target: localData.target,
+            nameKiri: nameKiri,
+            nameKanan: nameKanan
+        });
+
+        try {
+            await fetch(scriptURL, { method: 'POST', body: params });
+        } catch (e) { console.error("Upload error"); }
+        isSyncing = false;
+    }
+
+    window.addEventListener('keydown', async (e) => {
+        if (document.activeElement.tagName === 'INPUT') return;
+
+        if (pendingSide) {
+            if (e.key === 'Enter') {
+                localData[pendingSide]++;
+                document.getElementById('popup').style.display = 'none';
+                render();
+                await syncToCloud();
+                pendingSide = null;
+            } else if (e.key === 'Escape') {
+                pendingSide = null;
+                document.getElementById('popup').style.display = 'none';
+            }
+            return;
+        }
+
+        if (e.key === 'ArrowLeft') showPopup('kiri');
+        if (e.key === 'ArrowRight') showPopup('kanan');
+    });
+
+    function showPopup(side) {
+        pendingSide = side;
+        const name = document.getElementById('name-' + side).value;
+        document.getElementById('pending-name').innerText = name;
+        document.getElementById('popup').style.display = 'flex';
+    }
+
+    function updateTarget() { localData.target = parseInt(document.getElementById('target-input').value); syncToCloud(); }
+    function updateNames() { syncToCloud(); }
+
+    setInterval(fetchCloudData, 6000);
+    fetchCloudData(); 
+</script>
+
+</body>
+</html>

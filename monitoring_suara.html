@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LIVE COUNT - PAGARNUSA UNUSIA</title>
+    <link rel="icon" href="logopn.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1B7548',
+                        primaryDark: '#145c38',
+                        accent: '#FFB800',
+                        slate900: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .hero-gradient { background: linear-gradient(135deg, #1B7548 0%, #064e3b 100%); }
+        .text-gradient { background: linear-gradient(to right, #FFB800, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Style Khusus Monitoring */
+        .progress-container {
+            height: 45px; background: #e2e8f0; border-radius: 999px; overflow: hidden;
+            display: flex; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .bar-kiri { background: #007bff; height: 100%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.875rem; }
+        .bar-kanan { background: #dc3545; height: 100%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 0.875rem; }
+        
+        .status-blink {
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+
+    <div class="bg-slate-900 text-white py-2.5 text-[10px] font-bold tracking-widest hidden md:block border-b border-white/5">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-6">
+                <span><i class="fas fa-envelope text-accent mr-2"></i> uktpagarnusa.my.id</span>
+                <span><i class="fas fa-clock text-accent mr-2"></i> LIVE MONITORING SYSTEM</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="digital-clock" class="bg-primary px-3 py-1 rounded">00:00:00</span>
+            </div>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-[100] bg-primary/95 backdrop-blur-md text-white shadow-2xl">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-3 group">
+                <div class="bg-white p-1 rounded-lg transform group-hover:rotate-12 transition shrink-0">
+                    <img src="logopn.png" alt="Logo" class="h-10 md:h-12">
+                </div>
+                <div class="leading-tight">
+                    <span class="block text-lg md:text-xl font-black tracking-tighter uppercase">PAGARNUSA</span>
+                    <span class="block text-[9px] uppercase tracking-[0.3em] text-accent font-bold">UNUSIA JAKARTA</span>
+                </div>
+            </a>
+            <nav class="hidden lg:flex items-center space-x-2 font-bold text-[11px] tracking-widest">
+                <a href="index.html" class="px-4 py-2 hover:text-accent transition">Beranda</a>
+                <a href="#" class="lg:ml-6 bg-accent text-slate-900 px-7 py-3 rounded-full font-black shadow-xl">REAL-TIME COUNT</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero-gradient text-white py-12 md:py-20 relative overflow-hidden">
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-12" data-aos="fade-down">
+                <div class="inline-flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-full border border-white/20 mb-6">
+                    <span class="w-2 h-2 bg-red-500 rounded-full status-blink"></span>
+                    <span class="text-[10px] font-black tracking-widest uppercase">Live Monitoring</span>
+                </div>
+                <h1 class="text-3xl md:text-6xl font-black leading-tight tracking-tighter mb-4">
+                    HASIL PERHITUNGAN <span class="text-accent">SUARA</span>
+                </h1>
+                <p class="text-emerald-50/80 font-medium italic border-t border-white/10 pt-4">
+                    Pemilihan Ketua Umum UKM Pencak Silat <br>Universitas Nahdlatul Ulama Indonesia
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto" data-aos="zoom-in">
+                <div class="bg-white rounded-[2rem] p-6 md:p-10 shadow-2xl mb-8">
+                    <div class="flex justify-between mb-4 font-black text-slate-900 text-sm md:text-xl uppercase tracking-tighter">
+                        <span id="label-kiri" class="text-blue-600">MEMUAT...</span>
+                        <span id="label-kanan" class="text-red-600">MEMUAT...</span>
+                    </div>
+                    
+                    <div class="progress-container mb-6">
+                        <div id="bar-kiri" class="bar-kiri" style="width: 50%">0%</div>
+                        <div id="bar-kanan" class="bar-kanan" style="width: 50%">0%</div>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div class="text-left">
+                            <p class="text-[10px] text-slate-400 font-black uppercase">Total Suara 01</p>
+                            <h3 id="val-kiri" class="text-2xl md:text-4xl font-black text-blue-600">0</h3>
+                        </div>
+                        <div class="text-center bg-slate-100 px-4 py-2 rounded-2xl">
+                            <p class="text-[10px] text-slate-400 font-black uppercase">Update Terakhir</p>
+                            <p id="update-time" class="text-xs font-bold text-slate-600">Menghubungkan...</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-400 font-black uppercase">Total Suara 02</p>
+                            <h3 id="val-kanan" class="text-2xl md:text-4xl font-black text-red-600">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[2rem] p-6 md:p-10 shadow-2xl">
+                    <h4 class="text-slate-900 font-black text-center mb-8 uppercase tracking-widest text-xs">Visualisasi Grafik Batang</h4>
+                    <div class="h-[300px] flex justify-center">
+                        <canvas id="liveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate900 text-white pt-20 pb-12">
+        <div class="container mx-auto px-6 text-center">
+            <div class="flex flex-col items-center space-y-6">
+                <img src="logopn.png" class="h-16 bg-white p-2 rounded-2xl">
+                <div>
+                    <span class="text-2xl font-black block tracking-tighter uppercase">PAGARNUSA</span>
+                    <span class="text-[9px] text-accent tracking-[0.3em] uppercase font-bold">UNUSIA JAKARTA</span>
+                </div>
+                <p class="text-slate-500 text-[10px] font-black tracking-widest uppercase">© 2026 PAGARNUSA UNUSIA Jakarta. Hak Cipta Dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        AOS.init();
+
+        // 1. DATA CONFIGURATION
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzzVF6ytK7_KCtKOWzZGTSqGXIm99JlmHT-rtdvsdK0KQC2nwDo-yLFwxXz0HAxYzFK/exec'; 
+        let myChart;
+
+        // 2. DIGITAL CLOCK
+        function startClock() {
+            setInterval(() => {
+                const now = new Date();
+                const timeString = now.getHours().toString().padStart(2, '0') + ":" +
+                                   now.getMinutes().toString().padStart(2, '0') + ":" +
+                                   now.getSeconds().toString().padStart(2, '0');
+                document.getElementById('digital-clock').innerText = timeString;
+            }, 1000);
+        }
+
+        // 3. CHART INITIALIZATION
+        function initChart() {
+            const ctx = document.getElementById('liveChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: ['Kandidat 01', 'Kandidat 02'],
+                    datasets: [{
+                        label: 'Perolehan Suara',
+                        data: [0, 0],
+                        backgroundColor: ['#007bff', '#dc3545'],
+                        borderRadius: 15,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            grid: { display: false }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false } 
+                    }
+                }
+            });
+        }
+
+        // 4. SYNC DATA FROM GOOGLE SHEETS
+        async function syncData() {
+            try {
+                const response = await fetch(scriptURL);
+                const data = await response.json();
+                
+                const total = data.kiri + data.kanan;
+                const pKiri = total === 0 ? 50 : (data.kiri / total * 100).toFixed(1);
+                const pKanan = total === 0 ? 50 : (data.kanan / total * 100).toFixed(1);
+
+                // Update UI Labels
+                document.getElementById('label-kiri').innerText = data.nameKiri;
+                document.getElementById('label-kanan').innerText = data.nameKanan;
+                document.getElementById('val-kiri').innerText = data.kiri;
+                document.getElementById('val-kanan').innerText = data.kanan;
+                
+                // Update Bars
+                document.getElementById('bar-kiri').style.width = pKiri + "%";
+                document.getElementById('bar-kiri').innerText = pKiri + "%";
+                document.getElementById('bar-kanan').style.width = pKanan + "%";
+                document.getElementById('bar-kanan').innerText = pKanan + "%";
+
+                // Update Chart
+                myChart.data.labels = [data.nameKiri, data.nameKanan];
+                myChart.data.datasets[0].data = [data.kiri, data.kanan];
+                myChart.update();
+
+                // Update Timestamp
+                const now = new Date();
+                document.getElementById('update-time').innerText = now.toLocaleTimeString('id-ID');
+
+            } catch (e) {
+                console.error("Sync Error");
+                document.getElementById('update-time').innerText = "Koneksi Terputus...";
+            }
+        }
+
+        // RUN ALL
+        initChart();
+        startClock();
+        syncData();
+        setInterval(syncData, 5000); // Sinkronisasi setiap 5 detik
+    </script>
+</body>
+</html>
