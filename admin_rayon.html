@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMINISTRASI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { pnGreen: '#1B7548', pnDark: '#0b3d26', pnAccent: '#ffcc00' },
+                    borderRadius: { '4xl': '2rem', '5xl': '3rem' }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @media (max-width: 1024px) {
+            #sidebar {
+                width: 75%; /* Agar tidak menutupi seluruh layar HP */
+                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            }
+            .sidebar-open {
+                transform: translateX(0) !important;
+            }
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); }
+        .nav-active { background: #ffcc00 !important; color: #0b3d26 !important; font-weight: 800; transform: scale(1.05); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .loader { border-top-color: #1B7548; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .gradient-pn { background: linear-gradient(135deg, #1B7548 0%, #0b3d26 100%); }
+    </style>
+</head>
+<body class="bg-[#F8FAFC] min-h-screen overflow-x-hidden">
+    <aside id="sidebar" onclick="closeSidebarIfMobile()" class="fixed left-0 top-0 h-screen w-80 bg-pnDark text-white z-50 transition-all duration-500 transform -translate-x-full lg:translate-x-0">
+        <div class="p-10 flex flex-col h-full">
+            <div class="flex items-center gap-5 mb-12">
+                <div class="bg-white p-2 rounded-3xl shadow-2xl w-16 h-16 shrink-0 flex items-center justify-center">
+                    <img src="logopn.png" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold text-pnAccent leading-none">PSNU PAGARNUSA</h1>
+                    <p class="text-[9px] font-bold opacity-50 tracking-tighter mt-1 uppercase">Rayon UNUSIA</p>
+                </div>
+            </div>
+
+            <nav class="space-y-2 flex-grow">
+                <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-4 ml-4">Main Dashboard</p>
+                <button onclick="switchTab('Dashboard')" class="nav-btn w-full flex items-center gap-4 p-5 rounded-[2rem] transition-all hover:bg-white/5">
+                    <i class="fas fa-layer-group text-lg"></i> <span class="text-sm font-bold">Ringkasan</span>
+                </button>
+                <button onclick="switchTab('Anggota')" class="nav-btn w-full flex items-center gap-4 p-5 rounded-[2rem] transition-all hover:bg-white/5">
+                    <i class="fas fa-id-card-alt text-lg"></i> <span class="text-sm font-bold">Database Anggota</span>
+                </button>
+                <button onclick="switchTab('Persuratan')" class="nav-btn w-full flex items-center gap-4 p-5 rounded-[2rem] transition-all hover:bg-white/5">
+                    <i class="fas fa-file-signature text-lg"></i> <span class="text-sm font-bold">Arsip Surat</span>
+                </button>
+                <button onclick="switchTab('Keuangan')" class="nav-btn w-full flex items-center gap-4 p-5 rounded-[2rem] transition-all hover:bg-white/5">
+                    <i class="fas fa-vault text-lg"></i> <span class="text-sm font-bold">Kas Organisasi</span>
+                </button>
+                <button onclick="switchTab('Inventaris')" class="nav-btn w-full flex items-center gap-4 p-5 rounded-[2rem] transition-all hover:bg-white/5">
+                    <i class="fas fa-boxes-stacked text-lg"></i> <span class="text-sm font-bold">Logistik & Aset</span>
+                </button>
+            </nav>
+
+            <div class="mt-auto pt-10 border-t border-white/5">
+                <div class="bg-white/5 rounded-3xl p-6 relative overflow-hidden group hover:bg-pnAccent/10 transition-colors cursor-pointer" onclick="switchTab('Peraturan')">
+                    <i class="fas fa-scroll absolute -right-2 -bottom-2 text-5xl opacity-10 group-hover:rotate-12 transition-transform"></i>
+                    <p class="text-[10px] font-black text-pnAccent mb-1">RELEVANSI</p>
+                    <h4 class="text-xs font-bold leading-tight uppercase">Hasil Rakernas 2024</h4>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="lg:ml-80 transition-all duration-500">
+        
+        <header class="sticky top-0 z-40 glass px-6 py-6 lg:px-12 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <button onclick="toggleSidebar()" class="lg:hidden w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border border-slate-200">
+                    <i class="fas fa-bars-staggered text-pnDark"></i>
+                </button>
+                <div>
+                    <h2 id="viewTitle" class="text-2xl font-black text-pnDark tracking-tighter uppercase leading-none">Ringkasan</h2>
+                    <p id="viewSubtitle" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Real-time Cloud Database</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="exportToExcel()" class="hidden md:flex bg-white text-pnDark border border-slate-200 px-6 py-4 rounded-2xl items-center gap-3 shadow-sm hover:bg-slate-50 transition-all">
+                    <i class="fas fa-file-excel text-green-600"></i>
+                    <span class="text-xs font-black uppercase tracking-widest">Cetak</span>
+                </button>
+                
+                <button onclick="openModal()" class="gradient-pn text-white px-6 py-4 rounded-2xl flex items-center gap-3 shadow-xl shadow-pnGreen/30 hover:scale-105 active:scale-95 transition-all">
+                    <i class="fas fa-plus-circle text-pnAccent"></i>
+                    <span class="text-xs font-black uppercase tracking-widest">Input Baru</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-6 lg:p-12 space-y-8">
+            <section id="statsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 hover:border-pnGreen transition-all group">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Anggota</p>
+                    <h3 id="stat-Anggota" class="text-3xl font-black text-pnDark italic">0</h3>
+                    <div class="w-full bg-slate-100 h-1.5 mt-3 rounded-full overflow-hidden">
+                        <div class="bg-pnGreen h-full w-2/3"></div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 hover:border-pnGreen transition-all group">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Arsip Surat</p>
+                    <h3 id="stat-Persuratan" class="text-3xl font-black text-pnDark italic">0</h3>
+                    <div class="w-full bg-slate-100 h-1.5 mt-3 rounded-full overflow-hidden">
+                        <div class="bg-pnAccent h-full w-1/2"></div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-4xl shadow-sm border border-slate-100 hover:border-pnGreen transition-all group">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Logistik/Aset</p>
+                    <h3 id="stat-Inventaris" class="text-3xl font-black text-pnDark italic">0</h3>
+                    <div class="w-full bg-slate-100 h-1.5 mt-3 rounded-full overflow-hidden">
+                        <div class="bg-blue-500 h-full w-3/4"></div>
+                    </div>
+                </div>
+                <div class="bg-pnDark p-6 rounded-4xl shadow-xl shadow-pnDark/20 text-white relative overflow-hidden">
+                    <p class="text-[10px] font-black text-white/50 uppercase tracking-widest mb-1">Saldo Kas</p>
+                    <h3 id="stat-Keuangan" class="text-xl font-black text-pnAccent italic">Rp 0</h3>
+                    <div class="mt-3 flex items-center gap-2">
+                        <span class="text-[8px] bg-white/10 px-2 py-1 rounded-full text-white/70">LIVE SYNC</span>
+                    </div>
+                </div>
+                
+            </section>
+            <div id="chartSection" class="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 mt-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h4 class="text-xs font-black uppercase tracking-widest text-pnDark flex items-center gap-2">
+                        <span class="w-1.5 h-4 bg-pnGreen rounded-full"></span> Kurva Aktivitas Organisasi
+                    </h4>
+                </div>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-[4rem] shadow-2xl shadow-slate-200/50 overflow-hidden border border-white min-h-[600px] relative">
+                <div class="p-10 flex flex-col md:row justify-between items-center gap-6">
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <div class="w-2 h-10 bg-pnAccent rounded-full"></div>
+                        <h4 class="text-xl font-black text-pnDark uppercase tracking-tighter" id="tableHeader">Log Aktivitas Terbaru</h4>
+                    </div>
+                    <div class="relative w-full md:w-96" id="searchContainer">
+                        <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                        <input type="text" onkeyup="filterData(this.value)" placeholder="Cari apapun..." class="w-full pl-14 pr-6 py-5 bg-slate-50 rounded-[2rem] border-none focus:ring-4 focus:ring-pnGreen/5 text-sm font-bold transition-all">
+                    </div>
+                </div>
+
+                <div id="contentDisplay" class="overflow-x-auto px-10 pb-10">
+                    <table class="w-full text-left" id="mainTable">
+                        <thead id="tHead" class="text-[10px] font-black uppercase text-slate-400 tracking-widest bg-slate-50/50"></thead>
+                        <tbody id="tBody" class="text-sm divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+
+                <div id="peraturanView" class="hidden p-10 space-y-8">
+                    <div class="bg-pnDark rounded-5xl p-12 text-white relative overflow-hidden shadow-2xl border-b-8 border-pnAccent">
+                        <img src="/assets/logopn.png" class="absolute -right-20 -bottom-20 w-96 opacity-5 rotate-12">
+                        <div class="relative z-10 max-w-2xl">
+                            <span class="bg-pnAccent text-pnDark px-4 py-1 rounded-full text-[10px] font-black uppercase mb-6 inline-block tracking-widest">Legalitas Terbaru</span>
+                            <h2 class="text-4xl font-black italic tracking-tighter mb-4 leading-none text-pnAccent">PO & PEDOMAN ORGANISASI</h2>
+                            <p class="text-white/80 text-xs font-bold leading-relaxed uppercase tracking-widest">Berdasarkan Keputusan Rakernas No: 002/RAKERNAS/PP-IV/VIII/2024</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white p-8 rounded-4xl border border-slate-100 shadow-sm">
+                            <div class="w-10 h-10 bg-pnGreen text-white rounded-full flex items-center justify-center mb-4 font-black">01</div>
+                            <h5 class="font-black text-pnDark text-xs uppercase mb-3 tracking-widest">Landasan Khidmah</h5>
+                            <p class="text-[11px] text-slate-500 leading-relaxed font-semibold">Mewujudkan kemaslahatan dunia & akhirat melalui ajaran Islam Ahlussunnah Wal Jama'ah An Nahdliyah.</p>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-4xl border border-slate-100 shadow-sm">
+                            <div class="w-10 h-10 bg-pnGreen text-white rounded-full flex items-center justify-center mb-4 font-black">02</div>
+                            <h5 class="font-black text-pnDark text-xs uppercase mb-3 tracking-widest">Perangkat Organisasi</h5>
+                            <p class="text-[11px] text-slate-500 leading-relaxed font-semibold">Rayon mengelola database untuk PASTI, Lembaga Pelatih, Wasit Juri, Pertabiban, Advokasi, & BAPENA.</p>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-4xl border border-slate-100 shadow-sm">
+                            <div class="w-10 h-10 bg-pnGreen text-white rounded-full flex items-center justify-center mb-4 font-black">03</div>
+                            <h5 class="font-black text-pnDark text-xs uppercase mb-3 tracking-widest">Ketaatan Aturan</h5>
+                            <p class="text-[11px] text-slate-500 leading-relaxed font-semibold">Seluruh keputusan administratif wajib merujuk pada AD/ART NU dan Peraturan Organisasi Pagar Nusa.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-2xl flex items-start gap-4">
+                        <i class="fas fa-info-circle text-amber-500 mt-1"></i>
+                        <p class="text-[11px] text-amber-800 font-bold leading-relaxed">
+                            Catatan: Sistem ini otomatis menyesuaikan dengan hasil Sidang Pleno III Rakernas Jombang, 20 Agustus 2024. Segala bentuk perubahan data wajib melalui persetujuan Ketua Rayon.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-6 bg-pnDark/80 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-xl rounded-5xl shadow-2xl overflow-hidden animate-slide">
+            <div class="p-10 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+                <div class="flex items-center gap-5">
+                    <img src="logopn.png" class="w-12 h-12 object-contain">
+                    <div>
+                        <h3 class="font-black text-pnDark uppercase tracking-tighter text-lg">Entri Data Baru</h3>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Sinkronisasi Cloud Aktif</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 hover:text-red-500"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form id="entryForm" class="p-10 space-y-6">
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Pilih Modul</label>
+                        <select id="f-type" onchange="buildForm()" class="w-full p-5 bg-slate-100 rounded-3xl border-none font-bold text-sm focus:ring-4 focus:ring-pnGreen/10 outline-none">
+                            <option value="Anggota">Anggota</option>
+                            <option value="Persuratan">Surat</option>
+                            <option value="Keuangan">Keuangan</option>
+                            <option value="Inventaris">Inventaris</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Tanggal</label>
+                        <input type="date" id="f-date" required class="w-full p-5 bg-slate-100 rounded-3xl border-none font-bold text-sm focus:ring-4 focus:ring-pnGreen/10 outline-none">
+                    </div>
+                </div>
+                <div id="dynamicInputs" class="space-y-6"></div>
+                <button type="submit" id="submitBtn" class="w-full py-6 gradient-pn text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-pnGreen/40 hover:scale-105 active:scale-95 transition-all">Simpan Data</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+        // CONFIGURATION
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyNaoU1NmFa0AV1n8w4fb3AZDn-7k1J6VKl-f-iJ_iq_KBgxb9HaWtbD5cZRLZ5J4P8/exec"; 
+
+        let allData = [];
+        let currentTab = 'Dashboard';
+
+        window.onload = () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            fetchData(); // Menjalankan pengambilan data langsung
+        };
+
+        function updateClock() {
+            const n = new Date();
+            document.getElementById('clock').innerText = n.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            document.getElementById('date').innerText = n.toLocaleDateString('id-ID', {weekday:'long', day:'numeric', month:'short', year:'numeric'});
+        }
+
+        async function fetchData() {
+            // LOADING OVERLAY DIHAPUS agar lebih instan
+            try {
+                if(SCRIPT_URL === "MASUKKAN_URL_WEB_APP_ANDA_DI_SINI") {
+                    allData = JSON.parse(localStorage.getItem('pn_cloud_db')) || [];
+                } else {
+                    const response = await fetch(SCRIPT_URL + "?action=read");
+                    allData = await response.json();
+                }
+                switchTab(currentTab);
+            } catch (e) {
+                console.error("Gagal ambil data", e);
+                allData = JSON.parse(localStorage.getItem('pn_cloud_db')) || [];
+                switchTab(currentTab);
+            }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('viewTitle').innerText = tab;
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('nav-active', b.innerText.includes(tab)));
+            
+            const isP = tab === 'Peraturan';
+            
+            document.getElementById('peraturanView').classList.toggle('hidden', !isP);
+            document.getElementById('contentDisplay').classList.toggle('hidden', isP);
+            document.getElementById('statsGrid').classList.toggle('hidden', isP);
+            document.getElementById('searchContainer').classList.toggle('hidden', isP);
+            
+            if(!isP) {
+                renderTable();
+                updateStats();
+            }
+            closeSidebarIfMobile(); // Menutup menu otomatis di HP
+        }
+
+        function renderTable() {
+            const head = document.getElementById('tHead');
+            const body = document.getElementById('tBody');
+            body.innerHTML = '';
+            
+            const cols = {
+                'Dashboard': ['Waktu', 'Modul', 'Subjek', 'Status', 'AKSI'],
+                'Anggota': ['Tgl Gabung', 'Nama Lengkap', 'Tingkatan', 'NIM/Jurusan', 'AKSI'],
+                'Persuratan': ['Tgl Surat', 'No. Surat', 'Perihal', 'Jenis', 'AKSI'],
+                'Keuangan': ['Tgl', 'Deskripsi', 'Tipe', 'Nominal', 'AKSI'],
+                'Inventaris': ['Tgl', 'Nama Aset', 'Kondisi', 'Jumlah', 'AKSI']
+            };
+            
+            const activeCols = cols[currentTab] || cols['Dashboard'];
+            head.innerHTML = `<tr>${activeCols.map(c => `<th class="px-8 py-6">${c}</th>`).join('')}</tr>`;
+
+            const displayData = currentTab === 'Dashboard' ? allData : allData.filter(x => x.type === currentTab);
+            
+            displayData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-50";
+                
+                let row = ``;
+                if(currentTab === 'Keuangan') {
+                    const c = item.v2 === 'Masuk' ? 'text-pnGreen' : 'text-red-500';
+                    row = `<td class="px-8 py-6 text-[11px] font-bold text-slate-400">${item.date}</td>
+                        <td class="font-bold text-pnDark">${item.v1}</td>
+                        <td><span class="bg-slate-100 px-3 py-1 rounded-full text-[10px] font-black uppercase">${item.v2}</span></td>
+                        <td class="${c} font-black">Rp ${parseInt(item.v3).toLocaleString('id-ID')}</td>`;
+                } else if(currentTab === 'Dashboard') {
+                    row = `<td class="px-8 py-6 text-[11px] font-bold text-slate-400">${item.date}</td>
+                        <td class="text-pnGreen font-black text-[10px] uppercase">${item.type}</td>
+                        <td class="font-bold text-pnDark">${item.v1}</td>
+                        <td class="italic opacity-60 text-xs">${item.v2}</td>`;
+                } else if(currentTab === 'Anggota') {
+                    // Update: Tampilan Foto Anggota di Tabel
+                    const fotoHtml = item.v3 
+                        ? `<img src="${item.v3}" class="w-10 h-10 rounded-full object-cover border-2 border-pnGreen shadow-sm">` 
+                        : `<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs font-black">PN</div>`;
+
+                    row = `<td class="px-8 py-6 text-[11px] font-bold text-slate-400">${item.date}</td>
+                        <td class="font-bold text-pnDark flex items-center gap-3">
+                            ${fotoHtml} 
+                            <span>${item.v1}</span>
+                        </td>
+                        <td class="text-xs font-semibold text-slate-600">${item.v2}</td>
+                        <td class="text-xs font-medium text-slate-500">${item.v3 || '-'}</td>`;
+                } else {
+                    row = `<td class="px-8 py-6 text-[11px] font-bold text-slate-400">${item.date}</td>
+                        <td class="font-bold text-pnDark">${item.v1}</td>
+                        <td class="text-xs font-semibold text-slate-600">${item.v2}</td>
+                        <td class="text-xs font-medium text-slate-500">${item.v3}</td>`;
+                }
+
+                tr.innerHTML = `${row} 
+                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="editData('${item.id}')" class="w-8 h-8 rounded-lg bg-pnGreen/10 text-pnGreen hover:bg-pnGreen hover:text-white transition-all flex items-center justify-center">
+                                <i class="fas fa-edit text-xs"></i>
+                            </button>
+                            <button onclick="deleteData('${item.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
+                                <i class="fas fa-trash-alt text-xs"></i>
+                            </button>
+                        </div>
+                    </td>`;
+                body.appendChild(tr);
+            });
+        }
+
+        function buildForm() {
+            const t = document.getElementById('f-type').value;
+            const c = document.getElementById('dynamicInputs');
+            const inputCls = "w-full p-5 bg-slate-50 rounded-3xl border-none font-bold text-sm focus:ring-4 focus:ring-pnGreen/10 outline-none";
+            
+            let html = '';
+            if(t === 'Anggota') {
+                html = `
+                    <input type="text" id="v1" placeholder="Nama Lengkap" class="${inputCls}" required>
+                    <input type="text" id="v2" placeholder="Jabatan (Siswa/Pelatih/Pengurus)" class="${inputCls}" required>
+                    <label class="text-[10px] font-black text-slate-400 block mt-2 uppercase">Link Foto Drive (Direct Link)</label>
+                    <input type="text" id="v3" placeholder="Paste link foto drive di sini" class="${inputCls}">
+                `;
+            } else if(t === 'Keuangan') {
+                html = `<input type="text" id="v1" placeholder="Keperluan / Deskripsi" class="${inputCls}" required>
+                        <select id="v2" class="${inputCls}"><option value="Masuk">Pemasukan (+)</option><option value="Keluar">Pengeluaran (-)</option></select>
+                        <input type="number" id="v3" placeholder="Jumlah Nominal (Angka)" class="${inputCls}" required>`;
+            } else if(t === 'Persuratan') {
+                html = `<input type="text" id="v1" placeholder="Nomor Surat Resmi" class="${inputCls}" required>
+                        <input type="text" id="v2" placeholder="Perihal atau Tujuan" class="${inputCls}" required>
+                        <select id="v3" class="${inputCls}"><option>Surat Masuk</option><option>Surat Keluar</option></select>`;
+            } else {
+                html = `<input type="text" id="v1" placeholder="Nama Barang / Alat" class="${inputCls}" required>
+                        <select id="v2" class="${inputCls}"><option>Sangat Baik</option><option>Rusak Ringan</option><option>Rusak Berat</option></select>
+                        <input type="number" id="v3" placeholder="Jumlah Kuantitas" class="${inputCls}" required>`;
+            }
+            c.innerHTML = html;
+        }
+
+        document.getElementById('entryForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fas fa-circle-notch animate-spin"></i> Sinkronisasi...`;
+            btn.disabled = true;
+
+            const payload = {
+                id: editMode ? currentEditId : "ID-" + Date.now(),
+                type: document.getElementById('f-type').value,
+                date: document.getElementById('f-date').value,
+                v1: document.getElementById('v1').value,
+                v2: document.getElementById('v2').value,
+                v3: document.getElementById('v3').value,
+                amt: document.getElementById('f-type').value === 'Keuangan' ? 
+                    (document.getElementById('v2').value === 'Masuk' ? parseInt(document.getElementById('v3').value) : -parseInt(document.getElementById('v3').value)) : 0
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: editMode ? 'update' : 'insert', 
+                        data: payload
+                    })
+                });
+                
+                await fetchData(); 
+                closeModal();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: editMode ? 'Data Diperbarui' : 'Data Disimpan',
+                    text: 'Database Cloud PN UNUSIA telah disinkronkan.',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            } catch (err) {
+                Swal.fire('Gagal!', 'Koneksi ke Cloud terputus.', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        function updateStats() {
+            const types = ['Anggota', 'Persuratan', 'Inventaris'];
+            types.forEach(t => {
+                const count = allData.filter(x => x.type === t).length;
+                const el = document.getElementById(`stat-${t}`);
+                if(el) el.innerText = count;
+            });
+            const saldo = allData.filter(x => x.type === 'Keuangan').reduce((a, b) => a + (b.amt || 0), 0);
+            const elK = document.getElementById('stat-Keuangan');
+            if(elK) elK.innerText = 'Rp ' + saldo.toLocaleString('id-ID');
+        }
+
+        async function deleteData(id) {
+            const itemToDelete = allData.find(x => x.id === id);
+            if (!itemToDelete) return;
+
+            const result = await Swal.fire({
+                title: 'Hapus Data?',
+                text: "Data akan dihapus permanen dari Cloud!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1B7548',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    if (SCRIPT_URL.includes("MASUKKAN_URL")) {
+                        allData = allData.filter(x => x.id !== id);
+                        localStorage.setItem('pn_cloud_db', JSON.stringify(allData));
+                    } else {
+                        await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                action: 'delete',
+                                id: id,
+                                type: itemToDelete.type
+                            })
+                        });
+                        await fetchData();
+                    }
+                    renderTable();
+                    updateStats();
+                    Swal.fire('Terhapus!', 'Data berhasil dibuang dari database.', 'success');
+                } catch (e) {
+                    Swal.fire('Error', 'Gagal menghapus data. Periksa koneksi.', 'error');
+                }
+            }
+        }
+        
+
+        function openModal() { document.getElementById('modal').classList.remove('hidden'); buildForm(); }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+            sidebar.classList.toggle('sidebar-open');
+        }
+
+        function closeSidebarIfMobile() {
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('sidebar-open');
+            }
+        }
+
+        function filterData(q) {
+            const rows = document.querySelectorAll('#tBody tr');
+            rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q.toLowerCase()) ? '' : 'none');
+        }
+
+        let editMode = false;
+        let currentEditId = null;
+
+        function editData(id) {
+            const item = allData.find(x => x.id === id);
+            if (!item) return;
+
+            editMode = true;
+            currentEditId = id;
+            
+            openModal();
+            document.getElementById('f-type').value = item.type;
+            document.getElementById('f-date').value = item.date;
+            
+            buildForm();
+            
+            document.getElementById('v1').value = item.v1;
+            document.getElementById('v2').value = item.v2;
+            document.getElementById('v3').value = item.v3;
+            
+            document.getElementById('submitBtn').innerHTML = "Perbarui Data Cloud";
+        }
+
+        function closeModal() { 
+            document.getElementById('modal').classList.add('hidden'); 
+            editMode = false;
+            currentEditId = null;
+            document.getElementById('entryForm').reset();
+            document.getElementById('submitBtn').innerHTML = "Simpan Data";
+        }
+
+        function exportToExcel() {
+            const table = document.getElementById("mainTable");
+            const wb = XLSX.utils.table_to_book(table, { sheet: currentTab });
+            const fileName = `Laporan_${currentTab}_PN_UNUSIA_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'File Excel sedang diunduh',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    </script>
+</body>
+</html>
