@@ -29,6 +29,9 @@
         color: #1e293b;
         -webkit-tap-highlight-color: transparent;
     }
+    @keyframes shimmer {
+            100% { transform: translateX(100%); }
+        }
 
     /* Glassmorphism Effect */
     .glass-card {
@@ -124,7 +127,7 @@
                     <div class="flex items-center gap-4 bg-white p-2.5 pr-8 rounded-[2rem] shadow-xl border border-slate-100">
                         <div id="avatarSmall" class="w-14 h-14 bg-gradient-to-br from-pnGreen to-pnDark text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-inner border-4 border-white">..</div>
                         <div class="hidden sm:block">
-                            <p id="userSmall" class="text-sm font-black text-slate-800 truncate max-w-[150px]">Memuat...</p>
+                            <p id="userSmall" class="text-sm font-black text-slate-800 italic truncate max-w-[150px]">Memuat...</p>
                             <span class="inline-flex items-center gap-2 text-[9px] text-emerald-600 font-black uppercase tracking-widest mt-1">
                                 <span class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span> Terverifikasi
                             </span>
@@ -280,9 +283,15 @@
                         </div>
                         <button type="button" onclick="navigator.clipboard.writeText('081366203248'); Swal.fire('Tersalin!', 'Nomor Dana berhasil disalin ke papan klip.', 'success')" class="px-6 py-3 bg-slate-100 hover:bg-pnDark hover:text-white rounded-2xl text-[10px] font-black uppercase transition-all shadow-sm">Salin</button>
                     </div>
-                    <a href="https://link.dana.id/minta?full_url=https://qr.dana.id/v1/281012092026012507613151" target="_blank" class="flex items-center justify-center gap-4 w-full shimmer text-white py-6 rounded-[2rem] text-[11px] font-black shadow-2xl shadow-blue-200 transition-all active:scale-95 uppercase italic tracking-[0.2em]">
-                        <i class="fas fa-bolt text-lg"></i> Buka Aplikasi DANA Instan
-                    </a>
+                        <a href="https://link.dana.id/minta?full_url=https://qr.dana.id/v1/281012092026012507613151" 
+                        target="_blank" 
+                        class="flex items-center justify-center gap-4 w-full bg-gradient-to-br from-blue-600 to-blue-400 hover:from-blue-500 hover:to-blue-300 text-white py-6 rounded-[2rem] text-[11px] font-black shadow-xl shadow-blue-200/50 transition-all active:scale-95 uppercase italic tracking-[0.2em] relative overflow-hidden group">
+                            
+                            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                            
+                            <i class="fas fa-bolt text-lg animate-pulse"></i> 
+                            <span class="relative z-10">Buka Aplikasi DANA Instan</span>
+                        </a>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -618,5 +627,4 @@
     }
 </script>
 </body>
-
 </html>
