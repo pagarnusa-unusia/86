@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagar Nusa Store - Official Checkout</title>
+    <link rel="icon" href="logopn.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        tailwind.config = { 
+            theme: { 
+                extend: { 
+                    colors: { 
+                        primary: '#1B7548', 
+                        primaryDark: '#145c38' 
+                    } 
+                } 
+            } 
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; overflow-x: hidden; scroll-behavior: smooth; }
+        [x-cloak] { display: none !important; }
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .slide-up { animation: slideUp 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-bounce:active { transform: scale(0.95); }
+        .cart-item { transition: all 0.3s ease; }
+        .cart-item:hover { transform: translateX(8px); background-color: #ecfdf5; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
+</head>
+<body x-data="checkoutApp()" x-init="init()">
+
+<header class="bg-primary text-white sticky top-0 z-50 shadow-lg backdrop-blur-md bg-opacity-95 border-b border-white/10">
+    <div class="container mx-auto px-6 h-16 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-white p-1.5 rounded-xl shadow-sm">
+                <img src="logopn.png" class="h-7 w-7 object-contain" alt="Logo">
+            </div>
+            <div class="flex flex-col">
+                <span class="font-black leading-none text-xs tracking-wider uppercase">PAGARNUSA</span>
+                <span class="font-light text-[10px] opacity-80 tracking-[0.2em] leading-tight">UNUSIA STORE</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <div x-show="loadingData" 
+                 class="flex items-center gap-2 text-[10px] font-medium bg-black/10 px-2 py-1 rounded-lg">
+                <i class="fas fa-circle-notch animate-spin text-emerald-400"></i>
+                <span class="hidden md:inline">Syncing...</span>
+            </div>
+
+            <div class="relative">
+                <div class="text-[9px] font-black text-primary bg-white px-4 py-1.5 rounded-full shadow-sm tracking-widest flex items-center gap-2">
+                    <span class="opacity-100">PROGRESS</span>
+                    <span x-text="step + ' / 2'"></span>
+                </div>
+                <div class="absolute -bottom-1 left-0 h-[2px] bg-emerald-400 transition-all duration-500 rounded-full" 
+                     :style="'width: ' + (step/2 * 100) + '%'"></div>
+            </div>
+        </div>
+    </div>
+</header>
+
+    <main class="max-w-xl mx-auto p-4 pb-24">
+        
+        <div x-show="showGuide" x-cloak 
+             class="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200">
+            <div class="bg-white rounded-[2rem] p-6 w-full max-w-md max-h-[90vh] overflow-y-auto relative slide-up shadow-2xl" @click.away="showGuide = false">
+                <button @click="showGuide = false" class="absolute top-4 right-4 bg-red-500 text-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center font-bold text-xl z-20 hover:rotate-90 transition-transform">
+                    &times;
+                </button>
+                <div class="space-y-8 p-2">
+                    <div class="text-center">
+                        <h3 class="font-black text-slate-800 text-sm mb-4 uppercase italic">Panduan Ukuran Usia Dini (&lt; TK, SD)</h3>
+                        <div class="overflow-x-auto rounded-xl border border-slate-100">
+                            <table class="w-full text-[10px] border-collapse text-center">
+                                <thead class="bg-slate-50 text-slate-400">
+                                    <tr><th class="border p-2 uppercase">Size</th><th class="border p-2">Lebar</th><th class="border p-2">Atas</th><th class="border p-2">Bawah</th><th class="border p-2">Berat</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">S</td><td class="border p-2">34</td><td class="border p-2">48</td><td class="border p-2">56</td><td class="border p-2 text-red-500">10-15kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">M</td><td class="border p-2">38</td><td class="border p-2">53</td><td class="border p-2">62</td><td class="border p-2 text-red-500">15-20kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">L</td><td class="border p-2">40</td><td class="border p-2">59</td><td class="border p-2">70</td><td class="border p-2 text-red-500">20-25kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">XL</td><td class="border p-2">44</td><td class="border p-2">65</td><td class="border p-2">78</td><td class="border p-2 text-red-500">25-30kg</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="text-center border-t pt-6">
+                        <h3 class="font-black text-slate-800 text-sm mb-4 uppercase italic">Panduan Ukuran (SMP, SMA, Dewasa)</h3>
+                        <div class="overflow-x-auto rounded-xl border border-slate-100">
+                            <table class="w-full text-[10px] border-collapse text-center">
+                                <thead class="bg-slate-50 text-slate-400">
+                                    <tr><th class="border p-2 uppercase">Size</th><th class="border p-2">Atas</th><th class="border p-2">Bawah</th><th class="border p-2">LD</th><th class="border p-2">Berat</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">S</td><td class="border p-2">68</td><td class="border p-2">83</td><td class="border p-2">48</td><td class="border p-2 text-red-500">30-45kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">M</td><td class="border p-2">70</td><td class="border p-2">87</td><td class="border p-2">51</td><td class="border p-2 text-red-500">45-55kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">L</td><td class="border p-2">71</td><td class="border p-2">90</td><td class="border p-2">53</td><td class="border p-2 text-red-500">55-65kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">XL</td><td class="border p-2">73</td><td class="border p-2">93</td><td class="border p-2">56</td><td class="border p-2 text-red-500">65-75kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">XXL</td><td class="border p-2">76</td><td class="border p-2">95</td><td class="border p-2">60</td><td class="border p-2 text-red-500">75-85kg</td></tr>
+                                    <tr class="hover:bg-slate-50"><td class="border p-2 font-bold">XXXL</td><td class="border p-2">82</td><td class="border p-2">98</td><td class="border p-2">65</td><td class="border p-2 text-red-500">85-95kg</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="!isSuccess" class="bg-white rounded-[2.5rem] shadow-xl p-8 border border-slate-100 fade-in">
+            
+            <div x-show="step === 1" x-transition:enter="transition ease-out duration-300" class="space-y-6">
+                <h2 class="text-xl font-black text-slate-800">Identitas Pemesan</h2>
+                <div class="space-y-4">
+                    <div class="relative group">
+                        <label class="text-[10px] font-black text-primary absolute -top-2 left-4 bg-white px-2 group-focus-within:text-emerald-600 transition-colors">Nama Pemesan:</label>
+                        <input type="text" x-model="form.nama" placeholder="Nama Lengkap" class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none text-sm font-semibold transition-all">
+                    </div>
+                    <div class="relative group">
+                        <label class="text-[10px] font-black text-primary absolute -top-2 left-4 bg-white px-2 group-focus-within:text-emerald-600 transition-colors">Email Pemesan:</label>
+                        <input type="email" x-model="form.email" placeholder="contoh@mail.com" class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none text-sm font-semibold transition-all">
+                    </div>
+                    <div class="relative group">
+                        <label class="text-[10px] font-black text-primary absolute -top-2 left-4 bg-white px-2 group-focus-within:text-emerald-600 transition-colors">No Whatsapp:</label>
+                        <input type="tel" x-model="form.wa" placeholder="08xxxxxxxxxx" class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-primary outline-none text-sm font-semibold transition-all">
+                    </div>
+                    <div class="relative group">
+                        <label class="text-[10px] font-black text-primary absolute -top-2 left-4 bg-white px-2 group-focus-within:text-emerald-600 transition-colors">Sebagai:</label>
+                        <select x-model="form.sebagai" class="w-full p-4 rounded-2xl border-2 border-slate-100 bg-white text-sm font-semibold outline-none focus:border-primary appearance-none">
+                            <option value="Wali Santri">Wali Santri</option>
+                            <option value="Pelatih">Pelatih / Pengurus</option>
+                            <option value="Pribadi">Pribadi / Santri</option>
+                        </select>
+                    </div>
+                    <button @click="step = 2" :disabled="!form.nama || !form.wa || !form.email" class="w-full bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:bg-primaryDark transition-all disabled:opacity-50 flex items-center justify-center gap-2 btn-bounce">
+                        Lanjut Pesanan <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-300" class="space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-black text-slate-800 uppercase italic">Detail Pesanan</h2>
+                    <button @click="showGuide = true" class="text-[10px] font-black text-primary underline decoration-2 underline-offset-4 hover:text-primaryDark">
+                        <i class="fas fa-ruler-combined mr-1"></i>Panduan Ukuran
+                    </button>
+                </div>
+                
+                <div class="bg-slate-50 p-5 rounded-[2rem] border-2 border-dashed border-slate-200">
+                    <div class="relative mb-4">
+                        <label class="text-[9px] font-black text-slate-400 absolute -top-2 left-3 bg-slate-50 px-2 uppercase">Lembaga / Jenjang</label>
+                        <select x-model="temp.lembaga" @change="temp.ukuran = ''; temp.qty = 1" class="w-full p-4 rounded-xl border border-slate-200 text-xs font-bold outline-none focus:border-primary bg-white appearance-none">
+                            <option value="">-- Pilih Lembaga --</option>
+                            <template x-for="l in daftarLembaga"><option :value="l" x-text="l"></option></template>
+                        </select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 mb-4" x-show="temp.lembaga">
+                        <template x-for="s in listUkuranTersedia">
+                            <button @click="selectSize(s)" 
+                                :disabled="getRemainingStock(s) <= 0"
+                                :class="[
+                                    temp.ukuran === s.ukuran ? 'bg-primary text-white border-primary shadow-md scale-[1.02]' : 'bg-white text-slate-600 border-slate-100',
+                                    getRemainingStock(s) <= 0 ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:border-primary/30'
+                                ]"
+                                class="p-3 rounded-xl border-2 text-[10px] font-black transition-all flex flex-col items-center btn-bounce">
+                                <span x-text="s.ukuran"></span>
+                                <span class="text-[8px] opacity-70" x-text="getRemainingStock(s) > 0 ? 'Sisa: ' + getRemainingStock(s) : 'Habis'"></span>
+                            </button>
+                        </template>
+                    </div>
+
+                    <div x-show="temp.ukuran" class="mb-4 flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 fade-in">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">Kuantitas:</span>
+                        <div class="flex items-center gap-3">
+                            <button @click="if(temp.qty > 1) temp.qty--" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">-</button>
+                            <input type="number" x-model.number="temp.qty" @input="validateQty" class="w-10 text-center font-black text-primary text-sm bg-transparent outline-none">
+                            <button @click="if(temp.qty < temp.availableLimit) temp.qty++" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">+</button>
+                        </div>
+                    </div>
+
+                    <button @click="addItem" :disabled="!temp.ukuran || temp.availableLimit <= 0" class="w-full bg-slate-800 text-white text-[10px] font-black py-4 rounded-xl shadow-lg hover:bg-black transition-all flex items-center justify-center gap-2 btn-bounce disabled:opacity-50">
+                        <i class="fas fa-plus-circle"></i> TAMBAH <span class="bg-white/20 px-2 py-0.5 rounded mx-1" x-text="temp.qty"></span> KE PESANAN
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <template x-for="(item, index) in cart" :key="index">
+                        <div class="flex justify-between items-center bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 cart-item slide-up">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center text-[10px] font-black" x-text="item.ukuran"></div>
+                                <div>
+                                    <p class="text-[10px] font-black text-emerald-900 leading-none mb-1" x-text="item.lembaga + ' x ' + item.qty"></p>
+                                    <p class="text-[11px] font-bold text-primary" x-text="formatRupiah(item.hargaTotal)"></p>
+                                </div>
+                            </div>
+                            <button @click="cart.splice(index, 1)" class="w-8 h-8 text-red-400 hover:text-red-600 transition-colors"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </template>
+                </div>
+
+                <div x-show="cart.length > 0" class="bg-slate-100 text-slate-800 p-6 rounded-[2rem] shadow-inner space-y-5 fade-in border border-slate-200">
+                    <div class="flex justify-between items-start">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Tagihan</span>
+                            <div class="text-2xl font-black text-primary" x-text="formatRupiah(grandTotal)"></div>
+                        </div>
+                        <img src="https://images.seeklogo.com/logo-png/62/2/seabank-logo-png_seeklogo-620133.png" class="h-6 object-contain grayscale opacity-70" alt="Seabank">
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 space-y-3 shadow-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[9px] font-bold text-slate-400 uppercase">Bank Tujuan</span>
+                            <span class="text-[10px] font-black text-slate-700">SEABANK (901)</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-100">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">No Rekening</span>
+                                <span class="text-[14px] font-black text-primary tracking-wider">901898555541</span>
+                            </div>
+                            <button @click="copyToClipboard('901898555541')" class="bg-primary text-white px-3 py-2 rounded-lg text-[10px] font-bold active:scale-95 hover:bg-primaryDark transition-all shadow-sm">SALIN</button>
+                        </div>
+                        <div class="text-center">
+                            <span class="text-[9px] font-bold text-slate-500">A.N MUHAMMAD IBNU MUNDZIR</span>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-slate-200 pt-4">
+                        <label class="block text-[10px] font-black text-slate-500 mb-3 text-center">Upload Bukti Transfer:</label>
+                        <div class="relative group">
+                            <input type="file" @change="uploadFile" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            <div class="bg-white border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center group-hover:border-primary group-hover:bg-emerald-50 transition-all">
+                                <i class="fas fa-camera mb-2 text-slate-400 group-hover:text-primary text-2xl"></i>
+                                <p class="text-[10px] font-bold text-slate-500" x-text="form.buktiBase64 ? '✓ Bukti Berhasil Dipilih' : 'Ketuk untuk Ambil Foto Bukti'"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button @click="step = 1" class="flex-1 bg-slate-100 text-slate-500 font-black py-5 rounded-2xl text-xs btn-bounce transition-colors hover:bg-slate-200">KEMBALI</button>
+                    <button @click="submit" :disabled="loading || cart.length === 0 || !form.buktiBase64" class="flex-[2] bg-primary text-white font-black py-5 rounded-2xl shadow-xl hover:bg-primaryDark transition-all disabled:opacity-50 flex items-center justify-center gap-2 btn-bounce">
+                        <span x-show="!loading">KIRIM PESANAN</span>
+                        <i x-show="loading" class="fas fa-circle-notch animate-spin"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+<div x-show="isSuccess" x-cloak class="max-w-md mx-auto space-y-6 fade-in pb-10">
+    
+    <div class="text-center bg-white p-8 rounded-[2.5rem] shadow-xl border-b-4 border-primary relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full opacity-50"></div>
+        
+        <div class="w-20 h-20 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-bounce relative z-10">
+            <i class="fas fa-check text-3xl"></i>
+        </div>
+        
+        <h2 class="text-xl font-black uppercase text-slate-800 tracking-tight">Pesanan Berhasil</h2>
+        <p class="text-slate-500 text-[11px] mt-1">Terimakasih atas Menggunakan Layanan Kami.</p>
+    </div>
+
+    <div id="invoice-preview" class="bg-white p-6 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+        <div class="flex justify-between items-start border-b border-dashed border-slate-200 pb-4 mb-4">
+            <div>
+                <h3 class="font-black text-primary text-sm uppercase tracking-tighter">Detail Pesanan</h3>
+                <p class="text-[9px] text-slate-400 font-mono" x-text="new Date().toLocaleString('id-ID')"></p>
+            </div>
+            <div class="text-right">
+                <span class="text-[8px] font-bold text-slate-400 block uppercase">Ref ID</span>
+                <span class="text-xs font-black text-slate-800 font-mono" x-text="finalOrderID"></span>
+            </div>
+        </div>
+
+        <div class="space-y-2 mb-5">
+            <div class="flex justify-between text-[11px]">
+                <span class="text-slate-400 font-bold uppercase text-[9px]">Pemesan</span>
+                <span class="font-black text-slate-800 text-right uppercase" x-text="form.nama"></span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[9px] font-bold text-slate-400 uppercase">Status Validasi</span>
+                <span class="bg-primary/10 text-primary px-3 py-1 rounded-full font-black text-[9px] border border-primary/20 italic">Lunas</span>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl p-5 space-y-3 mb-4 border border-slate-100">
+            <template x-for="item in cart" :key="item.id">
+                <div class="flex justify-between items-center text-[11px]">
+                    <div class="flex flex-col">
+                        <span class="font-black text-slate-700 uppercase italic" x-text="item.lembaga + ' - ' + item.ukuran"></span>
+                        <span class="text-[10px] text-slate-400 font-mono" x-text="item.qty + ' x ' + formatRupiah(item.harga)"></span>
+                    </div>
+                    <span class="font-black text-slate-800 font-mono" x-text="formatRupiah(item.harga * item.qty)"></span>
+                </div>
+            </template>
+            
+            <div class="border-t-2 border-dashed border-slate-200 mt-3 pt-3 flex justify-between items-center">
+                <span class="font-black text-slate-500 text-[10px] uppercase">Total Dibayarkan</span>
+                <span class="font-black text-primary text-sm font-mono" x-text="formatRupiah(grandTotal)"></span>
+            </div>
+        </div>
+
+        <div class="text-center py-2">
+            <div class="inline-block px-4 py-1 border-2 border-slate-100 rounded-lg">
+                <p class="text-[8px] font-black tracking-[0.2em] text-slate-300 uppercase">PSNU PAGARNUSA UNUSIA Store</p>
+            </div>
+        </div>
+        
+        <div class="absolute -bottom-3 left-0 right-0 flex justify-around opacity-5">
+            <template x-for="i in 12">
+                <div class="w-5 h-5 bg-black rounded-full"></div>
+            </template>
+        </div>
+    </div>
+
+    <div class="flex flex-col gap-3 pt-2">
+        <button @click="downloadKwitansi()" class="bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 hover:bg-black transition-all text-sm group">
+            <i class="fas fa-file-pdf text-rose-500 group-hover:scale-110 transition-transform"></i> 
+            DOWNLOAD BUKTI
+        </button>
+        
+        <a :href="waUrl" target="_blank" class="bg-[#25D366] text-white font-black py-4 rounded-2xl shadow-lg flex items-center justify-center gap-3 active:scale-95 hover:opacity-90 transition-all text-sm">
+            <i class="fab fa-whatsapp text-xl"></i> KONFIRMASI PEMBAYARAN
+        </a>
+
+        <button @click="location.reload()" class="text-slate-400 font-bold py-3 text-[10px] hover:text-primary transition-all uppercase tracking-[0.2em]">
+            ← Beli Lagi
+        </button>
+    </div>
+</div>
+    </div>
+</div>
+    </main>
+
+    <div x-show="copied" x-cloak x-transition class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-6 py-3 rounded-full text-[11px] font-black shadow-2xl z-[100] border-2 border-white/20">
+        DATA BERHASIL DISALIN
+    </div>
+
+<script>
+    function checkoutApp() {
+        return {
+            step: 1, loading: false, loadingData: false, isSuccess: false, showGuide: false, copied: false,
+            finalOrderID: '',
+            form: { nama: '', email: '', wa: '', sebagai: 'Pribadi', buktiBase64: '' },
+            temp: { lembaga: '', ukuran: '', harga: 0, qty: 1, availableLimit: 0 },
+            cart: [],
+            dbStok: [
+                {lembaga: "TK/SD", ukuran: "S", stok: 0, harga: 175000},
+                {lembaga: "TK/SD", ukuran: "M", stok: 0, harga: 175000},
+                {lembaga: "TK/SD", ukuran: "L", stok: 0, harga: 175000},
+                {lembaga: "TK/SD", ukuran: "XL", stok: 0, harga: 175000},
+                {lembaga: "SMP/SMA/Dewasa", ukuran: "S", stok: 0, harga: 180000},
+                {lembaga: "SMP/SMA/Dewasa", ukuran: "M", stok: 0, harga: 185000},
+                {lembaga: "SMP/SMA/Dewasa", ukuran: "L", stok: 0, harga: 190000},
+                {lembaga: "SMP/SMA/Dewasa", ukuran: "XL", stok: 0, harga: 195000},
+                {lembaga: "SMP/SMA/Dewasa", ukuran: "XXL", stok: 0, harga: 200000},
+                {lembaga: "SMP/SMA/Dewasa", ukuran: "XXXL", stok: 0, harga: 205000}
+            ],
+            scriptUrl: 'https://script.google.com/macros/s/AKfycbxjKvdP5x1JtXi5alofMejBJrtDkis_F3Ghxx7skTKaEzcNDNLH4hoi4m8BPDntP8Ec-Q/exec',
+            waUrl: '#',
+
+            async init() {
+                this.loadingData = true;
+                try {
+                    const res = await fetch(this.scriptUrl + '?t=' + Date.now());
+                    const data = await res.json();
+                    if(data && Array.isArray(data) && data.length > 0) {
+                        this.dbStok = data;
+                    }
+                } catch (e) { 
+                    console.warn("Mode Offline aktif - Menggunakan data cadangan"); 
+                } finally {
+                    this.loadingData = false;
+                }
+            },
+
+            get daftarLembaga() { 
+                return [...new Set(this.dbStok.map(i => i.lembaga))]; 
+            },
+
+            get listUkuranTersedia() {
+                return this.dbStok.filter(i => i.lembaga === this.temp.lembaga);
+            },
+
+            getRemainingStock(item) {
+                const inCart = this.cart
+                    .filter(c => c.lembaga === item.lembaga && c.ukuran === item.ukuran)
+                    .reduce((sum, c) => sum + c.qty, 0);
+                return Math.max(0, item.stok - inCart);
+            },
+
+            selectSize(s) {
+                const limit = this.getRemainingStock(s);
+                if(limit <= 0) return;
+                this.temp.ukuran = s.ukuran;
+                this.temp.harga = s.harga;
+                this.temp.availableLimit = limit;
+                this.temp.qty = 1;
+            },
+
+            validateQty() {
+                if(this.temp.qty > this.temp.availableLimit) this.temp.qty = this.temp.availableLimit;
+                if(this.temp.qty < 1 || !this.temp.qty) this.temp.qty = 1;
+            },
+
+            addItem() {
+                if(!this.temp.ukuran) return;
+                this.cart.push({
+                    lembaga: this.temp.lembaga,
+                    ukuran: this.temp.ukuran,
+                    qty: this.temp.qty,
+                    harga: this.temp.harga, // Pastikan ini ada untuk logika PDF
+                    hargaTotal: this.temp.harga * this.temp.qty
+                });
+                this.temp.ukuran = '';
+                this.temp.qty = 1;
+            },
+
+            get grandTotal() { return this.cart.reduce((a, b) => a + b.hargaTotal, 0); },
+
+            formatRupiah(n) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n); },
+
+            copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    this.copied = true;
+                    setTimeout(() => this.copied = false, 2000);
+                });
+            },
+
+            uploadFile(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                if(file.size > 2 * 1024 * 1024) {
+                    alert("Ukuran foto terlalu besar. Maksimal 2MB.");
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = (f) => this.form.buktiBase64 = f.target.result.split(',')[1];
+                reader.readAsDataURL(file);
+            },
+
+            async submit() {
+                if(this.loading) return;
+                this.loading = true;
+                this.finalOrderID = `KWS1985${Math.floor(100 + Math.random() * 899)}`;
+                
+                const payload = { 
+                    ...this.form, 
+                    orderID: this.finalOrderID,
+                    items: this.cart, 
+                    grandTotal: this.grandTotal,
+                    tanggal: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })
+                };
+
+                try {
+                    const res = await fetch(this.scriptUrl, { 
+                        method: 'POST', 
+                        body: JSON.stringify(payload)
+                    });
+                    const text = await res.text();
+                    
+                    if (text.includes("Success")) {
+                        const details = this.cart.map(i => `- ${i.lembaga} (${i.ukuran}) x${i.qty}`).join('%0A');
+                        this.waUrl = `https://wa.me/6285715232441?text=Halo Admin, Saya *${this.form.nama}*%0A(ID: ${this.finalOrderID})%0A%0APesanan:%0A${details}%0A%0ATotal: ${this.formatRupiah(this.grandTotal)}`;
+                        this.isSuccess = true;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        throw new Error("Respon server tidak valid");
+                    }
+                } catch (e) { 
+                    alert('Gagal mengirim pesanan. Silahkan coba lagi atau hubungi admin via WA.'); 
+                } finally { 
+                    this.loading = false; 
+                }
+            },
+
+            // --- FUNGSI DOWNLOAD PDF PINDAH KE DALAM SINI ---
+            async downloadKwitansi() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = { left: 25, right: 25, top: 15, bottom: 15 };
+                const centerX = pageWidth / 2;
+
+                const logoUrl = "https://lh3.googleusercontent.com/d/1drM76LlU3sdqpwo-Urq7ZULoyORC0UMQ"; 
+                try {
+                    doc.addImage(logoUrl, 'PNG', margin.left, margin.top, 20, 20);
+                } catch (e) { console.error("Logo error:", e); }
+
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(14);
+                doc.text("PIMPINAN RAYON", 50, margin.top + 7);
+                
+                doc.setFontSize(18);
+                doc.setTextColor(27, 117, 72);
+                doc.text("PSNU PAGARNUSA UNUSIA", 50, margin.top + 15);
+                
+                doc.setFontSize(9);
+                doc.setTextColor(100);
+                doc.setFont("helvetica", "normal");
+                doc.text("Sekretariat: Kampus UNUSIA, Bogor. | Email: ukmpagarnusaunusia@gmail.com", 50, margin.top + 20);
+
+                doc.setLineWidth(0.8);
+                doc.setDrawColor(0, 0, 0);
+                doc.line(margin.left, margin.top + 25, pageWidth - margin.right, margin.top + 25);
+                doc.setLineWidth(0.2);
+                doc.line(margin.left, margin.top + 26.5, pageWidth - margin.right, margin.top + 26.5);
+
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont("helvetica", "bold");
+                doc.text("SURAT BUKTI PEMESANAN (INVOICE)", centerX, margin.top + 38, { align: "center" });
+                
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text(`No. Referensi: ${this.finalOrderID}`, centerX, margin.top + 43, { align: "center" });
+
+                doc.setFontSize(10);
+                doc.text("DATA PEMESAN:", margin.left, margin.top + 55);
+                doc.setFont("helvetica", "bold");
+                doc.text(`Nama : ${this.form.nama.toUpperCase()}`, margin.left, margin.top + 60);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Email : ${this.form.email}`, margin.left, margin.top + 65);
+                doc.text(`WhatsApp : ${this.form.wa}`, margin.left, margin.top + 70);
+                
+                const tglCetak = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+                doc.setFontSize(8);
+                doc.text(`Waktu Transaksi: ${tglCetak}`, pageWidth - margin.right, margin.top + 60, { align: "right" });
+
+                const rows = this.cart.map((item, i) => [
+                    i + 1,
+                    `${item.lembaga}\nSize: ${item.ukuran}`,
+                    item.qty,
+                    `Rp ${item.harga.toLocaleString('id-ID')}`,
+                    `Rp ${(item.harga * item.qty).toLocaleString('id-ID')}`
+                ]);
+
+                doc.autoTable({
+                    head: [['NO', 'DESKRIPSI PRODUK', 'QTY', 'HARGA SATUAN', 'SUBTOTAL']],
+                    body: rows,
+                    startY: margin.top + 78,
+                    margin: { left: margin.left, right: margin.right },
+                    headStyles: { fillColor: [27, 117, 72], halign: 'center', fontStyle: 'bold' },
+                    columnStyles: { 
+                        0: { halign: 'center', cellWidth: 10 },
+                        2: { halign: 'center' },
+                        3: { halign: 'right' },
+                        4: { halign: 'right' }
+                    },
+                    foot: [['', '', '', 'TOTAL PEMBAYARAN', `Rp ${this.grandTotal.toLocaleString('id-ID')}`]],
+                    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'right' },
+                    theme: 'grid',
+                    styles: { fontSize: 9, cellPadding: 3 }
+                });
+
+                let ySign = doc.lastAutoTable.finalY + 15;
+                if (ySign + 40 > pageHeight) { doc.addPage(); ySign = 20; }
+
+                doc.setFontSize(10);
+                doc.text("Bogor, " + new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}), pageWidth - margin.right - 10, ySign, { align: "center" });
+                
+                const signPos = pageWidth - margin.right - 35;
+                doc.text("Bendahara,", signPos + 25, ySign + 7, { align: "center" });
+                
+                try {
+                    const stampUrl = "https://lh3.googleusercontent.com/d/1_1sFSL8g98RTrgm6YJLpgduzbHyQP_iJ"; 
+                    doc.addImage(stampUrl, 'PNG', signPos + 10, ySign + 8, 30, 20);
+                } catch(e) {}
+
+                doc.setFont("helvetica", "bold underline");
+                doc.text("SYIFA ULYA SETIAWAN", signPos + 25, ySign + 33, { align: "center" });
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                doc.text("NIA: 27091985", signPos + 25, ySign + 37, { align: "center" });
+
+                doc.setDrawColor(200);
+                doc.line(margin.left, pageHeight - 15, pageWidth - margin.right, pageHeight - 15);
+                doc.setFontSize(7);
+                doc.setTextColor(150);
+                doc.text("Simpan bukti ini sebagai syarat pengambilan atribut. Dicetak secara sistem oleh Brankas Psnu Pagarnusa Unusia Store.", centerX, pageHeight - 10, { align: "center" });
+
+                doc.save(`KWITANSI_${this.finalOrderID}_${this.form.nama.replace(/\s+/g, '_')}.pdf`);
+            }
+        }
+    }
+</script>
+</body>
+</html>
