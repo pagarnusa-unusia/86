@@ -7,88 +7,141 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .animate-fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        /* Memperbaiki tampilan area scan agar kotak */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Styling area scan 1:1 */
         #reader { border: none !important; }
-        #reader video { border-radius: 0px !important; object-fit: cover !important; }
+        #reader video { 
+            object-fit: cover !important; 
+            aspect-ratio: 1 / 1 !important;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5));
+            mask: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" fill="black"/></svg>') 0 0 / 100% 100% no-repeat;
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg preserveAspectRatio="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="70" height="70" rx="5" fill="black"/></svg>') 0 0 / 100% 100% no-repeat;
+            mask-composite: exclude;
+            -webkit-mask-composite: destination-out;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 15%; left: 15%; width: 70%; height: 2px;
+            background: #22c55e;
+            box-shadow: 0 0 15px #22c55e;
+            animation: scanning 2.5s infinite linear;
+            z-index: 20;
+        }
+
+        @keyframes scanning {
+            0% { top: 15%; } 50% { top: 85%; } 100% { top: 15%; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-[#f8fafc] min-h-screen flex items-center justify-center p-4">
 
-    <div class="max-w-md mx-auto p-4">
-        <div class="bg-[#1b7548] text-white p-6 rounded-t-2xl text-center shadow-lg">
-            <h1 class="text-xl font-bold uppercase tracking-widest">Validasi Pesanan</h1>
-            <p class="text-xs opacity-80">Scan QR Code pada Kwitansi Pelanggan</p>
+    <div class="max-w-md w-full">
+        <div class="bg-[#1b7548] p-6 rounded-t-3xl shadow-xl text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+            <h1 class="text-white text-lg font-extrabold uppercase tracking-[0.2em]">Scanner Validasi</h1>
+            <p class="text-green-100 text-[10px] font-medium opacity-80 uppercase mt-1">Sistem Gudang Pagarnusa Unusia</p>
         </div>
 
-        <div class="bg-black relative overflow-hidden shadow-inner aspect-square">
+        <div class="relative bg-black aspect-square overflow-hidden shadow-2xl border-x-4 border-[#1b7548]">
             <div id="reader" class="w-full h-full"></div>
-            <div id="scanOverlay" class="absolute inset-0 border-[40px] border-black/40 pointer-events-none z-10">
-                <div class="w-full h-full border-2 border-dashed border-white/60 rounded-lg shadow-[0_0_15px_rgba(255,255,255,0.3)]"></div>
+            
+            <div id="scannerUI">
+                <div class="scanner-overlay"></div>
+                <div class="scan-line"></div>
+                <div class="absolute top-[15%] left-[15%] w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-lg z-30"></div>
+                <div class="absolute top-[15%] right-[15%] w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-lg z-30"></div>
+                <div class="absolute bottom-[15%] left-[15%] w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-lg z-30"></div>
+                <div class="absolute bottom-[15%] right-[15%] w-8 h-8 border-b-4 border-r-4 border-white rounded-br-lg z-30"></div>
             </div>
         </div>
 
-        <div id="statusBox" class="bg-white p-6 rounded-b-2xl shadow-lg border-t border-gray-100">
-            <div id="idleState">
-                <p class="text-center text-gray-500 italic text-sm">Mengarahkan kamera ke QR Code...</p>
-                <div class="mt-4 flex justify-center">
-                    <button onclick="startScanning()" class="bg-[#1b7548] text-white px-4 py-2 rounded-lg text-xs font-bold">AKTIFKAN KAMERA</button>
+        <div class="bg-white rounded-b-3xl shadow-2xl p-6 border-t border-gray-100 min-h-[180px] flex flex-col justify-center">
+            
+            <div id="idleState" class="text-center py-4">
+                <div class="flex justify-center mb-3">
+                    <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center animate-pulse">
+                        <svg class="w-6 h-6 text-[#1b7548]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    </div>
+                </div>
+                <p class="text-gray-400 font-medium text-sm italic">Menunggu QR Code terdeteksi...</p>
+            </div>
+
+            <div id="loadingState" class="hidden text-center py-4 animate-slide-up">
+                <div class="flex flex-col items-center">
+                    <div class="w-10 h-10 border-4 border-gray-100 border-t-[#1b7548] rounded-full animate-spin"></div>
+                    <p class="text-sm text-gray-500 font-bold mt-4 tracking-widest uppercase">Memproses Data...</p>
                 </div>
             </div>
 
-            <div id="resultState" class="hidden animate-fade-in">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold">DATA DITEMUKAN</span>
-                    <span id="resOrderID" class="font-mono font-bold text-gray-800"></span>
+            <div id="resultState" class="hidden animate-slide-up">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="bg-green-50 text-[#1b7548] px-3 py-1 rounded-full text-[10px] font-extrabold tracking-widest uppercase">Verified Order</div>
+                    <span id="resOrderID" class="font-mono font-bold text-gray-500 text-sm"></span>
                 </div>
                 
-                <div class="space-y-3 text-left">
-                    <div>
-                        <label class="text-[10px] text-gray-400 block uppercase italic">Nama Pemesan</label>
-                        <p id="resNama" class="font-semibold text-gray-800 text-lg"></p>
+                <div class="space-y-4">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1 italic">Customer</span>
+                        <p id="resNama" class="font-bold text-gray-800 text-xl leading-none"></p>
                     </div>
-                    <div>
-                        <label class="text-[10px] text-gray-400 block uppercase italic">Rincian Item</label>
-                        <ul id="resItems" class="text-sm text-gray-600 list-disc list-inside"></ul>
+                    <div class="bg-gray-50 rounded-2xl p-4">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-2 italic">Order Detail</span>
+                        <div id="resItems" class="text-sm text-gray-700 font-semibold leading-relaxed"></div>
                     </div>
-                    <div class="pt-3 border-t">
-                        <label class="text-[10px] text-gray-400 block uppercase italic">Total Bayar</label>
-                        <p id="resTotal" class="font-bold text-[#1b7548] text-xl"></p>
+                    <div class="flex justify-between items-end border-t border-dashed pt-4">
+                        <span class="text-[10px] text-gray-400 font-bold uppercase italic">Total Paid</span>
+                        <p id="resTotal" class="font-black text-[#1b7548] text-2xl leading-none"></p>
                     </div>
                 </div>
 
-                <button onclick="resetScanner()" class="w-full mt-6 bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-black transition">
-                    SCAN PESANAN LAIN
+                <button onclick="resetScanner()" class="w-full mt-8 bg-gray-900 text-white py-4 rounded-2xl font-bold text-sm tracking-widest hover:bg-black transition-all shadow-lg active:scale-95 uppercase">
+                    Scan Selanjutnya
                 </button>
             </div>
-
-            <div id="loadingState" class="hidden text-center py-4">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1b7548] mx-auto"></div>
-                <p class="text-sm text-gray-500 mt-2">Mencari di database...</p>
-            </div>
         </div>
+        <p class="text-center mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-[0.3em]">© 2026 Pagarnusa Unusia</p>
     </div>
 
 <script>
     const scriptUrl = 'https://script.google.com/macros/s/AKfycbxw19azk92bUVGoGJBBgYYaM69W0qu0ukA3ED6yth0yTgGxJmDqVqSNyTfMhXiQNgL8/exec';
     let html5QrCode;
 
-    // Fungsi Memulai Scanner (Penting untuk izin browser HP)
-    function startScanning() {
+    async function startScanning() {
         html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        const config = { 
+            fps: 15, 
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0 
+        };
 
-        // Memilih kamera belakang (environment) secara otomatis
-        html5QrCode.start({ facingMode: "environment" }, config, (decodedText) => {
-            // Jika berhasil scan
-            html5QrCode.pause(true); // Jeda kamera
-            cariDataPesanan(decodedText.trim());
-        }).catch(err => {
-            alert("Gagal akses kamera. Pastikan izin kamera diizinkan dan gunakan HTTPS.");
-        });
-        
-        document.querySelector('button[onclick="startScanning()"]').classList.add('hidden');
+        try {
+            await html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                (decodedText) => {
+                    html5QrCode.pause(true);
+                    cariDataPesanan(decodedText.trim());
+                }
+            );
+        } catch (err) {
+            console.error("Camera error:", err);
+            alert("Kamera tidak dapat diakses. Gunakan HTTPS atau berikan izin kamera.");
+        }
     }
 
     async function cariDataPesanan(orderID) {
@@ -97,33 +150,41 @@
             const response = await fetch(scriptUrl + '?type=pesanan&t=' + Date.now());
             const database = await response.json();
             
-            // Cari data di kolom index 0 (Order ID)
             const row = database.find(r => r[0].toString() === orderID.toString());
 
             if (row) {
                 tampilkanHasil({
                     orderID: row[0],
                     nama: row[1],
-                    itemRincian: row[5],
-                    total: row[7]
+                    item: row[5], // Kolom Lembaga & Ukuran
+                    qty: row[6],  // Kolom QTY
+                    total: row[7] // Kolom Harga Total
                 }, orderID);
             } else {
-                alert("ID " + orderID + " Tidak Terdaftar!");
+                alert("Data Pesanan #" + orderID + " tidak ditemukan.");
                 resetScanner();
             }
         } catch (error) {
-            alert("Error database: Pastikan Web App sudah Deploy sebagai 'Anyone'");
+            alert("Gagal memuat database.");
             resetScanner();
         }
     }
 
     function tampilkanHasil(data, orderID) {
         document.getElementById('resOrderID').innerText = "#" + orderID;
-        document.getElementById('resNama').innerText = data.nama;
+        document.getElementById('resNama').innerText = data.nama || "Guest";
         document.getElementById('resTotal').innerText = "Rp " + (parseInt(data.total) || 0).toLocaleString('id-ID');
-        document.getElementById('resItems').innerHTML = `<li>${data.itemRincian}</li>`;
+        
+        // Tampilkan item dan kuantitas dengan gaya yang lebih rapi
+        document.getElementById('resItems').innerHTML = `
+            <div class="flex justify-between items-center border-b border-gray-200 pb-2 mb-1">
+                <span class="max-w-[70%]">${data.item}</span>
+                <span class="text-[#1b7548] font-extrabold text-base">${data.qty} Pcs</span>
+            </div>
+        `;
+
         showState('result');
-        document.getElementById('scanOverlay').classList.add('hidden');
+        document.getElementById('scannerUI').classList.add('hidden');
     }
 
     function showState(state) {
@@ -134,12 +195,13 @@
 
     function resetScanner() {
         showState('idle');
-        document.getElementById('scanOverlay').classList.remove('hidden');
+        document.getElementById('scannerUI').classList.remove('hidden');
         if (html5QrCode) html5QrCode.resume();
     }
 
-    // Jalankan otomatis saat buka (jika browser mendukung auto-start)
+    // Start otomatis saat halaman siap
     window.onload = startScanning;
 </script>
+
 </body>
 </html>
